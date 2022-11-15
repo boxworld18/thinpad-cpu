@@ -4,31 +4,43 @@
 
 module hazard_detection_unit(
     input wire [`INST_BUS] id_inst,
-    input wire [2:0] imm_type,
     
     input wire ex_wb_ren,
-    
     input wire ex_rf_wen, 
     input wire [`REG_ADDR_BUS] ex_rf_waddr,
-    input wire mem_rf_wen,
-    input wire [`REG_ADDR_BUS] mem_rf_waddr,
-    input wire wb_rf_wen,
-    input wire [`REG_ADDR_BUS] wb_rf_waddr,
 
-    output wire hazard
+    input wire branch,
+
+    output reg if_id_flush,
+    output reg id_ex_flush,
+
+    output reg if_id_hold,
+    output reg id_ex_hold
 );
 
-    // 简单版, 一直插气泡
-    logic ex_hazard, mem_hazard, wb_hazard, branch_hazard;
-    assign ex_hazard = ex_rf_wen & (ex_rf_waddr == id_inst[24:20] | ex_rf_waddr == id_inst[19:15]);
-    assign mem_hazard = mem_rf_wen & (mem_rf_waddr == id_inst[24:20] | mem_rf_waddr == id_inst[19:15]);
-    assign wb_hazard = wb_rf_wen & (wb_rf_waddr == id_inst[24:20] | wb_rf_waddr == id_inst[19:15]);
-    assign branch_hazard = (imm_type == IMM_SB) & (ex_hazard | mem_hazard | wb_hazard);    
+    logic ex_hazard;
+    assign ex_hazard = ex_rf_wen & (ex_rf_waddr == id_inst[24:20] | ex_rf_waddr == id_inst[19:15]);   
 
     logic load_hazard;
     assign load_hazard = ex_wb_ren & ex_hazard;
 
-    assign hazard = load_hazard | branch_hazard;
-
+    always_comb begin
+        if (branch) begin
+            if_id_flush = `ENABLE;
+            id_ex_flush = `ENABLE;
+            if_id_hold = `DISABLE;
+            id_ex_hold = `DISABLE;
+        end else if (load_hazard) begin
+            if_id_flush = `DISABLE;
+            id_ex_flush = `ENABLE;
+            if_id_hold = `ENABLE;
+            id_ex_hold = `DISABLE;
+        end else begin
+            if_id_flush = `DISABLE;
+            id_ex_flush = `DISABLE;
+            if_id_hold = `DISABLE;
+            id_ex_hold = `DISABLE;
+        end
+    end
 
 endmodule

@@ -16,14 +16,14 @@ module regfile(
     output wire [`REG_DATA_BUS] rdata_b  
 );
 
-    logic [`REG_DATA_BUS][`REG_NUM-1:0] regs;
+    logic [`REG_DATA_BUS] regs [`REG_NUM-1:0];
 
     assign rdata_a = regs[raddr_a];
     assign rdata_b = regs[raddr_b];
 
     always_ff @ (posedge clk) begin
         if (rst) begin
-            regs <= {(`REG_DATA_WIDTH * `REG_NUM){1'h0}}; 
+            regs <= '{default: 0};
         end else begin
             if (wen && waddr != 0) begin
                 regs[waddr] <= wdata;

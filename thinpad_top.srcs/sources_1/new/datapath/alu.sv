@@ -20,6 +20,7 @@ module alu(
             ALU_OP_SRL: y = a >> b;
             ALU_OP_SRA: y = $signed(a) >>> b;
             ALU_OP_B: y = b;
+            ALU_OP_ADD_4: y = a + 4;
             default: y = 0;
         endcase
     end

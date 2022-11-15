@@ -3,24 +3,25 @@
 
 // general
 `define ZERO_WORD 32'h0000_0000
-`define ENABLE 1'b1
-`define DISABLE 1'b0
+`define INST_NOP 32'h0000_0013 
+`define ENABLE 1'b1 // 使能
+`define DISABLE 1'b0 
 
 // PC
-`define PC_RESET 32'h8000_0000
+`define PC_RESET 32'h8000_0000 // PC复位值
 
-// Instruction Set
-`define ADDR_WIDTH 32
-`define DATA_WIDTH 32
-`define INST_WIDTH 32
+// WIDTH
+`define ADDR_WIDTH 32 // 地址宽度
+`define DATA_WIDTH 32 // 数据宽度
+`define INST_WIDTH 32 // 指令宽度
 `define ADDR_BUS `ADDR_WIDTH-1:0 // 地址总线宽度
 `define DATA_BUS `DATA_WIDTH-1:0 // 数据总线宽度
 `define INST_BUS `INST_WIDTH-1:0 // 指令总线宽度
 `define SEL `DATA_WIDTH/8-1:0 // 选择信号宽度
 
 // Regfile
-`define REG_DATA_BUS 31:0 // 寄存器数据线宽度
 `define REG_DATA_WIDTH 32 // 寄存器数据宽度
+`define REG_DATA_BUS `REG_DATA_WIDTH-1:0 // 寄存器数据线宽度
 `define REG_NUM 32 // 寄存器数量
 `define REG_ADDR_BUS `REG_NUM/8:0 // 寄存器地址线宽度
 
@@ -34,19 +35,6 @@
 
 // Instruction Decode
 
-typedef enum logic [3:0] {
-    INST_R,
-    INST_I,
-    INST_S,
-    INST_SB,
-    INST_U,
-    INST_UJ,
-    INST_L,
-    INST_AUIPC,
-    INST_JALR,
-    INST_NOP
-} inst_type_t;
-
 `define OPCODE_WIDTH 7 // 操作码宽度
 `define FUNC3_WIDTH 3 // FUNC3宽度
 `define FUNC7_WIDTH 7 // FUNC7宽度
@@ -54,8 +42,8 @@ typedef enum logic [3:0] {
 `define OPCODE_I 7'b0010011 // I-type addi slli srli srai andi ori xori  REG OP IMM 
 `define OPCODE_S 7'b0100011 // S-type sb sh sw                           REG + IMM
 `define OPCODE_SB 7'b1100011 // SB-type beq bne blt bge bltu bgeu        PC + IMM   
-`define OPCODE_U 7'b0110111 // U-type lui                                     IMM
-`define OPCODE_UJ 7'b1101111 // UJ-type jal                              PC + IMM
+`define OPCODE_LUI 7'b0110111 // U-type lui                                     IMM
+`define OPCODE_JAL 7'b1101111 // UJ-type jal                              PC + IMM
 `define OPCODE_L 7'b0000011 // load lb lh lw lbu lhu                     REG + IMM   
 `define OPCODE_AUIPC 7'b0010111 // auipc                                 PC + IMM   
 `define OPCODE_JALR 7'b1100111 // jalr                                   REG + IMM
@@ -75,25 +63,23 @@ typedef enum logic [4:0] {
     ALU_OP_SRA = 5'd8,
     ALU_OP_B   = 5'd9, // 直接选data_b
     ALU_OP_SLT = 5'd10,
-    ALU_OP_SLTU = 5'd11
+    ALU_OP_SLTU = 5'd11,
+    ALU_OP_ADD_4 = 5'd12
 } alu_op_t;
-
-// IMM
-typedef enum logic [2:0] {
-    IMM_NOP = 3'b000,
-    IMM_I = 3'b001,
-    IMM_S = 3'b010,
-    IMM_SB = 3'b011,
-    IMM_U = 3'b100,
-    IMM_UJ = 3'b101
-} imm_type_t;
 
 // ALU Select
 `define ALU_SEL_WIDTH 2 // ALU选择信号宽度
+typedef enum logic [1:0] {
+    ALU_SEL_REG_B = 2'b00, // ALU选择信号：寄存器
+    ALU_SEL_IMM = 2'b01, // ALU选择信号：立即数
+    ALU_SEL_4 = 2'b10 // ALU选择信号：4
+} alu_sel_imm_t;
+
 typedef enum logic {
-    ALU_SEL_REG = 1'b0, // ALU选择信号：寄存器
-    ALU_SEL_IMM = 1'b1 // ALU选择信号：立即数
-} alu_sel_t_imm;
+    ALU_SEL_REG_A = 1'b0, // ALU选择信号：寄存器
+    ALU_SEL_PC = 1'b1 // ALU选择信号：PC
+} alu_sel_pc_t;
+
 typedef enum logic [1:0] {
     ALU_SEL_NOP = 2'b00,
     ALU_SEL_EX = 2'b01,

@@ -33,11 +33,19 @@ module cpu (
     output reg wbm1_we_o
 );
 
+    // stall -> used by if_master and mem_master
+
     logic if_master_stall, mem_master_stall; 
     logic stall; 
-    logic hazard;
-    logic flush;
     assign stall = if_master_stall | mem_master_stall;
+
+    // flush 
+    logic if_id_flush;
+    logic id_ex_flush;
+
+    // hold
+    logic if_id_hold;
+    logic id_ex_hold;
 
     /* =========== IF begin =========== */
 
@@ -48,19 +56,17 @@ module cpu (
     logic [`INST_BUS] id_inst;
 
     logic [`ADDR_BUS] pc_branch;
-    logic pc_sel; 
+    logic branch; 
 
     cpu_if_master u_cpu_if_master (
         .clk(clk_i),
         .rst(rst_i),
-        .hazard(hazard),
-        .flush(flush),
         .stall(stall),
+        .hold(if_id_hold),
 
-        .pc_sel(pc_sel),
+        .branch(branch),
         .pc_branch(pc_branch),
-        .pc(if_pc),
-
+        
         .wb_ack_i(wbm0_ack_i),
         .wb_dat_i(wbm0_dat_i),
         
@@ -71,6 +77,7 @@ module cpu (
         .wb_sel_o(wbm0_sel_o),
         .wb_we_o(wbm0_we_o),
 
+        .pc(if_pc),
         .inst(if_inst),
         .if_master_stall(if_master_stall)
     );
@@ -81,11 +88,12 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),
         .stall(stall),
-        .hazard(hazard),
+        .flush(if_id_flush),
+        .hold(if_id_hold),
         .if_pc(if_pc),
         .if_inst(if_inst),
         .id_pc(id_pc),
-        .id_inst(id_inst)  
+        .id_inst(id_inst)
     );
 
     /* =========== ID begin =========== */
@@ -95,7 +103,6 @@ module cpu (
     logic [2:0] id_imm_type;
     imm_gen u_imm_gen(
         .inst(id_inst),
-        .imm_type(id_imm_type),
         .imm(id_imm)
     );
 
@@ -111,17 +118,15 @@ module cpu (
     logic [`REG_ADDR_BUS] wb_rf_waddr;
     hazard_detection_unit u_hazard_detection_unit(
         .id_inst(id_inst),
-        .imm_type(id_imm_type),
-
         .ex_wb_ren(ex_wb_ren),
         .ex_rf_wen(ex_rf_wen),
         .ex_rf_waddr(ex_rf_waddr),
-        .mem_rf_wen(mem_rf_wen),
-        .mem_rf_waddr(mem_rf_waddr),
-        .wb_rf_wen(wb_rf_wen),
-        .wb_rf_waddr(wb_rf_waddr),
+        .branch(branch),
 
-        .hazard(hazard)
+        .if_id_flush(if_id_flush),
+        .id_ex_flush(id_ex_flush),
+        .if_id_hold(if_id_hold),
+        .id_ex_hold(id_ex_hold)
     );
 
     // regfile
@@ -133,13 +138,12 @@ module cpu (
     logic [`SEL] id_wb_sel;
     // alu
     logic [`ALU_OP_WIDTH-1:0] id_alu_op;
-    logic id_alu_sel;
+    logic id_alu_sel_imm;
+    logic id_alu_sel_pc;
 
     control u_control(
         .pc(id_pc),
         .inst(id_inst),
-
-        .id_imm_type(id_imm_type),
 
         .id_rf_wen(id_rf_wen),
         .id_rf_sel(id_rf_sel),
@@ -149,7 +153,8 @@ module cpu (
         .id_wb_sel(id_wb_sel),
 
         .id_alu_op(id_alu_op),
-        .id_alu_sel(id_alu_sel)
+        .id_alu_sel_imm(id_alu_sel_imm),
+        .id_alu_sel_pc(id_alu_sel_pc)
     );
 
     logic [`REG_DATA_BUS] id_rf_data_a;
@@ -169,12 +174,6 @@ module cpu (
         .rdata_b(id_rf_data_b)
     );
 
-    logic rf_data_equ;
-    assign pc_branch = rf_data_equ ? (id_pc + id_imm) : (id_pc + 4);
-    assign rf_data_equ = (id_rf_data_a == id_rf_data_b);
-    assign pc_sel = (id_imm_type == IMM_SB);
-    assign flush = (id_imm_type == IMM_SB) & !hazard;
-
     /* =========== ID end =========== */
 
     logic [`ADDR_BUS] ex_pc;
@@ -185,7 +184,8 @@ module cpu (
     logic ex_wb_wen;
     logic [`SEL] ex_wb_sel;
     logic [`ALU_OP_WIDTH-1:0] ex_alu_op;
-    logic ex_alu_sel;
+    logic ex_alu_sel_imm;
+    logic ex_alu_sel_pc;
     logic [`REG_ADDR_BUS] ex_rs1;
     logic [`REG_ADDR_BUS] ex_rs2;
     logic [`DATA_BUS] ex_imm;
@@ -194,7 +194,8 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),
         .stall(stall),
-        .insert_nop(hazard),
+        .flush(id_ex_flush),
+        .hold(id_ex_hold),
 
         .id_pc(id_pc),
         .id_inst(id_inst),
@@ -207,7 +208,8 @@ module cpu (
         .id_wb_ren(id_wb_ren),
         .id_wb_sel(id_wb_sel),
         .id_alu_op(id_alu_op),
-        .id_alu_sel(id_alu_sel),
+        .id_alu_sel_imm(id_alu_sel_imm),
+        .id_alu_sel_pc(id_alu_sel_pc),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -223,7 +225,8 @@ module cpu (
         .ex_wb_ren(ex_wb_ren),
         .ex_wb_sel(ex_wb_sel),
         .ex_alu_op(ex_alu_op),
-        .ex_alu_sel(ex_alu_sel),
+        .ex_alu_sel_imm(ex_alu_sel_imm),
+        .ex_alu_sel_pc(ex_alu_sel_pc),
         .ex_rs1(ex_rs1),
         .ex_rs2(ex_rs2),
         .ex_imm(ex_imm)
@@ -231,7 +234,8 @@ module cpu (
 
     /* =========== EX begin =========== */
 
-    // ex_alu_sel: reg or imm
+    // ex_alu_sel_imm: reg or imm
+    // ex_alu_sel_pc: reg or pc
     // ex_alu_sel_a/b: forward unit
 
     logic [`ALU_SEL_WIDTH-1:0] ex_alu_sel_a;
@@ -259,11 +263,22 @@ module cpu (
             ALU_SEL_WB:  alu_data_b = wb_rf_wdata;
         endcase
     end
+    
+    branch_comp u_branch_comp(
+        .pc(ex_pc),
+        .inst(ex_inst),
+        .imm(ex_imm),
+        .data_a(alu_data_a),
+        .data_b(alu_data_b),
+
+        .pc_branch(pc_branch), // branch target
+        .branch(branch)  // branch taken
+    );
 
     logic [`DATA_BUS] alu_data_o;
     alu u_alu(
-        .a(alu_data_a),
-        .b(ex_alu_sel == ALU_SEL_IMM ? ex_imm : alu_data_b),
+        .a(ex_alu_sel_pc == ALU_SEL_PC ? ex_pc : alu_data_a),
+        .b(ex_alu_sel_imm == ALU_SEL_IMM ? ex_imm : alu_data_b),
         .op(ex_alu_op),
         .y(alu_data_o)
     );

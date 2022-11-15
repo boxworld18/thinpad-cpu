@@ -5,13 +5,11 @@
 module cpu_if_master(
     input wire clk,
     input wire rst,
-    input wire hazard,
-    input wire flush,
     input wire stall,
+    input wire hold,
 
-    input wire pc_sel,
+    input wire branch,
     input wire [`ADDR_BUS] pc_branch,
-    output reg [`ADDR_BUS] pc,
 
     // master
     input wire wb_ack_i,
@@ -26,7 +24,7 @@ module cpu_if_master(
 
     // cpu if
     output reg [`INST_BUS] inst,
-    output reg [`ADDR_BUS] pc_old,
+    output reg [`ADDR_BUS] pc,
     output reg if_master_stall
 );
 
@@ -58,10 +56,10 @@ module cpu_if_master(
                     if (!stall) begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= pc_sel ? pc_branch : pc_reg + 4;
+                        wb_adr_o <= branch ? pc_branch : pc_reg + 4;
                         wb_sel_o <= 4'hF;
                         if_master_stall <= 1'b1;
-                        pc_reg <= pc_sel ? pc_branch : pc_reg + 4;
+                        pc_reg <= branch ? pc_branch : pc_reg + 4;
                         state <= READ_DATA_ACTION;
                     end
                 end
@@ -69,13 +67,9 @@ module cpu_if_master(
                     if (wb_ack_i) begin
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;
-                        if (flush) begin
-                            pc <= `ZERO_WORD;
-                            inst <= `ZERO_WORD;
-                        end else if (!hazard) begin
-                            pc <= pc_reg;
-                            inst <= wb_dat_i;    
-                        end else begin
+                        pc <= pc_reg;
+                        inst <= wb_dat_i; 
+                        if (hold) begin
                             pc_reg <= pc_reg - 4;
                         end
                         if_master_stall <= 1'b0;
@@ -86,7 +80,5 @@ module cpu_if_master(
             endcase
         end
     end
-
-    
 
 endmodule

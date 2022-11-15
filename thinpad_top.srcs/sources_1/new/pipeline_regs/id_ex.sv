@@ -6,7 +6,8 @@ module id_ex(
     input wire clk,
     input wire rst,
     input wire stall,
-    input wire insert_nop,
+    input wire flush,
+    input wire hold,
     // PC Inst
     input wire [`ADDR_BUS] id_pc,
     input wire [`INST_BUS] id_inst,
@@ -22,7 +23,8 @@ module id_ex(
     input wire [`SEL] id_wb_sel,
     // alu (EX)
     input wire [`ALU_OP_WIDTH-1:0] id_alu_op,
-    input wire id_alu_sel,
+    input wire id_alu_sel_imm,
+    input wire id_alu_sel_pc,
     // forward 
     input wire [`REG_ADDR_BUS] id_rs1,
     input wire [`REG_ADDR_BUS] id_rs2,
@@ -41,7 +43,8 @@ module id_ex(
     output reg ex_wb_ren,
     output reg [`SEL] ex_wb_sel,
     output reg [`ALU_OP_WIDTH-1:0] ex_alu_op,
-    output reg ex_alu_sel,
+    output reg ex_alu_sel_imm,
+    output reg ex_alu_sel_pc,
     output reg [`REG_ADDR_BUS] ex_rs1,
     output reg [`REG_ADDR_BUS] ex_rs2,
     output reg [`DATA_BUS] ex_imm
@@ -61,14 +64,15 @@ module id_ex(
             ex_wb_ren <= 1'b0;
             ex_wb_sel <= 0;
             ex_alu_op <= 0;
-            ex_alu_sel <= 1'b0;
+            ex_alu_sel_imm <= 1'b0;
+            ex_alu_sel_pc <= 1'b0;
             ex_rs1 <= 0;
             ex_rs2 <= 0;
             ex_imm <= 0;
         end else if (!stall) begin
-            if (insert_nop) begin
-                ex_pc <= 0;
-                ex_inst <= 0;
+            if (flush) begin
+                ex_pc <= `ZERO_WORD;
+                ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;
                 ex_rf_waddr <= 0;
                 ex_rf_data_a <= 0;
@@ -78,11 +82,12 @@ module id_ex(
                 ex_wb_ren <= 1'b0;
                 ex_wb_sel <= 0;
                 ex_alu_op <= 0;
-                ex_alu_sel <= 1'b0;
+                ex_alu_sel_imm <= 1'b0;
+                ex_alu_sel_pc <= 1'b0;
                 ex_rs1 <= 0;
                 ex_rs2 <= 0;
                 ex_imm <= 0;
-            end else begin
+            end else if (!hold)begin
                 ex_pc <= id_pc;
                 ex_inst <= id_inst;
                 ex_rf_wen <= id_rf_wen;
@@ -94,7 +99,8 @@ module id_ex(
                 ex_wb_ren <= id_wb_ren;
                 ex_wb_sel <= id_wb_sel;
                 ex_alu_op <= id_alu_op;
-                ex_alu_sel <= id_alu_sel;
+                ex_alu_sel_imm <= id_alu_sel_imm;
+                ex_alu_sel_pc <= id_alu_sel_pc;
                 ex_rs1 <= id_rs1;
                 ex_rs2 <= id_rs2;
                 ex_imm <= id_imm;

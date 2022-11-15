@@ -6,7 +6,6 @@ module control(
     input wire [`ADDR_BUS] pc,
     input wire [`INST_BUS] inst,
 
-    output reg [2:0] id_imm_type,
     // regfile
     output reg id_rf_wen,
     output reg id_rf_sel,
@@ -16,7 +15,8 @@ module control(
     output reg [`SEL] id_wb_sel,
     // alu
     output reg [`ALU_OP_WIDTH-1:0] id_alu_op,
-    output reg id_alu_sel
+    output reg id_alu_sel_imm,
+    output reg id_alu_sel_pc
 );
 
     // 提取指令字段
@@ -28,60 +28,40 @@ module control(
     assign opcode = inst[6:0];
 
     // 判断指令类型, 设置选择信号
-    logic [3:0] inst_type;
+    /*
+        R:     add rd, rs1, rs2   ---  x[rd] = rs1 op rs2                        --- add, sub, and, or, xor, sll, srl, sra, 
+        I:     addi rd, rs1, imm  ---  x[rd] = rs1 op imm                        --- addi, andi, ori, xori, slli, srli, srai,
+        L:     lw rd, imm(rs1)    ---  x[rd] = mem[rs1 + imm]                    --- lb lh lw  还差 lbu lhu
+        S:     sw rs2, imm(rs1)   ---  mem[rs2] = rs1 + imm                      --- sb sh sw
+        SB:    beq rs1, rs2, imm  ---  pc = pc + imm                             --- beq bne blt bge bltu bgeu
+        LUI:   lui rd, imm        ---  x[rd] = imm                               --- lui
+        AUIPC: auipc rd, imm      ---  x[rd] = pc + imm                          --- auipc   
+        JAL:   jal rd, imm        ---  x[rd] = pc + 4; pc = pc + imm             --- jal   
+        JALR:  jalr rd, imm(rs1)  ---  x[rd] = pc + 4; pc = (x[rs1] + imm) & ~1; --- jalr
+     */
 
-    always_comb begin
-        case (opcode)
-            `OPCODE_R: begin // add rd, rs1, rs2  
-                inst_type = INST_R;
-                id_rf_wen = `ENABLE;
-                id_alu_sel = ALU_SEL_REG; // rs1 op rs2
-                id_imm_type = IMM_NOP;
-            end
-            `OPCODE_I: begin // addi rd, rs1, imm
-                inst_type = INST_I;
-                id_rf_wen = `ENABLE;
-                id_alu_sel = ALU_SEL_IMM; // rs1 op imm
-                id_imm_type = IMM_I;
-            end
-            `OPCODE_S: begin // sw rs2, imm(rs1)
-                inst_type = INST_S;
-                id_rf_wen = `DISABLE;
-                id_alu_sel = ALU_SEL_IMM; // rs1 + imm
-                id_imm_type = IMM_S;
-            end
-            `OPCODE_SB: begin // beq rs1, rs2, imm
-                inst_type = INST_SB;
-                id_rf_wen = `DISABLE;
-                id_alu_sel = ALU_SEL_IMM; // do nothing
-                id_imm_type = IMM_SB;
-            end
-            `OPCODE_U: begin // lui rd, imm
-                inst_type = INST_U;
-                id_rf_wen = `ENABLE;
-                id_alu_sel = ALU_SEL_IMM; // choose imm directly
-                id_imm_type = IMM_U;
-            end
-            `OPCODE_L: begin // lw rd, imm(rs1)
-                inst_type = INST_L;
-                id_rf_wen = `ENABLE;
-                id_alu_sel = ALU_SEL_IMM; // rs1 + imm
-                id_imm_type = IMM_I;
-            end
-            default: begin // 不支持 jal jalr auipc 
-                inst_type = INST_NOP;
-                id_rf_wen = `DISABLE;
-                id_alu_sel = ALU_SEL_IMM; // do nothing
-                id_imm_type = IMM_NOP;
-            end
-        endcase
-    end
+    logic is_r, is_i, is_l, is_s, is_sb, is_lui, is_auipc, is_jal, is_jalr; 
+    assign is_r = (opcode == `OPCODE_R);
+    assign is_i = (opcode == `OPCODE_I);
+    assign is_l = (opcode == `OPCODE_L);
+    assign is_s = (opcode == `OPCODE_S);
+    assign is_sb = (opcode == `OPCODE_SB);
+    assign is_lui = (opcode == `OPCODE_LUI);
+    assign is_auipc = (opcode == `OPCODE_AUIPC);
+    assign is_jal = (opcode == `OPCODE_JAL);
+    assign is_jalr = (opcode == `OPCODE_JALR);
 
-    assign id_rf_sel = (inst_type == INST_L); // lw 读取 mem, 其他读取 alu_result
+    // alu
+    assign id_alu_sel_pc = (is_auipc || is_jal || is_jalr) ? ALU_SEL_PC : ALU_SEL_REG_A;
+    assign id_alu_sel_imm = (is_r) ? ALU_SEL_REG_B : ALU_SEL_IMM;
+
+    // rf
+    assign id_rf_sel = (is_l); // lw 读取 mem, 其他读取 alu_result
+    assign id_rf_wen = ((is_s) || (is_sb)) ? `DISABLE : `ENABLE;
 
     // wishbone
-    assign id_wb_wen = (inst_type == INST_S);
-    assign id_wb_ren = (inst_type == INST_L);
+    assign id_wb_wen = (is_s);
+    assign id_wb_ren = (is_l);
     
     always_comb begin // 不代表最终的使能, 只确定字节数, 写入wishbone之前应左移 addr 的低2位
         case (func3)
@@ -96,10 +76,10 @@ module control(
 
     // alu
     always_comb begin
-        if (inst_type == INST_R || inst_type == INST_I) begin
+        if (is_r || is_i) begin
             case (func3)
                 3'b000: begin
-                    if (inst_type == INST_R && func7 == 7'b0100000)
+                    if (is_r && func7 == 7'b0100000)
                         id_alu_op = ALU_OP_SUB;
                     else
                         id_alu_op = ALU_OP_ADD;
@@ -118,8 +98,10 @@ module control(
                 3'b111: id_alu_op = ALU_OP_AND;
                 default: id_alu_op = ALU_OP_NOP;
             endcase
-        end else if (inst_type == INST_U) begin // lui: choose imm directly
+        end else if (is_lui) begin // lui: choose imm directly
             id_alu_op = ALU_OP_B;
+        end else if (is_jal || is_jalr) begin
+            id_alu_op = ALU_OP_ADD_4;
         end else begin
             id_alu_op = ALU_OP_ADD;
         end
