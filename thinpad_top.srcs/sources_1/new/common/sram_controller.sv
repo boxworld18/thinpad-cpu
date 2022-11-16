@@ -97,6 +97,10 @@ module sram_controller #(
         end
 
         STATE_WRITE_2: begin
+          state <= STATE_WRITE_3;
+        end
+
+        STATE_WRITE_3: begin
           state <= STATE_IDLE;
           sram_we_n <= 1'b1;
           wb_ack_o <= 1'b1;
