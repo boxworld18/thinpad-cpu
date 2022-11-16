@@ -39,11 +39,15 @@ module sram_controller #(
   assign sram_data = sram_data_t ? 32'bz : sram_data_o;
   assign sram_data_i = sram_data;
 
-  typedef enum logic [1:0] {
+  typedef enum logic [2:0] {
     STATE_IDLE = 0,
     STATE_READ = 1,
     STATE_WRITE = 2,
-    STATE_WRITE_2 = 3
+    STATE_WRITE_2 = 3,
+
+    // 备用
+    STATE_READ_2 = 4,
+    STATE_WRITE_3 = 5
   } state_t;
 
   state_t state;
@@ -78,6 +82,10 @@ module sram_controller #(
         end
 
         STATE_READ: begin
+          state <= STATE_READ;
+        end
+
+        STATE_READ_2: begin
           wb_dat_o <= sram_data_i;
           wb_ack_o <= 1'b1;
           state <= STATE_IDLE;
