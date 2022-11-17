@@ -76,14 +76,14 @@ module sram_controller #(
               sram_data_o <= wb_dat_i;
               sram_data_t <= 1'b0;
             end else begin 
-              state <= STATE_READ;              
+              state <= STATE_READ_2;              
             end
           end
         end
 
-        STATE_READ: begin
-          state <= STATE_READ;
-        end
+        // STATE_READ: begin
+        //   state <= STATE_READ_2;
+        // end
 
         STATE_READ_2: begin
           wb_dat_o <= sram_data_i;
@@ -92,13 +92,13 @@ module sram_controller #(
         end
 
         STATE_WRITE: begin
-          state <= STATE_WRITE_2;
+          state <= STATE_WRITE_3;
           sram_we_n <= 1'b0;
         end
 
-        STATE_WRITE_2: begin
-          state <= STATE_WRITE_3;
-        end
+        // STATE_WRITE_2: begin
+        //   state <= STATE_WRITE_3;
+        // end
 
         STATE_WRITE_3: begin
           state <= STATE_IDLE;
