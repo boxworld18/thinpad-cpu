@@ -64,7 +64,10 @@ typedef enum logic [4:0] {
     ALU_OP_B   = 5'd9, // 直接选data_b
     ALU_OP_SLT = 5'd10,
     ALU_OP_SLTU = 5'd11,
-    ALU_OP_ADD_4 = 5'd12
+    ALU_OP_ADD_4 = 5'd12,
+    ALU_OP_ANDN = 5'd13,
+    ALU_OP_SBCLR = 5'd14,
+    ALU_OP_CTZ = 5'd15
 } alu_op_t;
 
 // ALU Select

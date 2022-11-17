@@ -23,9 +23,11 @@ module control(
     logic [6:0] func7;
     logic [2:0] func3;
     logic [6:0] opcode;
+    logic [4:0] rs2;
     assign func7 = inst[31:25];
     assign func3 = inst[14:12];
     assign opcode = inst[6:0];
+    assign rs2 = inst[24:20];
 
     // 判断指令类型, 设置选择信号
     /*
@@ -84,7 +86,14 @@ module control(
                     else
                         id_alu_op = ALU_OP_ADD;
                 end
-                3'b001: id_alu_op = ALU_OP_SLL;
+                3'b001: begin
+                    if (func7 == 7'b0100100)
+                        id_alu_op = ALU_OP_SBCLR;
+                    else if (func7 == 7'b0110000 && rs2 == 5'b00001)
+                        id_alu_op = ALU_OP_CTZ;
+                    else
+                        id_alu_op = ALU_OP_SLL;
+                end
                 3'b010: id_alu_op = ALU_OP_SLT; // alu 暂不支持
                 3'b011: id_alu_op = ALU_OP_SLTU; // alu 暂不支持
                 3'b100: id_alu_op = ALU_OP_XOR;
@@ -95,7 +104,12 @@ module control(
                         id_alu_op = ALU_OP_SRL;
                 end
                 3'b110: id_alu_op = ALU_OP_OR;
-                3'b111: id_alu_op = ALU_OP_AND;
+                3'b111: begin
+                    if (func7 == 7'b0100000)
+                        id_alu_op = ALU_OP_ANDN;
+                    else
+                        id_alu_op = ALU_OP_AND;
+                end
                 default: id_alu_op = ALU_OP_NOP;
             endcase
         end else if (is_lui) begin // lui: choose imm directly
