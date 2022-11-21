@@ -31,7 +31,7 @@ module control(
 
     // 判断指令类型, 设置选择信号
     /*
-        R:     add rd, rs1, rs2   ---  x[rd] = rs1 op rs2                        --- add, sub, and, or, xor, sll, srl, sra, 
+        R:     add rd, rs1, rs2   ---  x[rd] = rs1 op rs2                        --- add, sub, and, or, xor, sll, srl, sra,    slt, sltu
         I:     addi rd, rs1, imm  ---  x[rd] = rs1 op imm                        --- addi, andi, ori, xori, slli, srli, srai,
         L:     lw rd, imm(rs1)    ---  x[rd] = mem[rs1 + imm]                    --- lb lh lw  还差 lbu lhu
         S:     sw rs2, imm(rs1)   ---  mem[rs2] = rs1 + imm                      --- sb sh sw
@@ -94,8 +94,8 @@ module control(
                     else
                         id_alu_op = ALU_OP_SLL;
                 end
-                3'b010: id_alu_op = ALU_OP_SLT; // alu 暂不支持
-                3'b011: id_alu_op = ALU_OP_SLTU; // alu 暂不支持
+                3'b010: id_alu_op = ALU_OP_SLT;
+                3'b011: id_alu_op = ALU_OP_SLTU;
                 3'b100: id_alu_op = ALU_OP_XOR;
                 3'b101: begin
                     if (func7 == 7'b0100000)

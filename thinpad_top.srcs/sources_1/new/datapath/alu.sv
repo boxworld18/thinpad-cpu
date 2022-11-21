@@ -21,6 +21,8 @@ module alu(
             ALU_OP_SRL: y = a >> b[4:0];
             ALU_OP_SRA: y = $signed(a) >>> b[4:0];
             ALU_OP_B: y = b;
+            ALU_OP_SLT: y = {31'b0, ($signed(a) < $signed(b))};
+            ALU_OP_SLTU: y = {31'b0, (a < b)};
             ALU_OP_ADD_4: y = a + 4;
             ALU_OP_ANDN: y = a & ~b;
             ALU_OP_SBCLR: y = a & ~(32'b1 << b[4:0]);

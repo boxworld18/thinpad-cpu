@@ -10,6 +10,7 @@ module cpu_mem_master(
     input wire wen,
     input wire ren,
     input wire [`SEL] sel,
+    input wire read_unsigned,
 
     // master
     input wire wb_ack_i,
@@ -73,8 +74,7 @@ module cpu_mem_master(
                 end
                 READ_DATA_ACTION: begin
                     if (wb_ack_i) begin
-                        state <= IDLE;
-                        
+                        state <= IDLE;    
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         mem_master_stall <= 1'b0;

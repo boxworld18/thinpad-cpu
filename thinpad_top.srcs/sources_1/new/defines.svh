@@ -38,16 +38,17 @@
 `define OPCODE_WIDTH 7 // 操作码宽度
 `define FUNC3_WIDTH 3 // FUNC3宽度
 `define FUNC7_WIDTH 7 // FUNC7宽度
-`define OPCODE_R 7'b0110011 // R-type add sub sll srl sra and or xor     REG OP REG
+`define OPCODE_R 7'b0110011 // R-type add sub sll srl sra and or xor slt sltu    REG OP REG  
 `define OPCODE_I 7'b0010011 // I-type addi slli srli srai andi ori xori  REG OP IMM 
 `define OPCODE_S 7'b0100011 // S-type sb sh sw                           REG + IMM
 `define OPCODE_SB 7'b1100011 // SB-type beq bne blt bge bltu bgeu        PC + IMM   
 `define OPCODE_LUI 7'b0110111 // U-type lui                                     IMM
-`define OPCODE_JAL 7'b1101111 // UJ-type jal                              PC + IMM
+`define OPCODE_JAL 7'b1101111 // UJ-type jal                             PC + IMM
 `define OPCODE_L 7'b0000011 // load lb lh lw lbu lhu                     REG + IMM   
 `define OPCODE_AUIPC 7'b0010111 // auipc                                 PC + IMM   
 `define OPCODE_JALR 7'b1100111 // jalr                                   REG + IMM
 `define OPCODE_NOP 7'b0000000 // nop                                     REG + REG
+`define OPCODE_PRIV 7'b1110011 //  CSRRC CSRRS CSRRW EBREAK ECALL MRET
 
 // ALU OP
 `define ALU_OP_WIDTH 5 // ALU操作码宽度 TBD
