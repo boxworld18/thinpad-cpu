@@ -18,6 +18,15 @@
 `define DATA_BUS `DATA_WIDTH-1:0 // 数据总线宽度
 `define INST_BUS `INST_WIDTH-1:0 // 指令总线宽度
 `define SEL `DATA_WIDTH/8-1:0 // 选择信号宽度
+`define INST_CACHELINE_WIDTH 224 // 指令缓存行宽度
+`define INST_CACHE_SIZE 64 // 指令缓存大小
+`define INST_CACHE_TAG_WIDTH 23 // 指令缓存标记宽度
+`define INST_CACHE_INDEX_WIDTH 6 // 指令缓存索引宽度
+
+// inst_cache
+`define VALID_BIT 56:56 // 有效位
+`define TAG_BIT 55:32 // 标记位
+`define INST_BIT 31:0 // 指令位
 
 // Regfile
 `define REG_DATA_WIDTH 32 // 寄存器数据宽度
