@@ -56,7 +56,14 @@ module cpu (
     logic [`INST_BUS] id_inst;
 
     logic [`ADDR_BUS] pc_branch;
-    logic branch; 
+    logic branch;
+
+    logic [`ADDR_BUS] inst_cache_addr;
+    logic [`INST_BUS] inst_cache_data_write;
+    logic is_add;
+    logic [`INST_BUS] inst_cache_data_read;
+    logic is_hit;
+
 
     cpu_if_master u_cpu_if_master (
         .clk(clk_i),
@@ -79,7 +86,23 @@ module cpu (
 
         .pc(if_pc),
         .inst(if_inst),
-        .if_master_stall(if_master_stall)
+        .if_master_stall(if_master_stall),
+
+        .inst_cache_addr_o(inst_cache_addr),
+        .inst_cache_data_o(inst_cache_data_write),
+        .is_add_o(is_add),
+        .inst_cache_data_i(inst_cache_data_read),
+        .is_hit_i(is_hit)
+    );
+
+    inst_cache u_inst_cache(
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .addr_i(inst_cache_addr),
+        .inst_i(inst_cache_data_write),
+        .is_add_i(is_add),
+        .inst_o(inst_cache_data_read),
+        .is_hit_o(is_hit)
     );
 
     /* =========== IF end =========== */    
