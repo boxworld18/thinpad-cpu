@@ -22,11 +22,16 @@
 `define INST_CACHE_SIZE 64 // 指令缓存大小
 `define INST_CACHE_TAG_WIDTH 23 // 指令缓存标记宽度
 `define INST_CACHE_INDEX_WIDTH 6 // 指令缓存索引宽度
+`define DATA_CACHELINE_WIDTH 224 // 数据缓存行宽度
+`define DATA_CACHE_SIZE 64 // 数据缓存大小
+`define DATA_CACHE_TAG_WIDTH 23 // 数据缓存标记宽度
+`define DATA_CACHE_INDEX_WIDTH 6 // 数据缓存索引宽度
 
 // inst_cache
 `define VALID_BIT 56:56 // 有效位
 `define TAG_BIT 55:32 // 标记位
 `define INST_BIT 31:0 // 指令位
+`define DATA_BIT 31:0 // 数据位
 
 // Regfile
 `define REG_DATA_WIDTH 32 // 寄存器数据宽度

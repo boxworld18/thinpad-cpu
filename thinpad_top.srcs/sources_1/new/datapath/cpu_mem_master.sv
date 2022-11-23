@@ -24,15 +24,26 @@ module cpu_mem_master(
 
     // cpu mem
     output reg [`DATA_BUS] mem_read_data,
-    output reg mem_master_stall
+    output reg mem_master_stall,
+
+    // data cache
+    output reg [`ADDR_BUS] data_cache_addr_o,
+    output reg [`DATA_BUS] data_cache_data_o,
+    output reg is_add_o,
+    input wire [`DATA_BUS] data_cache_data_i,
+    input wire is_hit_i
 );
 
     typedef enum logic [1:0] {
-        IDLE,
-        READ_DATA_ACTION,
-        WRITE_DATA_ACTION
+        IDLE = 0,
+        QUERY_CACHE = 1,
+        READ_DATA_ACTION = 2,
+        WRITE_DATA_ACTION = 3
     } state_t;
     state_t state;
+
+    logic highest_bit;
+    assign highest_bit = addr[`ADDR_WIDTH-1];
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -44,17 +55,30 @@ module cpu_mem_master(
             wb_we_o <= 1'b0;
             mem_read_data <= 0;
             mem_master_stall <= 1'b0;
+            data_cache_addr_o <= 0;
+            data_cache_data_o <= 0;
+            is_add_o <= 1'b0;
         end else begin
             case (state)
-               IDLE: begin     
+               IDLE: begin
+                    is_add_o <= 1'b0;
                     if (ren) begin
-                        state <= READ_DATA_ACTION;
-                        wb_stb_o <= 1'b1;
-                        wb_cyc_o <= 1'b1;
-                        wb_adr_o <= addr;
-                        wb_sel_o <= (sel << addr[1:0]);
-                        wb_we_o <= 1'b0;
-                        mem_master_stall <= 1'b1;
+                        if(highest_bit) begin
+                            state <= QUERY_CACHE;
+                            wb_stb_o <= 1'b0;
+                            wb_cyc_o <= 1'b0;
+                            wb_we_o <= 1'b0;
+                            mem_master_stall <= 1'b1;
+                            data_cache_addr_o <= addr;
+                        end else begin
+                            state <= READ_DATA_ACTION;
+                            wb_stb_o <= 1'b1;
+                            wb_cyc_o <= 1'b1;
+                            wb_adr_o <= addr;
+                            wb_sel_o <= (sel << addr[1:0]);
+                            wb_we_o <= 1'b0;
+                            mem_master_stall <= 1'b1;
+                        end
                     end else if (wen) begin
                         state <= WRITE_DATA_ACTION;
                         wb_stb_o <= 1'b1;
@@ -71,6 +95,28 @@ module cpu_mem_master(
                         mem_master_stall <= 1'b0;
                     end       
                 end
+                QUERY_CACHE: begin
+                    if (is_hit_i) begin
+                        state <= IDLE;
+                        case(sel << addr[1:0])
+                            4'b0001: mem_read_data <= {24'b0, data_cache_data_i[7:0]};
+                            4'b0010: mem_read_data <= {24'b0, data_cache_data_i[15:8]};
+                            4'b0100: mem_read_data <= {24'b0, data_cache_data_i[23:16]};
+                            4'b1000: mem_read_data <= {24'b0, data_cache_data_i[31:24]};
+                            4'b1111: mem_read_data <= data_cache_data_i;
+                            default: mem_read_data <= 0;
+                        endcase
+                        mem_master_stall <= 1'b0;
+                    end else begin
+                        state <= READ_DATA_ACTION;
+                        wb_stb_o <= 1'b1;
+                        wb_cyc_o <= 1'b1;
+                        wb_adr_o <= addr;
+                        wb_sel_o <= (sel << addr[1:0]);
+                        wb_we_o <= 1'b0;
+                        mem_master_stall <= 1'b1;
+                    end
+                end
                 READ_DATA_ACTION: begin
                     if (wb_ack_i) begin
                         state <= IDLE;
@@ -86,6 +132,11 @@ module cpu_mem_master(
                             4'b1111: mem_read_data <= wb_dat_i;
                             default: mem_read_data <= 0;
                         endcase
+                        if(highest_bit) begin
+                            data_cache_addr_o <= addr;
+                            data_cache_data_o <= wb_dat_i;
+                            is_add_o <= 1'b1;
+                        end
                     end
                 end
                 WRITE_DATA_ACTION: begin
@@ -95,6 +146,12 @@ module cpu_mem_master(
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         wb_we_o <= 1'b0;
+                        
+                        if(highest_bit) begin
+                            data_cache_addr_o <= addr;
+                            data_cache_data_o <= wb_dat_i;
+                            is_add_o <= 1'b1;
+                        end
                     end
                 end
             endcase

@@ -341,6 +341,13 @@ module cpu (
     /* =========== MEM begin =========== */
 
     logic [`DATA_BUS] mem_read_data;
+
+    logic [`ADDR_BUS] data_cache_addr;
+    logic [`DATA_BUS] data_cache_data_write;
+    logic data_cache_is_add;
+    logic [`DATA_BUS] data_cache_data_read;
+    logic data_cache_is_hit;
+
     cpu_mem_master u_cpu_mem_master (
         .clk(clk_i),
         .rst(rst_i),
@@ -361,7 +368,23 @@ module cpu (
         .wb_we_o(wbm1_we_o),
 
         .mem_read_data(mem_read_data),
-        .mem_master_stall(mem_master_stall)
+        .mem_master_stall(mem_master_stall),
+
+        .data_cache_addr_o(data_cache_addr),
+        .data_cache_data_o(data_cache_data_write),
+        .is_add_o(data_cache_is_add),
+        .data_cache_data_i(data_cache_data_read),
+        .is_hit_i(data_cache_is_hit)
+    );
+
+    data_cache u_data_cache(
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .addr_i(data_cache_addr),
+        .data_i(data_cache_data_write),
+        .is_add_i(data_cache_is_add),
+        .data_o(data_cache_data_read),
+        .is_hit_o(data_cache_is_hit)
     );
 
     /* =========== MEM end =========== */
