@@ -140,6 +140,11 @@ module cpu (
     logic [`ALU_OP_WIDTH-1:0] id_alu_op;
     logic id_alu_sel_imm;
     logic id_alu_sel_pc;
+    // csr
+    logic [`CSR_SEL_BUS] id_csr_ren;
+    logic [`CSR_SEL_BUS] id_csr_wen;
+    logic [1:0] id_csr_sel;
+
 
     control u_control(
         .pc(id_pc),
@@ -154,7 +159,11 @@ module cpu (
 
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
-        .id_alu_sel_pc(id_alu_sel_pc)
+        .id_alu_sel_pc(id_alu_sel_pc),
+
+        .id_csr_ren(id_csr_ren),
+        .id_csr_wen(id_csr_wen),
+        .id_csr_sel(id_csr_sel)
     );
 
     logic [`REG_DATA_BUS] id_rf_data_a;
@@ -186,6 +195,9 @@ module cpu (
     logic [`ALU_OP_WIDTH-1:0] ex_alu_op;
     logic ex_alu_sel_imm;
     logic ex_alu_sel_pc;
+    logic [`CSR_SEL_BUS] ex_csr_ren;
+    logic [`CSR_SEL_BUS] ex_csr_wen;
+    logic [1:0] ex_csr_sel;
     logic [`REG_ADDR_BUS] ex_rs1;
     logic [`REG_ADDR_BUS] ex_rs2;
     logic [`DATA_BUS] ex_imm;
@@ -210,6 +222,9 @@ module cpu (
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
+        .id_csr_ren(id_csr_ren),
+        .id_csr_wen(id_csr_wen),
+        .id_csr_sel(id_csr_sel),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -227,6 +242,9 @@ module cpu (
         .ex_alu_op(ex_alu_op),
         .ex_alu_sel_imm(ex_alu_sel_imm),
         .ex_alu_sel_pc(ex_alu_sel_pc),
+        .ex_csr_ren(ex_csr_ren),
+        .ex_csr_wen(ex_csr_wen),
+        .ex_csr_sel(ex_csr_sel),
         .ex_rs1(ex_rs1),
         .ex_rs2(ex_rs2),
         .ex_imm(ex_imm)

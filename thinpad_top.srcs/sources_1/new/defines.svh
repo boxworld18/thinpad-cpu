@@ -4,8 +4,8 @@
 // general
 `define ZERO_WORD 32'h0000_0000
 `define INST_NOP 32'h0000_0013 
-`define ENABLE 1'b1 // 使能
-`define DISABLE 1'b0 
+`define ENABLE 1 // 使能
+`define DISABLE 0 
 
 // PC
 `define PC_RESET 32'h8000_0000 // PC复位值
@@ -48,7 +48,7 @@
 `define OPCODE_AUIPC 7'b0010111 // auipc                                 PC + IMM   
 `define OPCODE_JALR 7'b1100111 // jalr                                   REG + IMM
 `define OPCODE_NOP 7'b0000000 // nop                                     REG + REG
-`define OPCODE_PRIV 7'b1110011 //  CSRRC CSRRS CSRRW EBREAK ECALL MRET
+`define OPCODE_PRIV 7'b1110011 // CSRRC CSRRS CSRRW EBREAK ECALL MRET
 
 // ALU OP
 `define ALU_OP_WIDTH 5 // ALU操作码宽度 TBD
@@ -94,8 +94,8 @@ typedef enum logic [1:0] {
 // CSR
 `define CSR_ADDR_WIDTH 12 // CSR地址宽度
 `define CSR_DATA_WIDTH 32 // CSR数据宽度
-`define CSR_ADDR_BUS `CSR_ADDR_WIDTH-1:0 // CSR地址线宽度
-`define CSR_DATA_BUS `CSR_DATA_WIDTH-1:0 // CSR数据线宽度
+`define CSR_ADDR_BUS `CSR_ADDR_WIDTH-1:0 // CSR地址线宽度 11:0
+`define CSR_DATA_BUS `CSR_DATA_WIDTH-1:0 // CSR数据线宽度 31:0
 `define CSR_MTVEC 12'h305 // CSR mtvec地址
 `define CSR_MSCRATCH 12'h340 // CSR mscratch地址
 `define CSR_MEPC 12'h341 // CSR mepc地址
@@ -103,5 +103,59 @@ typedef enum logic [1:0] {
 `define CSR_MSTATUS 12'h300 // CSR mstatus地址
 `define CSR_MIE 12'h304 // CSR mie地址
 `define CSR_MIP 12'h344 // CSR mip地址
+
+`define CSR_NUM 7 // CSR数量
+`define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
+
+typedef struct packed
+{
+    logic mtvec;
+    logic mepc;  
+    logic mcause;
+    logic mstatus;
+    logic mscratch; 
+    logic mie;
+    logic mip;
+} csr_ren;
+
+typedef struct packed
+{
+    logic mtvec;
+    logic mepc;  
+    logic mcause;
+    logic mstatus;
+    logic mscratch; 
+    logic mie;
+    logic mip;
+} csr_wen;
+
+typedef struct packed
+{
+    logic [`CSR_DATA_BUS] mtvec;
+    logic [`CSR_DATA_BUS] mepc;
+    logic [`CSR_DATA_BUS] mcause;
+    logic [`CSR_DATA_BUS] mstatus;
+    logic [`CSR_DATA_BUS] mscratch;
+    logic [`CSR_DATA_BUS] mie;
+    logic [`CSR_DATA_BUS] mip;
+} csr_rdata;
+
+typedef struct packed
+{
+    logic [`CSR_DATA_BUS] mtvec;
+    logic [`CSR_DATA_BUS] mepc;
+    logic [`CSR_DATA_BUS] mcause;
+    logic [`CSR_DATA_BUS] mstatus;
+    logic [`CSR_DATA_BUS] mscratch;
+    logic [`CSR_DATA_BUS] mie;
+    logic [`CSR_DATA_BUS] mip;
+} csr_wdata;
+
+typedef enum logic [1:0] {
+    CSRRW_NOP = 2'b00,
+    CSRRW = 2'b01,
+    CSRRS = 2'b10,
+    CSRRC = 2'b11
+} csrrw_t;
 
 `endif

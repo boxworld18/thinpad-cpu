@@ -16,7 +16,11 @@ module control(
     // alu
     output reg [`ALU_OP_WIDTH-1:0] id_alu_op,
     output reg id_alu_sel_imm,
-    output reg id_alu_sel_pc
+    output reg id_alu_sel_pc,
+    // csr
+    output reg [`CSR_SEL_BUS] id_csr_ren,
+    output reg [`CSR_SEL_BUS] id_csr_wen,
+    output reg [1:0] id_csr_sel // CSRRW = 1, CSRRS = 2, CSRRC = 3, CSRRW_NOP = 0
 );
 
     // 提取指令字段
@@ -24,10 +28,16 @@ module control(
     logic [2:0] func3;
     logic [6:0] opcode;
     logic [4:0] rs2;
+    logic [4:0] rs1;
+    logic [4:0] rd;
+    logic [`CSR_ADDR_BUS] csr_addr;
     assign func7 = inst[31:25];
     assign func3 = inst[14:12];
     assign opcode = inst[6:0];
     assign rs2 = inst[24:20];
+    assign rs1 = inst[19:15];
+    assign rd = inst[11:7];
+    assign csr_addr = inst[31:20];
 
     // 判断指令类型, 设置选择信号
     /*
@@ -40,7 +50,7 @@ module control(
         AUIPC: auipc rd, imm      ---  x[rd] = pc + imm                          --- auipc   
         JAL:   jal rd, imm        ---  x[rd] = pc + 4; pc = pc + imm             --- jal   
         JALR:  jalr rd, imm(rs1)  ---  x[rd] = pc + 4; pc = (x[rs1] + imm) & ~1; --- jalr
-        PRIV:  
+        PRIV:  CSRRW rd, csr, zimm[4:0](rs1) --- x[rd] = CSRs[csr], CSRs[csr] = x[rs1];  --- CSRRW, CSRRS, CSRRC
      */
 
     logic is_r, is_i, is_l, is_s, is_sb, is_lui, is_auipc, is_jal, is_jalr, is_priv;; 
@@ -122,5 +132,48 @@ module control(
             id_alu_op = ALU_OP_ADD;
         end
     end
+
+    // csr
+    logic csrrw_c_s, csr_ren_global, csr_wen_global;
+
+    assign csrrw_c_s = (is_priv && (func3[2] == 1'b0 && func3[1:0] != 2'b00));
+    assign csr_ren_global = csrrw_c_s && (rd != 0 || func3 != 3'b001);
+    assign csr_wen_global = csrrw_c_s && (rs1 != 0 || func3 == 3'b001);
+
+    always_comb begin
+        if (csrrw_c_s) begin // CSRRW CSRRS CSRRC
+            id_csr_ren = `DISABLE;
+            id_csr_wen = `DISABLE;
+            case (csr_addr) 
+                `CSR_MTVEC:    begin id_csr_ren.mtvec = csr_ren_global;    id_csr_wen.mtvec = csr_wen_global;    end
+                `CSR_MEPC:     begin id_csr_ren.mepc = csr_ren_global;     id_csr_wen.mepc = csr_wen_global;     end
+                `CSR_MSTATUS:  begin id_csr_ren.mstatus = csr_ren_global;  id_csr_wen.mstatus = csr_wen_global;  end
+                `CSR_MCAUSE:   begin id_csr_ren.mcause = csr_ren_global;   id_csr_wen.mcause = csr_wen_global;   end
+                `CSR_MSCRATCH: begin id_csr_ren.mscratch = csr_ren_global; id_csr_wen.mscratch = csr_wen_global; end
+                `CSR_MIE:      begin id_csr_ren.mie = csr_ren_global;      id_csr_wen.mie = csr_wen_global;      end
+                `CSR_MIP:      begin id_csr_ren.mip = csr_ren_global;      id_csr_wen.mip = csr_wen_global;      end 
+                default: ;                                            
+            endcase
+        end else if (is_priv && (func3 == 3'b000)) begin // ECALL EBREAK MRET
+            // TODO
+        end else begin
+            id_csr_ren = `DISABLE;
+            id_csr_wen = `DISABLE;
+        end
+    end
+
+    always_comb begin
+        if (is_priv) begin
+            case (func3)
+                3'b001: id_csr_sel = CSRRW;
+                3'b010: id_csr_sel = CSRRS;
+                3'b011: id_csr_sel = CSRRC;
+                default: id_csr_sel = CSRRW_NOP;
+            endcase
+        end else begin
+            id_csr_sel = CSRRW_NOP;
+        end
+    end
+    
 
 endmodule
