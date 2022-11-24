@@ -149,7 +149,7 @@ module cpu_mem_master(
                         
                         if(highest_bit) begin
                             data_cache_addr_o <= addr;
-                            data_cache_data_o <= wb_dat_i;
+                            data_cache_data_o <= data;
                             is_add_o <= 1'b1;
                         end
                     end
