@@ -45,6 +45,8 @@ module cpu_mem_master(
     logic highest_bit;
     assign highest_bit = addr[`ADDR_WIDTH-1];
 
+    logic [`ADDR_BUS] addr_cache;
+
     always_ff @(posedge clk) begin
         if (rst) begin
             state <= IDLE;
@@ -70,6 +72,7 @@ module cpu_mem_master(
                             wb_we_o <= 1'b0;
                             mem_master_stall <= 1'b1;
                             data_cache_addr_o <= addr;
+                            addr_cache <= addr;
                         end else begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
@@ -111,7 +114,7 @@ module cpu_mem_master(
                         state <= READ_DATA_ACTION;
                         wb_stb_o <= 1'b1;
                         wb_cyc_o <= 1'b1;
-                        wb_adr_o <= addr;
+                        wb_adr_o <= addr_cache;
                         wb_sel_o <= (sel << addr[1:0]);
                         wb_we_o <= 1'b0;
                         mem_master_stall <= 1'b1;
@@ -133,7 +136,7 @@ module cpu_mem_master(
                             default: mem_read_data <= 0;
                         endcase
                         if(highest_bit) begin
-                            data_cache_addr_o <= addr;
+                            data_cache_addr_o <= addr_cache;
                             data_cache_data_o <= wb_dat_i;
                             is_add_o <= 1'b1;
                         end
