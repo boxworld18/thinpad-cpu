@@ -38,8 +38,8 @@
 `define OPCODE_WIDTH 7 // 操作码宽度
 `define FUNC3_WIDTH 3 // FUNC3宽度
 `define FUNC7_WIDTH 7 // FUNC7宽度
-`define OPCODE_R 7'b0110011 // R-type add sub sll srl sra and or xor slt sltu    REG OP REG  
-`define OPCODE_I 7'b0010011 // I-type addi slli srli srai andi ori xori  REG OP IMM 
+`define OPCODE_R 7'b0110011 // R-type add sub sll srl sra and or xor slt sltu       REG OP REG  
+`define OPCODE_I 7'b0010011 // I-type addi slli srli srai andi ori xori slti sltiu  REG OP IMM 
 `define OPCODE_S 7'b0100011 // S-type sb sh sw                           REG + IMM
 `define OPCODE_SB 7'b1100011 // SB-type beq bne blt bge bltu bgeu        PC + IMM   
 `define OPCODE_LUI 7'b0110111 // U-type lui                                     IMM
@@ -90,5 +90,18 @@ typedef enum logic [1:0] {
     ALU_SEL_MEM = 2'b10,
     ALU_SEL_WB   = 2'b11
 } alu_sel_t;
+
+// CSR
+`define CSR_ADDR_WIDTH 12 // CSR地址宽度
+`define CSR_DATA_WIDTH 32 // CSR数据宽度
+`define CSR_ADDR_BUS `CSR_ADDR_WIDTH-1:0 // CSR地址线宽度
+`define CSR_DATA_BUS `CSR_DATA_WIDTH-1:0 // CSR数据线宽度
+`define CSR_MTVEC 12'h305 // CSR mtvec地址
+`define CSR_MSCRATCH 12'h340 // CSR mscratch地址
+`define CSR_MEPC 12'h341 // CSR mepc地址
+`define CSR_MCAUSE 12'h342 // CSR mcause地址
+`define CSR_MSTATUS 12'h300 // CSR mstatus地址
+`define CSR_MIE 12'h304 // CSR mie地址
+`define CSR_MIP 12'h344 // CSR mip地址
 
 `endif

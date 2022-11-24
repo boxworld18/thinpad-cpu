@@ -31,18 +31,19 @@ module control(
 
     // 判断指令类型, 设置选择信号
     /*
-        R:     add rd, rs1, rs2   ---  x[rd] = rs1 op rs2                        --- add, sub, and, or, xor, sll, srl, sra,    slt, sltu
-        I:     addi rd, rs1, imm  ---  x[rd] = rs1 op imm                        --- addi, andi, ori, xori, slli, srli, srai,
-        L:     lw rd, imm(rs1)    ---  x[rd] = mem[rs1 + imm]                    --- lb lh lw  还差 lbu lhu
+        R:     add rd, rs1, rs2   ---  x[rd] = rs1 op rs2                        --- add, sub, and, or, xor, sll, srl, sra, slt, sltu
+        I:     addi rd, rs1, imm  ---  x[rd] = rs1 op imm                        --- addi, andi, ori, xori, slli, srli, srai, slti, sltiu
+        L:     lw rd, imm(rs1)    ---  x[rd] = mem[rs1 + imm]                    --- lb lw  还差 lbu lh lhu
         S:     sw rs2, imm(rs1)   ---  mem[rs2] = rs1 + imm                      --- sb sh sw
         SB:    beq rs1, rs2, imm  ---  pc = pc + imm                             --- beq bne blt bge bltu bgeu
         LUI:   lui rd, imm        ---  x[rd] = imm                               --- lui
         AUIPC: auipc rd, imm      ---  x[rd] = pc + imm                          --- auipc   
         JAL:   jal rd, imm        ---  x[rd] = pc + 4; pc = pc + imm             --- jal   
         JALR:  jalr rd, imm(rs1)  ---  x[rd] = pc + 4; pc = (x[rs1] + imm) & ~1; --- jalr
+        PRIV:  
      */
 
-    logic is_r, is_i, is_l, is_s, is_sb, is_lui, is_auipc, is_jal, is_jalr; 
+    logic is_r, is_i, is_l, is_s, is_sb, is_lui, is_auipc, is_jal, is_jalr, is_priv;; 
     assign is_r = (opcode == `OPCODE_R);
     assign is_i = (opcode == `OPCODE_I);
     assign is_l = (opcode == `OPCODE_L);
@@ -52,6 +53,7 @@ module control(
     assign is_auipc = (opcode == `OPCODE_AUIPC);
     assign is_jal = (opcode == `OPCODE_JAL);
     assign is_jalr = (opcode == `OPCODE_JALR);
+    assign is_priv = (opcode == `OPCODE_PRIV);
 
     // alu
     assign id_alu_sel_pc = (is_auipc || is_jal || is_jalr) ? ALU_SEL_PC : ALU_SEL_REG_A;
@@ -67,11 +69,11 @@ module control(
     
     always_comb begin // 不代表最终的使能, 只确定字节数, 写入wishbone之前应左移 addr 的低2位
         case (func3)
-            3'b000: id_wb_sel = 4'b0001;
-            3'b100: id_wb_sel = 4'b0001;
-            3'b001: id_wb_sel = 4'b0011;
-            3'b101: id_wb_sel = 4'b0011;
-            3'b010: id_wb_sel = 4'b1111;
+            3'b000: id_wb_sel = 4'b0001; // lb
+            3'b100: id_wb_sel = 4'b0001; // lbu
+            3'b001: id_wb_sel = 4'b0011; // lh
+            3'b101: id_wb_sel = 4'b0011; // lhu
+            3'b010: id_wb_sel = 4'b1111; // lw
             default: id_wb_sel = 4'b0000;
         endcase
     end

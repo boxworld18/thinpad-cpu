@@ -78,7 +78,7 @@ module cpu_mem_master(
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         mem_master_stall <= 1'b0;
-                        case (wb_sel_o) 
+                        case (wb_sel_o) // 不支持 lh lhu
                             4'b0001: mem_read_data <= {24'b0, wb_dat_i[7:0]};
                             4'b0010: mem_read_data <= {24'b0, wb_dat_i[15:8]};
                             4'b0100: mem_read_data <= {24'b0, wb_dat_i[23:16]};
