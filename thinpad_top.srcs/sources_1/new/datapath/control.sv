@@ -134,7 +134,8 @@ module control(
         end
     end
 
-    // csr
+    // CSR (Control and Status Registers)
+
     // logic csrrw_c_s, csr_ren_global, csr_wen_global;
     // csr_en csr_ren_reg, csr_wen_reg;
     // assign id_csr_ren = csr_ren_reg;
