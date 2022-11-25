@@ -18,9 +18,7 @@ module control(
     output reg id_alu_sel_imm,
     output reg id_alu_sel_pc,
     // csr
-    output reg [`CSR_SEL_BUS] id_csr_ren,
-    output reg [`CSR_SEL_BUS] id_csr_wen,
-    output reg [1:0] id_csr_sel // CSRRW = 1, CSRRS = 2, CSRRC = 3, CSRRW_NOP = 0
+    output reg [2:0] id_csr_inst_sel // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6
 );
 
     // 提取指令字段
@@ -134,44 +132,32 @@ module control(
     end
 
     // csr
-    logic csrrw_c_s, csr_ren_global, csr_wen_global;
-
-    assign csrrw_c_s = (is_priv && (func3[2] == 1'b0 && func3[1:0] != 2'b00));
-    assign csr_ren_global = csrrw_c_s && (rd != 0 || func3 != 3'b001);
-    assign csr_wen_global = csrrw_c_s && (rs1 != 0 || func3 == 3'b001);
-
-    always_comb begin
-        if (csrrw_c_s) begin // CSRRW CSRRS CSRRC
-            id_csr_ren = `DISABLE;
-            id_csr_wen = `DISABLE;
-            case (csr_addr) 
-                `CSR_MTVEC:    begin id_csr_ren.mtvec = csr_ren_global;    id_csr_wen.mtvec = csr_wen_global;    end
-                `CSR_MEPC:     begin id_csr_ren.mepc = csr_ren_global;     id_csr_wen.mepc = csr_wen_global;     end
-                `CSR_MSTATUS:  begin id_csr_ren.mstatus = csr_ren_global;  id_csr_wen.mstatus = csr_wen_global;  end
-                `CSR_MCAUSE:   begin id_csr_ren.mcause = csr_ren_global;   id_csr_wen.mcause = csr_wen_global;   end
-                `CSR_MSCRATCH: begin id_csr_ren.mscratch = csr_ren_global; id_csr_wen.mscratch = csr_wen_global; end
-                `CSR_MIE:      begin id_csr_ren.mie = csr_ren_global;      id_csr_wen.mie = csr_wen_global;      end
-                `CSR_MIP:      begin id_csr_ren.mip = csr_ren_global;      id_csr_wen.mip = csr_wen_global;      end 
-                default: ;                                            
-            endcase
-        end else if (is_priv && (func3 == 3'b000)) begin // ECALL EBREAK MRET
-            // TODO
-        end else begin
-            id_csr_ren = `DISABLE;
-            id_csr_wen = `DISABLE;
-        end
-    end
+    // logic csrrw_c_s, csr_ren_global, csr_wen_global;
+    // csr_en csr_ren_reg, csr_wen_reg;
+    // assign id_csr_ren = csr_ren_reg;
+    // assign id_csr_wen = csr_wen_reg;
+    // assign csrrw_c_s = (is_priv && (func3[2] == 1'b0 && func3[1:0] != 2'b00));
+    // assign csr_ren_global = csrrw_c_s && (rd != 0 || func3 != 3'b001);
+    // assign csr_wen_global = csrrw_c_s && (rs1 != 0 || func3 == 3'b001);
 
     always_comb begin
         if (is_priv) begin
             case (func3)
-                3'b001: id_csr_sel = CSRRW;
-                3'b010: id_csr_sel = CSRRS;
-                3'b011: id_csr_sel = CSRRC;
-                default: id_csr_sel = CSRRW_NOP;
+                3'b001: id_csr_inst_sel = CSRRW;
+                3'b010: id_csr_inst_sel = CSRRS;
+                3'b011: id_csr_inst_sel = CSRRC;
+                3'b000: begin
+                    case (csr_addr)
+                        `CSR_ECALL: id_csr_inst_sel = ECALL;
+                        `CSR_EBREAK: id_csr_inst_sel = EBREAK;
+                        `CSR_MRET: id_csr_inst_sel = MRET;
+                        default: id_csr_inst_sel = CSR_INST_NOP;
+                    endcase
+                end
+                default: id_csr_inst_sel = CSR_INST_NOP;
             endcase
         end else begin
-            id_csr_sel = CSRRW_NOP;
+            id_csr_inst_sel = CSR_INST_NOP;
         end
     end
     

@@ -141,10 +141,7 @@ module cpu (
     logic id_alu_sel_imm;
     logic id_alu_sel_pc;
     // csr
-    logic [`CSR_SEL_BUS] id_csr_ren;
-    logic [`CSR_SEL_BUS] id_csr_wen;
-    logic [1:0] id_csr_sel;
-
+    logic [2:0] id_csr_inst_sel;
 
     control u_control(
         .pc(id_pc),
@@ -161,9 +158,7 @@ module cpu (
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
 
-        .id_csr_ren(id_csr_ren),
-        .id_csr_wen(id_csr_wen),
-        .id_csr_sel(id_csr_sel)
+        .id_csr_inst_sel(id_csr_inst_sel)
     );
 
     logic [`REG_DATA_BUS] id_rf_data_a;
@@ -183,6 +178,22 @@ module cpu (
         .rdata_b(id_rf_data_b)
     );
 
+    logic [`CSR_DATA_BUS] id_csr_rdata;
+    logic [2:0] wb_csr_inst_sel;
+    logic [`CSR_ADDR_BUS] wb_csr_waddr;
+    logic [`CSR_DATA_BUS] wb_csr_wdata;
+    csr u_csr(
+        .clk(clk_i),
+        .rst(rst_i),
+
+        .raddr(id_inst[31:20]),
+        .rdata(id_csr_rdata),
+
+        .sel(wb_csr_inst_sel),
+        .waddr(wb_csr_waddr),
+        .wdata(wb_csr_wdata)
+    );
+
     /* =========== ID end =========== */
 
     logic [`ADDR_BUS] ex_pc;
@@ -197,7 +208,7 @@ module cpu (
     logic ex_alu_sel_pc;
     logic [`CSR_SEL_BUS] ex_csr_ren;
     logic [`CSR_SEL_BUS] ex_csr_wen;
-    logic [1:0] ex_csr_sel;
+    logic [2:0] ex_csr_inst_sel;
     logic [`REG_ADDR_BUS] ex_rs1;
     logic [`REG_ADDR_BUS] ex_rs2;
     logic [`DATA_BUS] ex_imm;
@@ -222,9 +233,7 @@ module cpu (
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
-        .id_csr_ren(id_csr_ren),
-        .id_csr_wen(id_csr_wen),
-        .id_csr_sel(id_csr_sel),
+        .id_csr_inst_sel(id_csr_inst_sel),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -242,9 +251,7 @@ module cpu (
         .ex_alu_op(ex_alu_op),
         .ex_alu_sel_imm(ex_alu_sel_imm),
         .ex_alu_sel_pc(ex_alu_sel_pc),
-        .ex_csr_ren(ex_csr_ren),
-        .ex_csr_wen(ex_csr_wen),
-        .ex_csr_sel(ex_csr_sel),
+        .id_csr_inst_sel(id_csr_inst_sel),
         .ex_rs1(ex_rs1),
         .ex_rs2(ex_rs2),
         .ex_imm(ex_imm)
@@ -303,6 +310,7 @@ module cpu (
 
     /* =========== EX end =========== */    
 
+    logic [`ADDR_BUS] mem_pc;
     logic [`DATA_BUS] mem_wb_wdata;
     logic mem_wb_wen;
     logic mem_wb_ren;
@@ -314,6 +322,7 @@ module cpu (
         .rst(rst_i),
         .stall(stall),
 
+        .ex_pc(ex_pc),
         .ex_data(alu_data_o),
         .ex_wb_wdata(alu_data_b),
         .ex_wb_wen(ex_wb_wen),
@@ -323,6 +332,7 @@ module cpu (
         .ex_rf_waddr(ex_rf_waddr),
         .ex_rf_sel(ex_rf_sel),
 
+        .mem_pc(mem_pc),
         .mem_data(mem_data),
         .mem_wb_wdata(mem_wb_wdata),
         .mem_wb_wen(mem_wb_wen),
@@ -361,6 +371,7 @@ module cpu (
 
     /* =========== MEM end =========== */
 
+    logic [`ADDR_BUS] wb_pc;
     logic [`REG_DATA_BUS] mem_rf_wdata;
     assign mem_rf_wdata = mem_rf_sel ? mem_read_data : mem_data;
 
@@ -368,9 +379,11 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),      
         .stall(stall),
+        .mem_pc(mem_pc),
         .mem_rf_wen(mem_rf_wen),
         .mem_rf_waddr(mem_rf_waddr),
         .mem_rf_wdata(mem_rf_wdata),
+        .wb_pc(wb_pc),
         .wb_rf_wen(wb_rf_wen),
         .wb_rf_waddr(wb_rf_waddr),
         .wb_rf_wdata(wb_rf_wdata)        

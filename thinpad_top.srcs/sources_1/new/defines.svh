@@ -104,8 +104,13 @@ typedef enum logic [1:0] {
 `define CSR_MIE 12'h304 // CSR mie地址
 `define CSR_MIP 12'h344 // CSR mip地址
 
+`define CSR_ECALL 12'h000 // CSR ecall地址
+`define CSR_EBREAK 12'h001 // CSR ebreak地址
+`define CSR_MRET 12'h302 // CSR mret地址
+
 `define CSR_NUM 7 // CSR数量
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
+`define CSR_TOTAL_DATA_BUS ((`CSR_NUM)*(`CSR_DATA_WIDTH))-1:0 // CSR总数据线宽度
 
 typedef struct packed
 {
@@ -116,46 +121,27 @@ typedef struct packed
     logic mscratch; 
     logic mie;
     logic mip;
-} csr_ren;
+} csr_en;
 
 typedef struct packed
 {
-    logic mtvec;
-    logic mepc;  
-    logic mcause;
-    logic mstatus;
-    logic mscratch; 
-    logic mie;
-    logic mip;
-} csr_wen;
-
-typedef struct packed
-{
-    logic [`CSR_DATA_BUS] mtvec;
+    logic [`CSR_DATA_BUS] mtvec;        // BASE(31:2) MODE(1:0)
     logic [`CSR_DATA_BUS] mepc;
-    logic [`CSR_DATA_BUS] mcause;
-    logic [`CSR_DATA_BUS] mstatus;
+    logic [`CSR_DATA_BUS] mcause;       // Interrupt (31) Exception Code(30:0)
+    logic [`CSR_DATA_BUS] mstatus;      // MPP(12:11) SPP(8) MPIE(7) SPIE(5) UPIE(4) MIE(3) SIE(1) UIE(0)
     logic [`CSR_DATA_BUS] mscratch;
     logic [`CSR_DATA_BUS] mie;
     logic [`CSR_DATA_BUS] mip;
-} csr_rdata;
+} csr_data;
 
-typedef struct packed
-{
-    logic [`CSR_DATA_BUS] mtvec;
-    logic [`CSR_DATA_BUS] mepc;
-    logic [`CSR_DATA_BUS] mcause;
-    logic [`CSR_DATA_BUS] mstatus;
-    logic [`CSR_DATA_BUS] mscratch;
-    logic [`CSR_DATA_BUS] mie;
-    logic [`CSR_DATA_BUS] mip;
-} csr_wdata;
-
-typedef enum logic [1:0] {
-    CSRRW_NOP = 2'b00,
-    CSRRW = 2'b01,
-    CSRRS = 2'b10,
-    CSRRC = 2'b11
-} csrrw_t;
+typedef enum logic [2:0] {
+    CSR_INST_NOP = 0,
+    CSRRW = 1,
+    CSRRS = 2,
+    CSRRC = 3,
+    ECALL = 4,
+    EBREAK = 5,
+    MRET = 6
+} csr_inst_t;
 
 `endif

@@ -6,6 +6,9 @@ module ex_mem(
     input wire clk,
     input wire rst,
     input wire stall,
+    
+    // pc
+    input wire [`ADDR_BUS] ex_pc,
 
     input wire [`DATA_BUS] ex_data,
     input wire [`DATA_BUS] ex_wb_wdata,
@@ -17,8 +20,14 @@ module ex_mem(
     input wire ex_rf_wen,
     input wire [`REG_ADDR_BUS] ex_rf_waddr,
     input wire ex_rf_sel,
+    // csr
+    input wire [2:0] ex_csr_inst_sel,
+    input wire ex_csr_waddr,
+    input wire ex_csr_wdata,
 
     //output
+    output reg [`ADDR_BUS] mem_pc,
+
     output reg [`DATA_BUS] mem_data,
     output reg [`DATA_BUS] mem_wb_wdata,
 
@@ -33,6 +42,7 @@ module ex_mem(
 
     always_ff @ (posedge clk) begin
         if (rst) begin
+            mem_pc <= 0;
             mem_data <= 0;
             mem_wb_wdata <= 0;
             mem_wb_wen <= 1'b0;
@@ -42,6 +52,7 @@ module ex_mem(
             mem_rf_waddr <= 0;
             mem_rf_sel <= 1'b0;
         end else if (!stall) begin
+            mem_pc <= ex_pc;
             mem_data <= ex_data;
             mem_wb_wdata <= ex_wb_wdata;
             mem_wb_wen <= ex_wb_wen;
