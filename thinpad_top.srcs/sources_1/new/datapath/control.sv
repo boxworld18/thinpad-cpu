@@ -19,7 +19,8 @@ module control(
     output reg id_alu_sel_pc,
     output reg id_sel_csr,
     // csr
-    output reg [2:0] id_csr_inst_sel // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6
+    output reg [2:0] id_csr_inst_sel, // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6
+    output reg [`CSR_ADDR_BUS] id_csr_raddr
 );
 
     // 提取指令字段
@@ -145,23 +146,23 @@ module control(
     always_comb begin
         if (is_priv) begin
             case (func3)
-                3'b001: id_csr_inst_sel = CSRRW;
-                3'b010: id_csr_inst_sel = CSRRS;
-                3'b011: id_csr_inst_sel = CSRRC;
+                3'b001: begin id_csr_inst_sel = CSRRW; id_csr_raddr = csr_addr; end
+                3'b010: begin id_csr_inst_sel = CSRRS; id_csr_raddr = csr_addr; end
+                3'b011: begin id_csr_inst_sel = CSRRC; id_csr_raddr = csr_addr; end
                 3'b000: begin
                     case (csr_addr)
-                        `CSR_ECALL: id_csr_inst_sel = ECALL;
-                        `CSR_EBREAK: id_csr_inst_sel = EBREAK;
-                        `CSR_MRET: id_csr_inst_sel = MRET;
-                        default: id_csr_inst_sel = CSR_INST_NOP;
+                        `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end
+                        `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end
+                        `CSR_MRET: begin id_csr_inst_sel = MRET; id_csr_raddr = `CSR_MEPC; end
+                        default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
                     endcase
                 end
-                default: id_csr_inst_sel = CSR_INST_NOP;
+                default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
             endcase
         end else begin
             id_csr_inst_sel = CSR_INST_NOP;
+            id_csr_raddr = 0;
         end
     end
-    
 
 endmodule

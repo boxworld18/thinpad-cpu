@@ -143,6 +143,7 @@ module cpu (
     logic id_sel_csr;
     // csr
     logic [2:0] id_csr_inst_sel;
+    logic [`CSR_ADDR_BUS] id_csr_raddr;
 
     control u_control(
         .pc(id_pc),
@@ -160,7 +161,8 @@ module cpu (
         .id_alu_sel_pc(id_alu_sel_pc),
         .id_sel_csr(id_sel_csr),
 
-        .id_csr_inst_sel(id_csr_inst_sel)
+        .id_csr_inst_sel(id_csr_inst_sel),
+        .id_csr_raddr(id_csr_raddr)
     );
 
     logic [`REG_DATA_BUS] id_rf_data_a;
@@ -188,9 +190,10 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),
 
-        .raddr(id_inst[31:20]),
+        .raddr(id_csr_raddr),
         .rdata(id_csr_rdata),
 
+        .wb_pc(wb_pc),
         .sel(wb_csr_inst_sel),
         .waddr(wb_csr_waddr),
         .wdata(wb_csr_wdata)
@@ -240,7 +243,7 @@ module cpu (
         .id_sel_csr(id_sel_csr),
         .id_csr_inst_sel(id_csr_inst_sel),
         .id_csr_waddr(id_inst[31:20]),
-        .id_csr_raddr(id_inst[31:20]),
+        .id_csr_raddr(id_csr_raddr),
         .id_csr_rdata(id_csr_rdata),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),

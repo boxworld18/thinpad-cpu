@@ -113,6 +113,10 @@ typedef enum logic [1:0] {
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
 `define CSR_TOTAL_DATA_BUS ((`CSR_NUM)*(`CSR_DATA_WIDTH))-1:0 // CSR总数据线宽度
 
+// exception code
+`define CAUSE_ECALL 8
+`define CAUSE_EBREAK 3
+
 typedef struct packed
 {
     logic mtvec;
