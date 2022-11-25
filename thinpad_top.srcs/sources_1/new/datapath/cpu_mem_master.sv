@@ -11,6 +11,8 @@ module cpu_mem_master(
     input wire ren,
     input wire [`SEL] sel,
 
+    input wire stall,
+
     // master
     input wire wb_ack_i,
     input wire [`DATA_BUS] wb_dat_i,
@@ -34,11 +36,12 @@ module cpu_mem_master(
     input wire is_hit_i
 );
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE = 0,
         QUERY_CACHE = 1,
         READ_DATA_ACTION = 2,
-        WRITE_DATA_ACTION = 3
+        WRITE_DATA_ACTION = 3,
+        DONE = 4
     } state_t;
     state_t state;
 
@@ -100,7 +103,7 @@ module cpu_mem_master(
                 end
                 QUERY_CACHE: begin
                     if (is_hit_i) begin
-                        state <= IDLE;
+                        state <= DONE;
                         case(sel << addr[1:0])
                             4'b0001: mem_read_data <= {24'b0, data_cache_data_i[7:0]};
                             4'b0010: mem_read_data <= {24'b0, data_cache_data_i[15:8]};
@@ -122,7 +125,7 @@ module cpu_mem_master(
                 end
                 READ_DATA_ACTION: begin
                     if (wb_ack_i) begin
-                        state <= IDLE;
+                        state <= DONE;
                         
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
@@ -144,7 +147,7 @@ module cpu_mem_master(
                 end
                 WRITE_DATA_ACTION: begin
                     if (wb_ack_i) begin
-                        state <= IDLE;
+                        state <= DONE;
                         mem_master_stall <= 1'b0;
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
@@ -157,6 +160,13 @@ module cpu_mem_master(
                         end
                     end
                 end
+                DONE: begin
+                    is_add_o <= 1'b0;
+                    if (!stall) begin
+                        state <= IDLE;
+                    end
+                end
+                default: ;
                 
             endcase
         end
