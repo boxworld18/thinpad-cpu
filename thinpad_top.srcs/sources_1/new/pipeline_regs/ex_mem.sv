@@ -22,8 +22,8 @@ module ex_mem(
     input wire ex_rf_sel,
     // csr
     input wire [2:0] ex_csr_inst_sel,
-    input wire ex_csr_waddr,
-    input wire ex_csr_wdata,
+    input wire [`CSR_ADDR_BUS] ex_csr_waddr,
+    input wire [`CSR_DATA_BUS] ex_csr_wdata,
 
     //output
     output reg [`ADDR_BUS] mem_pc,
@@ -40,8 +40,8 @@ module ex_mem(
     output reg mem_rf_sel,
 
     output reg [2:0] mem_csr_inst_sel,
-    output reg mem_csr_waddr,
-    output reg mem_csr_wdata
+    output reg [`CSR_ADDR_BUS] mem_csr_waddr,
+    output reg [`CSR_DATA_BUS] mem_csr_wdata
 );
 
     always_ff @ (posedge clk) begin

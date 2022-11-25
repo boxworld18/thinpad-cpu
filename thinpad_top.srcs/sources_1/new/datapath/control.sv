@@ -68,7 +68,7 @@ module control(
 
     // alu
     assign id_alu_sel_pc = (is_auipc || is_jal || is_jalr) ? ALU_SEL_PC : ALU_SEL_REG_A;
-    assign id_alu_sel_imm = (is_r) ? ALU_SEL_REG_B : ALU_SEL_IMM;
+    assign id_alu_sel_imm = (is_r || is_priv) ? ALU_SEL_REG_B : ALU_SEL_IMM;
 
     // rf
     assign id_rf_sel = (is_l); // lw 读取 mem, 其他读取 alu_result

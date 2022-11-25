@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="16fs"></ZoomEndTime>
-      <Cursor1Time time="2fs"></Cursor1Time>
+      <ZoomStartTime time="288785834fs"></ZoomStartTime>
+      <ZoomEndTime time="291495835fs"></ZoomEndTime>
+      <Cursor1Time time="291480834fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="209"></NameColumnWidth>
-      <ValueColumnWidth column_width="80"></ValueColumnWidth>
+      <NameColumnWidth column_width="207"></NameColumnWidth>
+      <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="81" />
+   <WVObjectSize size="88" />
    <wvobject fp_name="/tb/dut/u_cpu/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -125,21 +125,13 @@
       <obj_property name="ElementShortName">stall</obj_property>
       <obj_property name="ObjectShortName">stall</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/hazard" type="logic">
-      <obj_property name="ElementShortName">hazard</obj_property>
-      <obj_property name="ObjectShortName">hazard</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/flush" type="logic">
-      <obj_property name="ElementShortName">flush</obj_property>
-      <obj_property name="ObjectShortName">flush</obj_property>
+   <wvobject fp_name="/tb/dut/u_cpu/branch" type="logic">
+      <obj_property name="ElementShortName">branch</obj_property>
+      <obj_property name="ObjectShortName">branch</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/pc_branch" type="array">
       <obj_property name="ElementShortName">pc_branch[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_branch[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/pc_sel" type="logic">
-      <obj_property name="ElementShortName">pc_sel</obj_property>
-      <obj_property name="ObjectShortName">pc_sel</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/if_pc" type="array">
       <obj_property name="ElementShortName">if_pc[31:0]</obj_property>
@@ -161,13 +153,65 @@
       <obj_property name="ElementShortName">id_imm[31:0]</obj_property>
       <obj_property name="ObjectShortName">id_imm[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/id_imm_type" type="array">
-      <obj_property name="ElementShortName">id_imm_type[2:0]</obj_property>
-      <obj_property name="ObjectShortName">id_imm_type[2:0]</obj_property>
+   <wvobject fp_name="/tb/dut/u_cpu/id_sel_csr" type="logic">
+      <obj_property name="ElementShortName">id_sel_csr</obj_property>
+      <obj_property name="ObjectShortName">id_sel_csr</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/id_alu_sel" type="logic">
-      <obj_property name="ElementShortName">id_alu_sel</obj_property>
-      <obj_property name="ObjectShortName">id_alu_sel</obj_property>
+   <wvobject fp_name="/tb/dut/u_cpu/id_csr_raddr" type="array">
+      <obj_property name="ElementShortName">id_csr_raddr[11:0]</obj_property>
+      <obj_property name="ObjectShortName">id_csr_raddr[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/id_csr_rdata" type="array">
+      <obj_property name="ElementShortName">id_csr_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">id_csr_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/id_csr_inst_sel" type="array">
+      <obj_property name="ElementShortName">id_csr_inst_sel[2:0]</obj_property>
+      <obj_property name="ObjectShortName">id_csr_inst_sel[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_waddr" type="array">
+      <obj_property name="ElementShortName">wb_csr_waddr[11:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_csr_waddr[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_wdata" type="array">
+      <obj_property name="ElementShortName">wb_csr_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_csr_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/ex_sel_csr" type="logic">
+      <obj_property name="ElementShortName">ex_sel_csr</obj_property>
+      <obj_property name="ObjectShortName">ex_sel_csr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/ex_csr_inst_sel" type="array">
+      <obj_property name="ElementShortName">ex_csr_inst_sel[2:0]</obj_property>
+      <obj_property name="ObjectShortName">ex_csr_inst_sel[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/ex_csr_waddr" type="array">
+      <obj_property name="ElementShortName">ex_csr_waddr[11:0]</obj_property>
+      <obj_property name="ObjectShortName">ex_csr_waddr[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/ex_csr_raddr" type="array">
+      <obj_property name="ElementShortName">ex_csr_raddr[11:0]</obj_property>
+      <obj_property name="ObjectShortName">ex_csr_raddr[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/ex_csr_rdata" type="array">
+      <obj_property name="ElementShortName">ex_csr_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">ex_csr_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/alu_csr_rdata" type="array">
+      <obj_property name="ElementShortName">alu_csr_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_csr_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/mem_csr_inst_sel" type="array">
+      <obj_property name="ElementShortName">mem_csr_inst_sel[2:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_csr_inst_sel[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/mem_csr_waddr" type="array">
+      <obj_property name="ElementShortName">mem_csr_waddr[11:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_csr_waddr[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/mem_csr_wdata" type="array">
+      <obj_property name="ElementShortName">mem_csr_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_csr_wdata[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/id_alu_op" type="array">
       <obj_property name="ElementShortName">id_alu_op[4:0]</obj_property>
@@ -200,10 +244,6 @@
    <wvobject fp_name="/tb/dut/u_cpu/id_rf_data_b" type="array">
       <obj_property name="ElementShortName">id_rf_data_b[31:0]</obj_property>
       <obj_property name="ObjectShortName">id_rf_data_b[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/rf_data_equ" type="logic">
-      <obj_property name="ElementShortName">rf_data_equ</obj_property>
-      <obj_property name="ObjectShortName">rf_data_equ</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
@@ -241,10 +281,6 @@
       <obj_property name="ElementShortName">ex_alu_op[4:0]</obj_property>
       <obj_property name="ObjectShortName">ex_alu_op[4:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/ex_alu_sel" type="logic">
-      <obj_property name="ElementShortName">ex_alu_sel</obj_property>
-      <obj_property name="ObjectShortName">ex_alu_sel</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/ex_imm" type="array">
       <obj_property name="ElementShortName">ex_imm[31:0]</obj_property>
       <obj_property name="ObjectShortName">ex_imm[31:0]</obj_property>
@@ -256,14 +292,6 @@
    <wvobject fp_name="/tb/dut/u_cpu/ex_alu_sel_b" type="array">
       <obj_property name="ElementShortName">ex_alu_sel_b[1:0]</obj_property>
       <obj_property name="ObjectShortName">ex_alu_sel_b[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/alu_data_a" type="array">
-      <obj_property name="ElementShortName">alu_data_a[31:0]</obj_property>
-      <obj_property name="ObjectShortName">alu_data_a[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/alu_data_b" type="array">
-      <obj_property name="ElementShortName">alu_data_b[31:0]</obj_property>
-      <obj_property name="ObjectShortName">alu_data_b[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/alu_data_o" type="array">
       <obj_property name="ElementShortName">alu_data_o[31:0]</obj_property>
