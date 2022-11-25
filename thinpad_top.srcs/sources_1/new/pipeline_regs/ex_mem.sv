@@ -37,7 +37,11 @@ module ex_mem(
 
     output reg mem_rf_wen,
     output reg [`REG_ADDR_BUS] mem_rf_waddr,
-    output reg mem_rf_sel
+    output reg mem_rf_sel,
+
+    output reg [2:0] mem_csr_inst_sel,
+    output reg mem_csr_waddr,
+    output reg mem_csr_wdata
 );
 
     always_ff @ (posedge clk) begin
@@ -51,6 +55,9 @@ module ex_mem(
             mem_rf_wen <= 1'b0;
             mem_rf_waddr <= 0;
             mem_rf_sel <= 1'b0;
+            mem_csr_inst_sel <= 0;
+            mem_csr_waddr <= 0;
+            mem_csr_wdata <= 0;
         end else if (!stall) begin
             mem_pc <= ex_pc;
             mem_data <= ex_data;
@@ -61,6 +68,9 @@ module ex_mem(
             mem_rf_wen <= ex_rf_wen;
             mem_rf_waddr <= ex_rf_waddr;
             mem_rf_sel <= ex_rf_sel;
+            mem_csr_inst_sel <= ex_csr_inst_sel;
+            mem_csr_waddr <= ex_csr_waddr;
+            mem_csr_wdata <= ex_csr_wdata;
         end
     end
 

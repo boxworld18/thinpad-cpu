@@ -14,45 +14,88 @@ module csr(
     input wire [`CSR_DATA_BUS] wdata
 );
 
-    csr_data csr_regs;
-    // logic [`CSR_DATA_BUS] mtvec;    // BASE(31:2) MODE(1:0)
-    // logic [`CSR_DATA_BUS] mepc;    
-    // logic [`CSR_DATA_BUS] mcause;   // Interrupt (31) Exception Code(30:0)
-    // logic [`CSR_DATA_BUS] mstatus;  // MPP(12:11) SPP(8) MPIE(7) SPIE(5) UPIE(4) MIE(3) SIE(1) UIE(0)
-    // logic [`CSR_DATA_BUS] mscratch; 
-    // logic [`CSR_DATA_BUS] mie;      
-    // logic [`CSR_DATA_BUS] mip;
+    // csr_data csr_regs;
+    logic [`CSR_DATA_BUS] mtvec;    // BASE(31:2) MODE(1:0)
+    logic [`CSR_DATA_BUS] mepc;    
+    logic [`CSR_DATA_BUS] mcause;   // Interrupt (31) Exception Code(30:0)
+    logic [`CSR_DATA_BUS] mstatus;  // MPP(12:11) SPP(8) MPIE(7) SPIE(5) UPIE(4) MIE(3) SIE(1) UIE(0)
+    logic [`CSR_DATA_BUS] mscratch; 
+    logic [`CSR_DATA_BUS] mie;      
+    logic [`CSR_DATA_BUS] mip;
 
     always_comb begin
         case (raddr)
-            `CSR_MTVEC:     rdata = csr_regs.mtvec;
-            `CSR_MEPC:      rdata = csr_regs.mepc;
-            `CSR_MCAUSE:    rdata = csr_regs.mcause;
-            `CSR_MSTATUS:   rdata = csr_regs.mstatus;
-            `CSR_MSCRATCH:  rdata = csr_regs.mscratch;
-            `CSR_MIE:       rdata = csr_regs.mie;
-            `CSR_MIP:       rdata = csr_regs.mip;  
+            `CSR_MTVEC:     rdata = mtvec;
+            `CSR_MEPC:      rdata = mepc;
+            `CSR_MCAUSE:    rdata = mcause;
+            `CSR_MSTATUS:   rdata = mstatus;
+            `CSR_MSCRATCH:  rdata = mscratch;
+            `CSR_MIE:       rdata = mie;
+            `CSR_MIP:       rdata = mip;  
             default:        rdata = 0;
         endcase
     end
 
-    genvar m;
-    generate
-        for (m = 0; m < `CSR_NUM; m = m + 1)
-        begin: generate_csr_controller
-            always_ff @ (posedge clk) begin
-                if (rst) begin
-                    csr_regs[m] <= 0;
-                end else begin
-                    if (wen[m]) begin
-                        csr_regs[m] <= wdata[m];
-                    end
-                    if (ren[m]) begin
-                        csr_rdata_regs[m] <= csr_regs[m];
-                    end
+    always_ff @ (posedge clk) begin
+        if (rst) begin
+            mtvec <= 0;
+            mepc <= 0;
+            mcause <= 0;
+            mstatus <= 0;
+            mscratch <= 0;
+            mie <= 0;
+            mip <= 0;
+        end else begin
+            case (sel)
+                CSR_INST_NOP: ;
+                CSRRW: begin
+                    case (waddr)
+                        `CSR_MTVEC:     mtvec <= wdata;
+                        `CSR_MEPC:      mepc <= wdata;
+                        `CSR_MCAUSE:    mcause <= wdata;
+                        `CSR_MSTATUS:   mstatus <= wdata;
+                        `CSR_MSCRATCH:  mscratch <= wdata;
+                        `CSR_MIE:       mie <= wdata;
+                        `CSR_MIP:       mip <= wdata;  
+                        default: ;
+                    endcase
                 end
-            end
+                CSRRS: begin
+                    case (waddr)
+                        `CSR_MTVEC:     mtvec <= mtvec | wdata;
+                        `CSR_MEPC:      mepc <= mepc | wdata;
+                        `CSR_MCAUSE:    mcause <= mcause | wdata;
+                        `CSR_MSTATUS:   mstatus <= mstatus | wdata;
+                        `CSR_MSCRATCH:  mscratch <= mscratch | wdata;
+                        `CSR_MIE:       mie <= mie | wdata;
+                        `CSR_MIP:       mip <= mip | wdata;  
+                        default: ;
+                    endcase
+                end
+                CSRRC: begin
+                    case (waddr)
+                        `CSR_MTVEC:     mtvec <= mtvec & ~wdata;
+                        `CSR_MEPC:      mepc <= mepc & ~wdata;
+                        `CSR_MCAUSE:    mcause <= mcause & ~wdata;
+                        `CSR_MSTATUS:   mstatus <= mstatus & ~wdata;
+                        `CSR_MSCRATCH:  mscratch <= mscratch & ~wdata;
+                        `CSR_MIE:       mie <= mie & ~wdata;
+                        `CSR_MIP:       mip <= mip & ~wdata;  
+                        default: ;
+                    endcase
+                end
+                ECALL: begin
+
+                end
+                EBREAK: begin
+
+                end
+                MRET: begin
+
+                end
+                default: ;
+            endcase
         end
-    endgenerate
+    end
     
 endmodule

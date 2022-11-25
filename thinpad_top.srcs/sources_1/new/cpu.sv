@@ -140,6 +140,7 @@ module cpu (
     logic [`ALU_OP_WIDTH-1:0] id_alu_op;
     logic id_alu_sel_imm;
     logic id_alu_sel_pc;
+    logic id_sel_csr;
     // csr
     logic [2:0] id_csr_inst_sel;
 
@@ -157,6 +158,7 @@ module cpu (
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
+        .id_sel_csr(id_sel_csr),
 
         .id_csr_inst_sel(id_csr_inst_sel)
     );
@@ -206,9 +208,11 @@ module cpu (
     logic [`ALU_OP_WIDTH-1:0] ex_alu_op;
     logic ex_alu_sel_imm;
     logic ex_alu_sel_pc;
-    logic [`CSR_SEL_BUS] ex_csr_ren;
-    logic [`CSR_SEL_BUS] ex_csr_wen;
+    logic ex_sel_csr;
     logic [2:0] ex_csr_inst_sel;
+    logic [`CSR_ADDR_BUS] ex_csr_waddr;
+    logic [`CSR_ADDR_BUS] ex_csr_raddr;
+    logic [`CSR_DATA_BUS] ex_csr_rdata;
     logic [`REG_ADDR_BUS] ex_rs1;
     logic [`REG_ADDR_BUS] ex_rs2;
     logic [`DATA_BUS] ex_imm;
@@ -233,7 +237,11 @@ module cpu (
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
+        .id_sel_csr(id_sel_csr),
         .id_csr_inst_sel(id_csr_inst_sel),
+        .id_csr_waddr(id_inst[31:20]),
+        .id_csr_raddr(id_inst[31:20]),
+        .id_csr_rdata(id_csr_rdata),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -251,7 +259,11 @@ module cpu (
         .ex_alu_op(ex_alu_op),
         .ex_alu_sel_imm(ex_alu_sel_imm),
         .ex_alu_sel_pc(ex_alu_sel_pc),
-        .id_csr_inst_sel(id_csr_inst_sel),
+        .ex_sel_csr(ex_sel_csr),
+        .ex_csr_inst_sel(ex_csr_inst_sel),
+        .ex_csr_waddr(ex_csr_waddr),
+        .ex_csr_raddr(ex_csr_raddr),
+        .ex_csr_rdata(ex_csr_rdata),
         .ex_rs1(ex_rs1),
         .ex_rs2(ex_rs2),
         .ex_imm(ex_imm)
@@ -266,26 +278,39 @@ module cpu (
     logic [`ALU_SEL_WIDTH-1:0] ex_alu_sel_a;
     logic [`ALU_SEL_WIDTH-1:0] ex_alu_sel_b;
 
-    logic [`DATA_BUS] alu_data_a;
-    logic [`DATA_BUS] alu_data_b;
+    logic [`DATA_BUS] alu_rf_data_a;
+    logic [`DATA_BUS] alu_rf_data_b;
 
     logic [`DATA_BUS] mem_data; // declare here for forward
 
     always_comb begin
         case (ex_alu_sel_a)
-            ALU_SEL_NOP: alu_data_a = 0;
-            ALU_SEL_EX:  alu_data_a = ex_rf_data_a; 
-            ALU_SEL_MEM: alu_data_a = mem_data;  
-            ALU_SEL_WB:  alu_data_a = wb_rf_wdata;
+            ALU_SEL_NOP: alu_rf_data_a = 0;
+            ALU_SEL_EX:  alu_rf_data_a = ex_rf_data_a; 
+            ALU_SEL_MEM: alu_rf_data_a = mem_data;  
+            ALU_SEL_WB:  alu_rf_data_a = wb_rf_wdata;
         endcase        
     end
 
+    logic [`CSR_DATA_BUS] mem_csr_wdata; // declare ahead for forward
     always_comb begin
         case (ex_alu_sel_b)
-            ALU_SEL_NOP: alu_data_b = 0;
-            ALU_SEL_EX:  alu_data_b = ex_rf_data_b; 
-            ALU_SEL_MEM: alu_data_b = mem_data;  
-            ALU_SEL_WB:  alu_data_b = wb_rf_wdata;
+            ALU_SEL_NOP: alu_rf_data_b = 0;
+            ALU_SEL_EX:  alu_rf_data_b = ex_rf_data_b; 
+            ALU_SEL_MEM: alu_rf_data_b = mem_data;  
+            ALU_SEL_WB:  alu_rf_data_b = wb_rf_wdata;
+        endcase
+    end
+
+    logic [`CSR_DATA_BUS] alu_csr_rdata;
+    logic [1:0] ex_alu_sel_csr;
+
+    always_comb begin
+        case (ex_alu_sel_csr)
+            ALU_SEL_NOP: alu_csr_rdata = 0;
+            ALU_SEL_EX:  alu_csr_rdata = ex_csr_rdata; 
+            ALU_SEL_MEM: alu_csr_rdata = mem_csr_wdata;  
+            ALU_SEL_WB:  alu_csr_rdata = wb_csr_wdata;
         endcase
     end
     
@@ -293,8 +318,8 @@ module cpu (
         .pc(ex_pc),
         .inst(ex_inst),
         .imm(ex_imm),
-        .data_a(alu_data_a),
-        .data_b(alu_data_b),
+        .data_a(alu_rf_data_a),
+        .data_b(alu_rf_data_b),
 
         .pc_branch(pc_branch), // branch target
         .branch(branch)  // branch taken
@@ -302,8 +327,8 @@ module cpu (
 
     logic [`DATA_BUS] alu_data_o;
     alu u_alu(
-        .a(ex_alu_sel_pc == ALU_SEL_PC ? ex_pc : alu_data_a),
-        .b(ex_alu_sel_imm == ALU_SEL_IMM ? ex_imm : alu_data_b),
+        .a(ex_alu_sel_pc == ALU_SEL_PC ? ex_pc : alu_rf_data_a),
+        .b(ex_alu_sel_imm == ALU_SEL_IMM ? ex_imm : (ex_sel_csr ? alu_csr_rdata : alu_rf_data_b)),
         .op(ex_alu_op),
         .y(alu_data_o)
     );
@@ -316,7 +341,9 @@ module cpu (
     logic mem_wb_ren;
     logic [`SEL] mem_wb_sel;
     logic mem_rf_sel;
-
+    logic [2:0] mem_csr_inst_sel;
+    logic [`CSR_ADDR_BUS] mem_csr_waddr;
+    
     ex_mem u_ex_mem(
         .clk(clk_i),
         .rst(rst_i),
@@ -324,13 +351,16 @@ module cpu (
 
         .ex_pc(ex_pc),
         .ex_data(alu_data_o),
-        .ex_wb_wdata(alu_data_b),
+        .ex_wb_wdata(alu_rf_data_b),
         .ex_wb_wen(ex_wb_wen),
         .ex_wb_ren(ex_wb_ren),
         .ex_wb_sel(ex_wb_sel),
         .ex_rf_wen(ex_rf_wen),
         .ex_rf_waddr(ex_rf_waddr),
         .ex_rf_sel(ex_rf_sel),
+        .ex_csr_inst_sel(ex_csr_inst_sel),
+        .ex_csr_waddr(ex_csr_waddr),
+        .ex_csr_wdata(alu_rf_data_a),
 
         .mem_pc(mem_pc),
         .mem_data(mem_data),
@@ -340,7 +370,10 @@ module cpu (
         .mem_wb_sel(mem_wb_sel),
         .mem_rf_wen(mem_rf_wen),
         .mem_rf_waddr(mem_rf_waddr),
-        .mem_rf_sel(mem_rf_sel)
+        .mem_rf_sel(mem_rf_sel),
+        .mem_csr_inst_sel(mem_csr_inst_sel),
+        .mem_csr_waddr(mem_csr_waddr),
+        .mem_csr_wdata(mem_csr_wdata)
     );
 
     /* =========== MEM begin =========== */
@@ -379,14 +412,22 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),      
         .stall(stall),
+
         .mem_pc(mem_pc),
         .mem_rf_wen(mem_rf_wen),
         .mem_rf_waddr(mem_rf_waddr),
         .mem_rf_wdata(mem_rf_wdata),
+        .mem_csr_inst_sel(mem_csr_inst_sel),
+        .mem_csr_waddr(mem_csr_waddr),
+        .mem_csr_wdata(mem_csr_wdata),
+
         .wb_pc(wb_pc),
         .wb_rf_wen(wb_rf_wen),
         .wb_rf_waddr(wb_rf_waddr),
-        .wb_rf_wdata(wb_rf_wdata)        
+        .wb_rf_wdata(wb_rf_wdata),
+        .wb_csr_inst_sel(wb_csr_inst_sel),
+        .wb_csr_waddr(wb_csr_waddr),
+        .wb_csr_wdata(wb_csr_wdata)        
     );
 
     /* =========== WB begin =========== */    
@@ -407,8 +448,15 @@ module cpu (
         .wb_rd(wb_rf_waddr),
         .wb_rf_wen(wb_rf_wen),
 
+        .ex_csr_raddr(ex_csr_raddr),
+        .mem_csr_waddr(mem_csr_waddr),
+        .mem_csr_wdata(mem_csr_wdata),
+        .wb_csr_waddr(wb_csr_waddr),
+        .wb_csr_wdata(wb_csr_wdata),
+
         .alu_sel_a(ex_alu_sel_a),
-        .alu_sel_b(ex_alu_sel_b)
+        .alu_sel_b(ex_alu_sel_b),
+        .alu_sel_csr(ex_alu_sel_csr)
     );
 
     /* =========== Forward Unit end =========== */ 

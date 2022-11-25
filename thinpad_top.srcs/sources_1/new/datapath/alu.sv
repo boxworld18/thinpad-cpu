@@ -27,6 +27,7 @@ module alu(
             ALU_OP_ANDN: y = a & ~b;
             ALU_OP_SBCLR: y = a & ~(32'b1 << b[4:0]);
             ALU_OP_CTZ: y = ((a == 0) ? 32'd32 : { 27'b0, ctz_result });
+            ALU_OP_A: y = a;
             default: y = 0;
         endcase
     end

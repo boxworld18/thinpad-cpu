@@ -17,6 +17,7 @@ module control(
     output reg [`ALU_OP_WIDTH-1:0] id_alu_op,
     output reg id_alu_sel_imm,
     output reg id_alu_sel_pc,
+    output reg id_sel_csr,
     // csr
     output reg [2:0] id_csr_inst_sel // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6
 );
@@ -62,6 +63,7 @@ module control(
     assign is_jal = (opcode == `OPCODE_JAL);
     assign is_jalr = (opcode == `OPCODE_JALR);
     assign is_priv = (opcode == `OPCODE_PRIV);
+    assign id_sel_csr = is_priv;
 
     // alu
     assign id_alu_sel_pc = (is_auipc || is_jal || is_jalr) ? ALU_SEL_PC : ALU_SEL_REG_A;
@@ -122,7 +124,7 @@ module control(
                 end
                 default: id_alu_op = ALU_OP_NOP;
             endcase
-        end else if (is_lui) begin // lui: choose imm directly
+        end else if (is_lui || is_priv) begin // lui: choose imm directly
             id_alu_op = ALU_OP_B;
         end else if (is_jal || is_jalr) begin
             id_alu_op = ALU_OP_ADD_4;
