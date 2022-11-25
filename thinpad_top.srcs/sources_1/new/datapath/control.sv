@@ -151,8 +151,8 @@ module control(
                 3'b011: begin id_csr_inst_sel = CSRRC; id_csr_raddr = csr_addr; end
                 3'b000: begin
                     case (csr_addr)
-                        `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end
-                        `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end
+                        `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end   // 跳转时取[31:2]
+                        `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end // 跳转时取[31:2]
                         `CSR_MRET: begin id_csr_inst_sel = MRET; id_csr_raddr = `CSR_MEPC; end
                         default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
                     endcase

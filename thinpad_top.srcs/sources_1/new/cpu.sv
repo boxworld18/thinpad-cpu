@@ -323,6 +323,8 @@ module cpu (
         .imm(ex_imm),
         .data_a(alu_rf_data_a),
         .data_b(alu_rf_data_b),
+        .csr_inst_sel(ex_csr_inst_sel),
+        .csr_rdata(alu_csr_rdata),
 
         .pc_branch(pc_branch), // branch target
         .branch(branch)  // branch taken
