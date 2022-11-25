@@ -12,111 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="328389059fs"></ZoomStartTime>
-      <ZoomEndTime time="329429060fs"></ZoomEndTime>
-      <Cursor1Time time="328610000fs"></Cursor1Time>
+      <ZoomStartTime time="7396797fs"></ZoomStartTime>
+      <ZoomEndTime time="9804798fs"></ZoomEndTime>
+      <Cursor1Time time="7451449fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="268"></NameColumnWidth>
-      <ValueColumnWidth column_width="180"></ValueColumnWidth>
+      <ValueColumnWidth column_width="162"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="115" />
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/addr" type="array">
-      <obj_property name="ElementShortName">addr[31:0]</obj_property>
-      <obj_property name="ObjectShortName">addr[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data" type="array">
-      <obj_property name="ElementShortName">data[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wen" type="logic">
-      <obj_property name="ElementShortName">wen</obj_property>
-      <obj_property name="ObjectShortName">wen</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/ren" type="logic">
-      <obj_property name="ElementShortName">ren</obj_property>
-      <obj_property name="ObjectShortName">ren</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/sel" type="array">
-      <obj_property name="ElementShortName">sel[3:0]</obj_property>
-      <obj_property name="ObjectShortName">sel[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_ack_i" type="logic">
-      <obj_property name="ElementShortName">wb_ack_i</obj_property>
-      <obj_property name="ObjectShortName">wb_ack_i</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_dat_i" type="array">
-      <obj_property name="ElementShortName">wb_dat_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_dat_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_cyc_o" type="logic">
-      <obj_property name="ElementShortName">wb_cyc_o</obj_property>
-      <obj_property name="ObjectShortName">wb_cyc_o</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_stb_o" type="logic">
-      <obj_property name="ElementShortName">wb_stb_o</obj_property>
-      <obj_property name="ObjectShortName">wb_stb_o</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_adr_o" type="array">
-      <obj_property name="ElementShortName">wb_adr_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_adr_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_dat_o" type="array">
-      <obj_property name="ElementShortName">wb_dat_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_dat_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_sel_o" type="array">
-      <obj_property name="ElementShortName">wb_sel_o[3:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_sel_o[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_we_o" type="logic">
-      <obj_property name="ElementShortName">wb_we_o</obj_property>
-      <obj_property name="ObjectShortName">wb_we_o</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mem_read_data" type="array">
-      <obj_property name="ElementShortName">mem_read_data[31:0]</obj_property>
-      <obj_property name="ObjectShortName">mem_read_data[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mem_master_stall" type="logic">
-      <obj_property name="ElementShortName">mem_master_stall</obj_property>
-      <obj_property name="ObjectShortName">mem_master_stall</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_addr_o" type="array">
-      <obj_property name="ElementShortName">data_cache_addr_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_cache_addr_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_data_o" type="array">
-      <obj_property name="ElementShortName">data_cache_data_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_cache_data_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/is_add_o" type="logic">
-      <obj_property name="ElementShortName">is_add_o</obj_property>
-      <obj_property name="ObjectShortName">is_add_o</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_data_i" type="array">
-      <obj_property name="ElementShortName">data_cache_data_i[31:0]</obj_property>
-      <obj_property name="ObjectShortName">data_cache_data_i[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/is_hit_i" type="logic">
-      <obj_property name="ElementShortName">is_hit_i</obj_property>
-      <obj_property name="ObjectShortName">is_hit_i</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/state" type="array">
-      <obj_property name="ElementShortName">state[1:0]</obj_property>
-      <obj_property name="ObjectShortName">state[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/highest_bit" type="logic">
-      <obj_property name="ElementShortName">highest_bit</obj_property>
-      <obj_property name="ObjectShortName">highest_bit</obj_property>
-   </wvobject>
+   <WVObjectSize size="116" />
    <wvobject fp_name="/tb/dut/u_cpu/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -480,5 +384,105 @@
    <wvobject fp_name="/tb/dut/u_cpu/mem_rf_wdata" type="array">
       <obj_property name="ElementShortName">mem_rf_wdata[31:0]</obj_property>
       <obj_property name="ObjectShortName">mem_rf_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/addr" type="array">
+      <obj_property name="ElementShortName">addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data" type="array">
+      <obj_property name="ElementShortName">data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wen" type="logic">
+      <obj_property name="ElementShortName">wen</obj_property>
+      <obj_property name="ObjectShortName">wen</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/ren" type="logic">
+      <obj_property name="ElementShortName">ren</obj_property>
+      <obj_property name="ObjectShortName">ren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/sel" type="array">
+      <obj_property name="ElementShortName">sel[3:0]</obj_property>
+      <obj_property name="ObjectShortName">sel[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_ack_i" type="logic">
+      <obj_property name="ElementShortName">wb_ack_i</obj_property>
+      <obj_property name="ObjectShortName">wb_ack_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_dat_i" type="array">
+      <obj_property name="ElementShortName">wb_dat_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_dat_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_cyc_o" type="logic">
+      <obj_property name="ElementShortName">wb_cyc_o</obj_property>
+      <obj_property name="ObjectShortName">wb_cyc_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_stb_o" type="logic">
+      <obj_property name="ElementShortName">wb_stb_o</obj_property>
+      <obj_property name="ObjectShortName">wb_stb_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_adr_o" type="array">
+      <obj_property name="ElementShortName">wb_adr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_adr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_dat_o" type="array">
+      <obj_property name="ElementShortName">wb_dat_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_dat_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_sel_o" type="array">
+      <obj_property name="ElementShortName">wb_sel_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_sel_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/wb_we_o" type="logic">
+      <obj_property name="ElementShortName">wb_we_o</obj_property>
+      <obj_property name="ObjectShortName">wb_we_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mem_read_data" type="array">
+      <obj_property name="ElementShortName">mem_read_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_read_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mem_master_stall" type="logic">
+      <obj_property name="ElementShortName">mem_master_stall</obj_property>
+      <obj_property name="ObjectShortName">mem_master_stall</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_addr_o" type="array">
+      <obj_property name="ElementShortName">data_cache_addr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_cache_addr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_data_o" type="array">
+      <obj_property name="ElementShortName">data_cache_data_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_cache_data_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/is_add_o" type="logic">
+      <obj_property name="ElementShortName">is_add_o</obj_property>
+      <obj_property name="ObjectShortName">is_add_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/data_cache_data_i" type="array">
+      <obj_property name="ElementShortName">data_cache_data_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_cache_data_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/is_hit_i" type="logic">
+      <obj_property name="ElementShortName">is_hit_i</obj_property>
+      <obj_property name="ObjectShortName">is_hit_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/state" type="array">
+      <obj_property name="ElementShortName">state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">state[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/highest_bit" type="logic">
+      <obj_property name="ElementShortName">highest_bit</obj_property>
+      <obj_property name="ObjectShortName">highest_bit</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/addr_cache" type="array">
+      <obj_property name="ElementShortName">addr_cache[31:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_cache[31:0]</obj_property>
    </wvobject>
 </wave_config>
