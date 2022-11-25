@@ -12,7 +12,11 @@ module csr(
     input wire [`ADDR_BUS] wb_pc,
     input wire [2:0] sel, // 指令 sel
     input wire [`CSR_ADDR_BUS] waddr,
-    input wire [`CSR_DATA_BUS] wdata
+    input wire [`CSR_DATA_BUS] wdata,
+
+    output reg [`CSR_DATA_BUS] csr_mstatus,
+    output reg [`CSR_DATA_BUS] csr_mie,
+    output reg [`CSR_DATA_BUS] csr_mip
 );
 
     // csr_data csr_regs;
@@ -88,15 +92,21 @@ module csr(
                 ECALL: begin
                     mepc <= wb_pc;
                     mcause <= `CAUSE_ECALL;
-                    mstatus <= mstatus; // TODO
+                    mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
+                    mstatus[`STATUS_MIE] <= 0;
+                    mstatus[`STATUS_MPP] <= 0;
                 end
                 EBREAK: begin
                     mepc <= wb_pc;
                     mcause <= `CAUSE_EBREAK;
-                    mstatus <= mstatus; // TODO
+                    mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
+                    mstatus[`STATUS_MIE] <= 0;
+                    mstatus[`STATUS_MPP] <= 0;
                 end
                 MRET: begin
-                    
+                    mstatus[`STATUS_MIE] <= mstatus[`STATUS_MPIE];
+                    mstatus[`STATUS_MPP] <= 0;
+                    mstatus[`STATUS_MPIE] <= 1;
                 end
                 default: ;
             endcase

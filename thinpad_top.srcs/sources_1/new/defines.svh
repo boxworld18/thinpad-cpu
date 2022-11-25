@@ -113,6 +113,35 @@ typedef enum logic [1:0] {
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
 `define CSR_TOTAL_DATA_BUS ((`CSR_NUM)*(`CSR_DATA_WIDTH))-1:0 // CSR总数据线宽度
 
+`define STATUS_MPP 12:11 
+`define STATUS_SPP 8
+`define STATUS_MPIE 7
+`define STATUS_SPIE 5
+`define STATUS_UPIE 4
+`define STATUS_MIE 3
+`define STATUS_SIE 1
+`define STATUS_UIE 0
+
+`define MIP_MEIP 11
+`define MIP_SEIP 9
+`define MIP_UEIP 8
+`define MIP_MTIP 7
+`define MIP_STIP 5
+`define MIP_UTIP 4
+`define MIP_MSIP 3
+`define MIP_SSIP 1
+`define MIP_USIP 0
+
+`define MIE_MEIE 11
+`define MIE_SEIE 9
+`define MIE_UEIE 8
+`define MIE_MTIE 7
+`define MIE_STIE 5
+`define MIE_UTIE 4
+`define MIE_MSIE 3
+`define MIE_SSIE 1
+`define MIE_USIE 0
+
 // exception code
 `define CAUSE_ECALL 8
 `define CAUSE_EBREAK 3
