@@ -326,6 +326,7 @@ module cpu (
         .wen(mem_wb_wen),
         .ren(mem_wb_ren),
         .sel(mem_wb_sel),
+        .stall(stall),
 
         .wb_ack_i(wbm1_ack_i),
         .wb_dat_i(wbm1_dat_i),

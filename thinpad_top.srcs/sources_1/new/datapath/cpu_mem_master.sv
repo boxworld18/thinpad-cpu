@@ -11,6 +11,8 @@ module cpu_mem_master(
     input wire ren,
     input wire [`SEL] sel,
 
+    input wire stall,
+
     // master
     input wire wb_ack_i,
     input wire [`DATA_BUS] wb_dat_i,
@@ -30,7 +32,8 @@ module cpu_mem_master(
     typedef enum logic [1:0] {
         IDLE,
         READ_DATA_ACTION,
-        WRITE_DATA_ACTION
+        WRITE_DATA_ACTION,
+        DONE
     } state_t;
     state_t state;
 
@@ -69,12 +72,12 @@ module cpu_mem_master(
                         wb_cyc_o <= 1'b0;
                         wb_we_o <= 1'b0;    
                         mem_master_stall <= 1'b0;
+                        state <= DONE;
                     end       
                 end
                 READ_DATA_ACTION: begin
                     if (wb_ack_i) begin
                         state <= IDLE;
-                        
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         mem_master_stall <= 1'b0;
@@ -86,6 +89,7 @@ module cpu_mem_master(
                             4'b1111: mem_read_data <= wb_dat_i;
                             default: mem_read_data <= 0;
                         endcase
+                        state <= DONE;
                     end
                 end
                 WRITE_DATA_ACTION: begin
@@ -95,8 +99,14 @@ module cpu_mem_master(
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         wb_we_o <= 1'b0;
+                        state <= DONE;
                     end
                 end
+                DONE: begin
+                    if (!stall) 
+                        state <= IDLE;
+                end 
+                default: ;
             endcase
         end
     end
