@@ -10,7 +10,7 @@ module branch_comp(
     input wire [`DATA_BUS] data_b,
 
     input wire [2:0] csr_inst_sel,
-    input wire [`CSR_DATA_BUS] csr_data,
+    input wire [`CSR_DATA_BUS] csr_rdata,
 
     output reg [`ADDR_BUS] pc_branch, // branch target
     output reg branch  // branch taken
@@ -18,7 +18,7 @@ module branch_comp(
 
     logic csr_branch;
     assign csr_branch = ((csr_inst_sel == ECALL) || (csr_inst_sel == EBREAK) || (csr_inst_sel == MRET));
-    assign pc_branch = (inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (csr_branch ? {csr_data[31:2], 2'b00} : pc + imm);
+    assign pc_branch = (inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (csr_branch ? {csr_rdata[31:2], 2'b00} : pc + imm);
 
     always_comb begin
         if (inst[6:0] == `OPCODE_SB) begin
