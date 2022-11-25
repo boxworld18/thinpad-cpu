@@ -46,7 +46,7 @@ module tb;
   wire uart_tsre;  // 数据发�?�完毕标�??
 
   // Windows �??要注意路径分隔符的转义，例如 "D:\\foo\\bar.bin"
-  parameter BASE_RAM_INIT_FILE = "C:\\Users\\29908\\Desktop\\Computer\\rv-2022\\asmcode\\lab6_test.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�??
+  parameter BASE_RAM_INIT_FILE = "C:\\Users\\29908\\Desktop\\Computer\\rv-2022\\supervisor-rv\\kernel\\kernel.bin"; // BaseRAM 初始化文件，请修改为实际的绝对路�??
   parameter EXT_RAM_INIT_FILE = "/tmp/eram.bin";  // ExtRAM 初始化文件，请修改为实际的绝对路�??
   parameter FLASH_INIT_FILE = "/tmp/kernel.elf";  // Flash 初始化文件，请修改为实际的绝对路�??
 
@@ -58,7 +58,37 @@ module tb;
     reset_btn = 0;
 
     #4000000;
-    $finish;
+    
+    uart.pc_send_byte(8'h41);
+    #500000
+    $display("A sent");
+    
+    uart.pc_send_byte(8'h80);
+    #50000
+    uart.pc_send_byte(8'h10);
+    #50000
+    uart.pc_send_byte(8'h00);
+    #50000
+    uart.pc_send_byte(8'h00);
+    #50000
+    $display("Address sent");
+    
+    uart.pc_send_byte(8'h4);
+    #50000
+    $display("num sent");
+    
+    uart.pc_send_byte(8'h00);
+    #50000
+    uart.pc_send_byte(8'h10);
+    #50000
+    uart.pc_send_byte(8'h05);
+    #50000
+    uart.pc_send_byte(8'h93);
+    #50000
+    $display("Command sent");
+    
+    uart.pc_send_byte(8'h52);
+    #100000000; $finish;
     
 
     // for (integer i = 0; i < 20; i = i + 1) begin

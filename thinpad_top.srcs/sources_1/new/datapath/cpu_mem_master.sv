@@ -99,6 +99,7 @@ module cpu_mem_master(
                         wb_cyc_o <= 1'b0;
                         wb_we_o <= 1'b0;    
                         mem_master_stall <= 1'b0;
+                        state <= DONE;
                     end       
                 end
                 QUERY_CACHE: begin
