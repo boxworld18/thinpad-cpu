@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="7396797fs"></ZoomStartTime>
-      <ZoomEndTime time="9804798fs"></ZoomEndTime>
-      <Cursor1Time time="7451449fs"></Cursor1Time>
+      <ZoomStartTime time="12634667fs"></ZoomStartTime>
+      <ZoomEndTime time="13686668fs"></ZoomEndTime>
+      <Cursor1Time time="12810000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="268"></NameColumnWidth>
-      <ValueColumnWidth column_width="162"></ValueColumnWidth>
+      <ValueColumnWidth column_width="156"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="116" />
+   <WVObjectSize size="143" />
    <wvobject fp_name="/tb/dut/u_cpu/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -474,8 +474,8 @@
       <obj_property name="ObjectShortName">is_hit_i</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/state" type="array">
-      <obj_property name="ElementShortName">state[1:0]</obj_property>
-      <obj_property name="ObjectShortName">state[1:0]</obj_property>
+      <obj_property name="ElementShortName">state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">state[2:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/highest_bit" type="logic">
       <obj_property name="ElementShortName">highest_bit</obj_property>
@@ -484,5 +484,113 @@
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/addr_cache" type="array">
       <obj_property name="ElementShortName">addr_cache[31:0]</obj_property>
       <obj_property name="ObjectShortName">addr_cache[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/clk_i" type="logic">
+      <obj_property name="ElementShortName">clk_i</obj_property>
+      <obj_property name="ObjectShortName">clk_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/rst_i" type="logic">
+      <obj_property name="ElementShortName">rst_i</obj_property>
+      <obj_property name="ObjectShortName">rst_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/addr_i" type="array">
+      <obj_property name="ElementShortName">addr_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">addr_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data_i" type="array">
+      <obj_property name="ElementShortName">data_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/is_add_i" type="logic">
+      <obj_property name="ElementShortName">is_add_i</obj_property>
+      <obj_property name="ObjectShortName">is_add_i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data_o" type="array">
+      <obj_property name="ElementShortName">data_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/is_hit_o" type="logic">
+      <obj_property name="ElementShortName">is_hit_o</obj_property>
+      <obj_property name="ObjectShortName">is_hit_o</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/cache" type="array">
+      <obj_property name="ElementShortName">cache[63:0][223:0]</obj_property>
+      <obj_property name="ObjectShortName">cache[63:0][223:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/cache_line" type="array">
+      <obj_property name="ElementShortName">cache_line[223:0]</obj_property>
+      <obj_property name="ObjectShortName">cache_line[223:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/tag" type="array">
+      <obj_property name="ElementShortName">tag[22:0]</obj_property>
+      <obj_property name="ObjectShortName">tag[22:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/index" type="array">
+      <obj_property name="ElementShortName">index[5:0]</obj_property>
+      <obj_property name="ObjectShortName">index[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/valid0" type="logic">
+      <obj_property name="ElementShortName">valid0</obj_property>
+      <obj_property name="ObjectShortName">valid0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/valid1" type="logic">
+      <obj_property name="ElementShortName">valid1</obj_property>
+      <obj_property name="ObjectShortName">valid1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/valid2" type="logic">
+      <obj_property name="ElementShortName">valid2</obj_property>
+      <obj_property name="ObjectShortName">valid2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/valid3" type="logic">
+      <obj_property name="ElementShortName">valid3</obj_property>
+      <obj_property name="ObjectShortName">valid3</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/tag0" type="array">
+      <obj_property name="ElementShortName">tag0[22:0]</obj_property>
+      <obj_property name="ObjectShortName">tag0[22:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/tag1" type="array">
+      <obj_property name="ElementShortName">tag1[22:0]</obj_property>
+      <obj_property name="ObjectShortName">tag1[22:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/tag2" type="array">
+      <obj_property name="ElementShortName">tag2[22:0]</obj_property>
+      <obj_property name="ObjectShortName">tag2[22:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/tag3" type="array">
+      <obj_property name="ElementShortName">tag3[22:0]</obj_property>
+      <obj_property name="ObjectShortName">tag3[22:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data0" type="array">
+      <obj_property name="ElementShortName">data0[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data0[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data1" type="array">
+      <obj_property name="ElementShortName">data1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data2" type="array">
+      <obj_property name="ElementShortName">data2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data2[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/data3" type="array">
+      <obj_property name="ElementShortName">data3[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data3[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/hit0" type="logic">
+      <obj_property name="ElementShortName">hit0</obj_property>
+      <obj_property name="ObjectShortName">hit0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/hit1" type="logic">
+      <obj_property name="ElementShortName">hit1</obj_property>
+      <obj_property name="ObjectShortName">hit1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/hit2" type="logic">
+      <obj_property name="ElementShortName">hit2</obj_property>
+      <obj_property name="ObjectShortName">hit2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_data_cache/hit3" type="logic">
+      <obj_property name="ElementShortName">hit3</obj_property>
+      <obj_property name="ObjectShortName">hit3</obj_property>
    </wvobject>
 </wave_config>

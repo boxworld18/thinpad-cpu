@@ -94,19 +94,19 @@ module data_cache(
         end else begin
             // add the data to the cache
             if(is_add_i) begin
-                if(!valid0) begin
+                if(!valid0 || hit0) begin
                     cache[index][224-1] <= 1'b1;
                     cache[index][223-1:200] <= tag;
                     cache[index][200-1:168] <= data_i;
-                end else if(!valid1) begin
+                end else if(!valid1 || hit1) begin
                     cache[index][168-1:0] <= 1'b1;
                     cache[index][167-1:144] <= tag;
                     cache[index][144-1:112] <= data_i;
-                end else if(!valid2) begin
+                end else if(!valid2 || hit2) begin
                     cache[index][112-1:0] <= 1'b1;
                     cache[index][111-1:88] <= tag;
                     cache[index][88-1:56] <= data_i;
-                end else if(!valid3) begin
+                end else if(!valid3 || hit3) begin
                     cache[index][56-1:0] <= 1'b1;
                     cache[index][55-1:32] <= tag;
                     cache[index][32-1:0] <= data_i;

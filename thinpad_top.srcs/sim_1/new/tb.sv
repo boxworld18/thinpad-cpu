@@ -57,38 +57,38 @@ module tb;
     #1000;
     reset_btn = 0;
 
-    #4000000;
+    #10000000;
     
-    uart.pc_send_byte(8'h41);
-    #500000
-    $display("A sent");
+//    uart.pc_send_byte(8'h41);
+//    #500000
+//    $display("A sent");
     
-    uart.pc_send_byte(8'h80);
-    #50000
-    uart.pc_send_byte(8'h10);
-    #50000
-    uart.pc_send_byte(8'h00);
-    #50000
-    uart.pc_send_byte(8'h00);
-    #50000
-    $display("Address sent");
+//    uart.pc_send_byte(8'h80);
+//    #50000
+//    uart.pc_send_byte(8'h10);
+//    #50000
+//    uart.pc_send_byte(8'h00);
+//    #50000
+//    uart.pc_send_byte(8'h00);
+//    #50000
+//    $display("Address sent");
     
-    uart.pc_send_byte(8'h4);
-    #50000
-    $display("num sent");
+//    uart.pc_send_byte(8'h4);
+//    #50000
+//    $display("num sent");
     
-    uart.pc_send_byte(8'h00);
-    #50000
-    uart.pc_send_byte(8'h10);
-    #50000
-    uart.pc_send_byte(8'h05);
-    #50000
-    uart.pc_send_byte(8'h93);
-    #50000
-    $display("Command sent");
+//    uart.pc_send_byte(8'h00);
+//    #50000
+//    uart.pc_send_byte(8'h10);
+//    #50000
+//    uart.pc_send_byte(8'h05);
+//    #50000
+//    uart.pc_send_byte(8'h93);
+//    #50000
+//    $display("Command sent");
     
-    uart.pc_send_byte(8'h52);
-    #100000000; $finish;
+//    uart.pc_send_byte(8'h52);
+//    #100000000; $finish;
     
 
     // for (integer i = 0; i < 20; i = i + 1) begin
