@@ -2,7 +2,7 @@ module bram_controller #(
     parameter DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 32,
 
-    parameter BRAM_ADDR_WIDTH = 16,
+    parameter BRAM_ADDR_WIDTH = 19,
     parameter BRAM_DATA_WIDTH = 8
 ) (
     // clk and reset

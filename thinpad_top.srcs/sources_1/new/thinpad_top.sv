@@ -365,9 +365,9 @@ module thinpad_top (
       .wbs2_cyc_o(wbs2_cyc_o),
 
       // Slave interface 3 (to VGA controller)
-      // Address range: 0x2000_0000 ~ 0x2000_FFFF
+      // Address range: 0x2000_0000 ~ 0x2007_FFFF
       .wbs3_addr    (32'h2000_0000),
-      .wbs3_addr_msk(32'hFFFF_0000),
+      .wbs3_addr_msk(32'hFFF8_0000),
 
       .wbs3_adr_o(wbs3_adr_o),
       .wbs3_dat_i(wbs3_dat_i),
@@ -477,7 +477,7 @@ module thinpad_top (
 
   logic [11:0] hdata;
   logic [11:0] vdata;
-  logic [15:0] video_nxtaddr;
+  logic [18:0] video_nxtaddr;
   logic [ 7:0] screen_color;
 
   assign video_clk   = clk_50M;
@@ -485,7 +485,7 @@ module thinpad_top (
   assign video_green = screen_color[5:3];
   assign video_blue  = screen_color[7:6];
 
-  vga_ram my_vga (
+  vga_bram my_vga (
       .clka (sys_clk),
 
       .ena  (1'b1),
@@ -499,7 +499,7 @@ module thinpad_top (
       .doutb(screen_color)
   );
 
-  vga #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1, 16) vga800x600at75 (
+  vga #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1, 19) vga800x600at75 (
       .clk        (video_clk),
       .hdata      (hdata),        // 横坐标
       .vdata      (vdata),             // 纵坐标
