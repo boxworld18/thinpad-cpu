@@ -291,7 +291,16 @@ module thinpad_top (
   logic [3:0] wbs2_sel_o;
   logic wbs2_we_o;
 
-  wb_mux_3 wb_mux (
+  logic wbs3_cyc_o;
+  logic wbs3_stb_o;
+  logic wbs3_ack_i;
+  logic [31:0] wbs3_adr_o;
+  logic [31:0] wbs3_dat_o;
+  logic [31:0] wbs3_dat_i;
+  logic [3:0] wbs3_sel_o;
+  logic wbs3_we_o;
+
+  wb_mux_4 wb_mux (
       .clk(sys_clk),
       .rst(sys_rst),
 
@@ -353,7 +362,24 @@ module thinpad_top (
       .wbs2_ack_i(wbs2_ack_i),
       .wbs2_err_i('0),
       .wbs2_rty_i('0),
-      .wbs2_cyc_o(wbs2_cyc_o)
+      .wbs2_cyc_o(wbs2_cyc_o),
+
+      // Slave interface 3 (to VGA controller)
+      // Address range: 0x2000_0000 ~ 0x2000_FFFF
+      .wbs3_addr    (32'h2000_0000),
+      .wbs3_addr_msk(32'hFFFF_0000),
+
+      .wbs3_adr_o(wbs3_adr_o),
+      .wbs3_dat_i(wbs3_dat_i),
+      .wbs3_dat_o(wbs3_dat_o),
+      .wbs3_we_o (wbs3_we_o),
+      .wbs3_sel_o(wbs3_sel_o),
+      .wbs3_stb_o(wbs3_stb_o),
+      .wbs3_ack_i(wbs3_ack_i),
+      .wbs3_err_i('0),
+      .wbs3_rty_i('0),
+      .wbs3_cyc_o(wbs3_cyc_o)
+      
   );
   /* =========== Wishbone MUX end =========== */
 
@@ -426,6 +452,64 @@ module thinpad_top (
       .uart_txd_o(txd),
       .uart_rxd_i(rxd)
   );
+
+  logic [15:0] vga_bram_addr;
+  logic [ 7:0] vga_bram_data;
+  logic vga_bram_we_n;
+
+  bram_controller bram_controller (
+      .clk_i(sys_clk),
+      .rst_i(sys_rst),
+
+      .wb_cyc_i(wbs3_cyc_o),
+      .wb_stb_i(wbs3_stb_o),
+      .wb_ack_o(wbs3_ack_i),
+      .wb_adr_i(wbs3_adr_o),
+      .wb_dat_i(wbs3_dat_o),
+      .wb_dat_o(wbs3_dat_i),
+      .wb_sel_i(wbs3_sel_o),
+      .wb_we_i (wbs3_we_o),
+
+      .bram_addr(vga_bram_addr),
+      .bram_data(vga_bram_data),
+      .bram_we_n(vga_bram_we_n)
+  );
+
+  logic [11:0] hdata;
+  logic [11:0] vdata;
+  logic [15:0] video_nxtaddr;
+  logic [ 7:0] screen_color;
+
+  assign video_clk   = clk_50M;
+  assign video_red   = screen_color[2:0];
+  assign video_green = screen_color[5:3];
+  assign video_blue  = screen_color[7:6];
+
+  vga_ram my_vga (
+      .clka (sys_clk),
+
+      .ena  (1'b1),
+      .wea  (vga_bram_we_n),
+      .addra(vga_bram_addr),
+      .dina (vga_bram_data),
+
+      .clkb (video_clk),
+      .enb  (1'b1),
+      .addrb(video_nxtaddr),
+      .doutb(screen_color)
+  );
+
+  vga #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1, 16) vga800x600at75 (
+      .clk        (video_clk),
+      .hdata      (hdata),        // 横坐标
+      .vdata      (vdata),             // 纵坐标
+      .hsync      (video_hsync),
+      .vsync      (video_vsync),
+      .nxtaddr    (video_nxtaddr),
+      .data_enable(video_de)
+  );
+
+
   /* =========== Wishbone Slaves end =========== */
 
   /* =========== Demo code begin =========== */
@@ -533,7 +617,7 @@ module thinpad_top (
   //     .TxD_data (ext_uart_tx)      // 待发送的数据
   // );
 
-  // // 图像输出演示，分辨率 800x600@75Hz，像素时钟为 50MHz
+  // 图像输出演示，分辨率 800x600@75Hz，像素时钟为 50MHz
   // logic [11:0] hdata;
   // assign video_red   = hdata < 266 ? 3'b111 : 0;  // 红色竖条
   // assign video_green = hdata < 532 && hdata >= 266 ? 3'b111 : 0;  // 绿色竖条
