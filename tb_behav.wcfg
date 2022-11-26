@@ -6,21 +6,22 @@
       <db_ref path="tb_behav.wdb" id="1">
          <top_modules>
             <top_module name="\$unit_control_sv " />
+            <top_module name="\$unit_thinpad_top_sv " />
             <top_module name="glbl" />
             <top_module name="tb" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="288785834fs"></ZoomStartTime>
-      <ZoomEndTime time="291495835fs"></ZoomEndTime>
-      <Cursor1Time time="291480834fs"></Cursor1Time>
+      <ZoomStartTime time="6569740000fs"></ZoomStartTime>
+      <ZoomEndTime time="6573460001fs"></ZoomEndTime>
+      <Cursor1Time time="6574210000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="207"></NameColumnWidth>
+      <NameColumnWidth column_width="192"></NameColumnWidth>
       <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="88" />
+   <WVObjectSize size="104" />
    <wvobject fp_name="/tb/dut/u_cpu/clk_i" type="logic">
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
@@ -113,6 +114,22 @@
       <obj_property name="ElementShortName">clk_i</obj_property>
       <obj_property name="ObjectShortName">clk_i</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/if_id_flush" type="logic">
+      <obj_property name="ElementShortName">if_id_flush</obj_property>
+      <obj_property name="ObjectShortName">if_id_flush</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/if_id_hold" type="logic">
+      <obj_property name="ElementShortName">if_id_hold</obj_property>
+      <obj_property name="ObjectShortName">if_id_hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/id_ex_flush" type="logic">
+      <obj_property name="ElementShortName">id_ex_flush</obj_property>
+      <obj_property name="ObjectShortName">id_ex_flush</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/id_ex_hold" type="logic">
+      <obj_property name="ElementShortName">id_ex_hold</obj_property>
+      <obj_property name="ObjectShortName">id_ex_hold</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/if_master_stall" type="logic">
       <obj_property name="ElementShortName">if_master_stall</obj_property>
       <obj_property name="ObjectShortName">if_master_stall</obj_property>
@@ -124,6 +141,18 @@
    <wvobject fp_name="/tb/dut/u_cpu/stall" type="logic">
       <obj_property name="ElementShortName">stall</obj_property>
       <obj_property name="ObjectShortName">stall</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/time_interrupt" type="logic">
+      <obj_property name="ElementShortName">time_interrupt</obj_property>
+      <obj_property name="ObjectShortName">time_interrupt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/time_interrupt_enable" type="logic">
+      <obj_property name="ElementShortName">time_interrupt_enable</obj_property>
+      <obj_property name="ObjectShortName">time_interrupt_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/time_interrupt_happen" type="logic">
+      <obj_property name="ElementShortName">time_interrupt_happen</obj_property>
+      <obj_property name="ObjectShortName">time_interrupt_happen</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/branch" type="logic">
       <obj_property name="ElementShortName">branch</obj_property>
@@ -152,6 +181,42 @@
    <wvobject fp_name="/tb/dut/u_cpu/id_imm" type="array">
       <obj_property name="ElementShortName">id_imm[31:0]</obj_property>
       <obj_property name="ObjectShortName">id_imm[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mtime" type="array">
+      <obj_property name="ElementShortName">mtime[63:0]</obj_property>
+      <obj_property name="ObjectShortName">mtime[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/mtimecmp" type="array">
+      <obj_property name="ElementShortName">mtimecmp[63:0]</obj_property>
+      <obj_property name="ObjectShortName">mtimecmp[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_csr/mode" type="array">
+      <obj_property name="ElementShortName">mode[1:0]</obj_property>
+      <obj_property name="ObjectShortName">mode[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_csr/mstatus" type="array">
+      <obj_property name="ElementShortName">mstatus[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mstatus[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_csr/mie" type="array">
+      <obj_property name="ElementShortName">mie[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mie[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_csr/mip" type="array">
+      <obj_property name="ElementShortName">mip[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mip[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/read_time_register" type="logic">
+      <obj_property name="ElementShortName">read_time_register</obj_property>
+      <obj_property name="ObjectShortName">read_time_register</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/time_register_rdata" type="array">
+      <obj_property name="ElementShortName">time_register_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">time_register_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_mem_master/write_time_register" type="logic">
+      <obj_property name="ElementShortName">write_time_register</obj_property>
+      <obj_property name="ObjectShortName">write_time_register</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/id_sel_csr" type="logic">
       <obj_property name="ElementShortName">id_sel_csr</obj_property>
