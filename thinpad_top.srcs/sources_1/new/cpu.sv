@@ -34,6 +34,9 @@ module cpu (
 );
     // interrupt
     logic time_interrupt;
+    logic time_interrupt_enable;
+    logic time_interrupt_happen;
+    assign time_interrupt_happen = time_interrupt & time_interrupt_enable;
 
     // stall -> used by if_master and mem_master
 
@@ -188,6 +191,8 @@ module cpu (
     logic [2:0] wb_csr_inst_sel;
     logic [`CSR_ADDR_BUS] wb_csr_waddr;
     logic [`CSR_DATA_BUS] wb_csr_wdata;
+    logic [`CSR_DATA_BUS] csr_mtvec;
+
     csr u_csr(
         .clk(clk_i),
         .rst(rst_i),
@@ -198,7 +203,10 @@ module cpu (
         .wb_pc(wb_pc),
         .sel(wb_csr_inst_sel),
         .waddr(wb_csr_waddr),
-        .wdata(wb_csr_wdata)
+        .wdata(wb_csr_wdata),
+
+        .csr_mtvec(csr_mtvec),
+        .time_interrupt_enable(time_interrupt_enable)
     );
 
     /* =========== ID end =========== */
@@ -250,6 +258,9 @@ module cpu (
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
+
+        .time_interrupt(time_interrupt_happen),
+        .mtvec(csr_mtvec),
 
         .ex_pc(ex_pc),
         .ex_inst(ex_inst),

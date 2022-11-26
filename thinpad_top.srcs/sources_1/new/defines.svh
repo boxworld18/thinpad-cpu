@@ -145,6 +145,7 @@ typedef enum logic [1:0] {
 // exception code
 `define CAUSE_ECALL 8
 `define CAUSE_EBREAK 3
+`define CAUSE_TIME 32'h80000007
 
 // time interrupt
 `define MTIME_ADDR_LOW 32'h200BFF8
@@ -181,7 +182,14 @@ typedef enum logic [2:0] {
     CSRRC = 3,
     ECALL = 4,
     EBREAK = 5,
-    MRET = 6
+    MRET = 6,
+    TIME_INTERRUPT = 7
 } csr_inst_t;
+
+typedef enum logic [1:0] {
+    U_MODE = 0,
+    S_MODE = 1,
+    M_MODE = 3
+} mode_t;
 
 `endif

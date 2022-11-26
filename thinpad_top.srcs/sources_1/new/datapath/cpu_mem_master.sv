@@ -74,6 +74,7 @@ module cpu_mem_master(
             end
             default: begin
                 read_time_register = 1'b0;
+                write_time_register = 1'b0;
                 time_register_rdata = 0;
             end
         endcase
@@ -82,7 +83,7 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 32'hffffffff;
+            mtimecmp <= 32'h10000;
         end else begin
             if (wen && state == IDLE) begin
                 case (addr) // 目前只支持4字节访问

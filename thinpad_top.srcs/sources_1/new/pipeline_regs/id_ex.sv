@@ -37,6 +37,10 @@ module id_ex(
     // imm
     input wire [`DATA_BUS] id_imm,
 
+    input wire time_interrupt,
+    // additional
+    input wire [`CSR_DATA_BUS] mtvec,
+
     // output
     output reg [`ADDR_BUS] ex_pc,
     output reg [`INST_BUS] ex_inst,
@@ -86,7 +90,29 @@ module id_ex(
             ex_rs2 <= 0;
             ex_imm <= 0;
         end else if (!stall) begin
-            if (flush) begin
+            if (time_interrupt) begin
+                ex_pc <= id_pc;     // TODO: hold or next ?
+                ex_inst <= `INST_NOP;
+                ex_rf_wen <= 1'b0;
+                ex_rf_waddr <= 0;
+                ex_rf_data_a <= 0;
+                ex_rf_data_b <= 0;
+                ex_rf_sel <= 1'b0;
+                ex_wb_wen <= 1'b0;
+                ex_wb_ren <= 1'b0;
+                ex_wb_sel <= 0;
+                ex_alu_op <= 0;
+                ex_alu_sel_imm <= 1'b0;
+                ex_alu_sel_pc <= 1'b0;
+                ex_sel_csr <= 1'b0;
+                ex_csr_inst_sel <= TIME_INTERRUPT;
+                ex_csr_waddr <= 0;
+                ex_csr_raddr <= `CSR_MTVEC;
+                ex_csr_rdata <= mtvec;
+                ex_rs1 <= 0;
+                ex_rs2 <= 0;
+                ex_imm <= 0;
+            end else if (flush) begin
                 ex_pc <= `ZERO_WORD;
                 ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;

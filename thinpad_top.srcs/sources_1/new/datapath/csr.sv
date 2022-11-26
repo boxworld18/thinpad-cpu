@@ -16,8 +16,14 @@ module csr(
 
     output reg [`CSR_DATA_BUS] csr_mstatus,
     output reg [`CSR_DATA_BUS] csr_mie,
-    output reg [`CSR_DATA_BUS] csr_mip
+    output reg [`CSR_DATA_BUS] csr_mip,
+
+    output reg [`CSR_DATA_BUS] csr_mtvec,
+    output reg time_interrupt_enable
 );
+
+    // mode
+    logic [1:0] mode;
 
     // csr_data csr_regs;
     logic [`CSR_DATA_BUS] mtvec;    // BASE(31:2) MODE(1:0)
@@ -28,6 +34,11 @@ module csr(
     logic [`CSR_DATA_BUS] mie;      
     logic [`CSR_DATA_BUS] mip;
 
+    assign csr_mtvec = mtvec;
+    assign time_interrupt_enable = (mie[`MIE_MTIE] && 
+                                    (mode == U_MODE || (mode == M_MODE && mstatus[`STATUS_MIE] == 1))
+                                    );
+                                    
     always_comb begin
         case (raddr)
             `CSR_MTVEC:     rdata = mtvec;
@@ -50,6 +61,7 @@ module csr(
             mscratch <= 0;
             mie <= 0;
             mip <= 0;
+            mode <= M_MODE;
         end else begin
             case (sel)
                 CSR_INST_NOP: ;
@@ -95,6 +107,7 @@ module csr(
                     mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
                     mstatus[`STATUS_MIE] <= 0;
                     mstatus[`STATUS_MPP] <= 0;
+                    mode <= M_MODE;
                 end
                 EBREAK: begin
                     mepc <= wb_pc;
@@ -102,11 +115,33 @@ module csr(
                     mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
                     mstatus[`STATUS_MIE] <= 0;
                     mstatus[`STATUS_MPP] <= 0;
+                    mode <= M_MODE;
                 end
                 MRET: begin
                     mstatus[`STATUS_MIE] <= mstatus[`STATUS_MPIE];
                     mstatus[`STATUS_MPP] <= 0;
                     mstatus[`STATUS_MPIE] <= 1;
+                    mode <= U_MODE;
+                end
+                TIME_INTERRUPT: begin
+                    if (mie[`MIE_MTIE]) begin
+                        if (mode == U_MODE) begin
+                            mepc <= wb_pc;
+                            mcause <= `CAUSE_TIME;
+                            mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
+                            mstatus[`STATUS_MIE] <= 0;
+                            mstatus[`STATUS_MPP] <= 0;
+                            mip[`MIP_MTIP] <= 1;
+                            mode <= M_MODE;
+                        end else if (mode == M_MODE && mstatus[`STATUS_MIE] == 1) begin
+                            mepc <= wb_pc;
+                            mcause <= `CAUSE_TIME;
+                            mstatus[`STATUS_MPIE] <= mstatus[`STATUS_MIE];
+                            mstatus[`STATUS_MIE] <= 0;
+                            mstatus[`STATUS_MPP] <= M_MODE;
+                            mip[`MIP_MTIP] <= 1;
+                        end
+                    end
                 end
                 default: ;
             endcase

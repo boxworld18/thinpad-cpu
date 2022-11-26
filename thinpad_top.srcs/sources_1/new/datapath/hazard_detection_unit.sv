@@ -31,14 +31,19 @@ module hazard_detection_unit(
     assign load_hazard = ex_wb_ren & ex_hazard;
 
     logic id_csr_branch, ex_csr_branch, mem_csr_branch, wb_csr_branch, csr_branch; 
-    assign id_csr_branch = ((id_csr_inst_sel == ECALL) || (id_csr_inst_sel == EBREAK) || (id_csr_inst_sel == MRET));
-    assign ex_csr_branch = ((ex_csr_inst_sel == ECALL) || (ex_csr_inst_sel == EBREAK) || (ex_csr_inst_sel == MRET));
-    assign mem_csr_branch = ((mem_csr_inst_sel == ECALL) || (mem_csr_inst_sel == EBREAK) || (mem_csr_inst_sel == MRET));
-    assign wb_csr_branch = ((wb_csr_inst_sel == ECALL) || (wb_csr_inst_sel == EBREAK) || (wb_csr_inst_sel == MRET));
+    assign id_csr_branch = ((id_csr_inst_sel == ECALL) || (id_csr_inst_sel == EBREAK) || (id_csr_inst_sel == MRET) || (id_csr_inst_sel == TIME_INTERRUPT));
+    assign ex_csr_branch = ((ex_csr_inst_sel == ECALL) || (ex_csr_inst_sel == EBREAK) || (ex_csr_inst_sel == MRET) || (ex_csr_inst_sel == TIME_INTERRUPT));
+    assign mem_csr_branch = ((mem_csr_inst_sel == ECALL) || (mem_csr_inst_sel == EBREAK) || (mem_csr_inst_sel == MRET) || (mem_csr_inst_sel == TIME_INTERRUPT));
+    assign wb_csr_branch = ((wb_csr_inst_sel == ECALL) || (wb_csr_inst_sel == EBREAK) || (wb_csr_inst_sel == MRET) || (wb_csr_inst_sel == TIME_INTERRUPT));
     assign csr_branch = id_csr_branch | ex_csr_branch | mem_csr_branch | wb_csr_branch;
     
     always_comb begin
-        if (branch | csr_branch) begin
+        if (csr_branch) begin
+            if_id_flush = `ENABLE;
+            id_ex_flush = `ENABLE;
+            if_id_hold = `ENABLE;
+            id_ex_hold = `DISABLE;
+        end else if (branch) begin
             if_id_flush = `ENABLE;
             id_ex_flush = `ENABLE;
             if_id_hold = `DISABLE;
