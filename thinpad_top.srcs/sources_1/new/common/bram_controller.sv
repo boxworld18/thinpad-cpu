@@ -21,7 +21,7 @@ module bram_controller #(
 
     // bram interface
     output wire [BRAM_ADDR_WIDTH-1:0] bram_addr,
-    inout wire [BRAM_DATA_WIDTH-1:0] bram_data,
+    output wire [BRAM_DATA_WIDTH-1:0] bram_data,
     output reg bram_we_n
 );
 
