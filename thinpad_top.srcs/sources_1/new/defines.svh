@@ -146,6 +146,12 @@ typedef enum logic [1:0] {
 `define CAUSE_ECALL 8
 `define CAUSE_EBREAK 3
 
+// time interrupt
+`define MTIME_ADDR_LOW 32'h200BFF8
+`define MTIME_ADDR_HIGH 32'h200BFFC
+`define MTIMECMP_ADDR_LOW 32'h2004000
+`define MTIMECMP_ADDR_HIGH 32'h2004004 
+
 typedef struct packed
 {
     logic mtvec;

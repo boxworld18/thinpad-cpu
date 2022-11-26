@@ -32,6 +32,8 @@ module cpu (
     output reg [`SEL] wbm1_sel_o,
     output reg wbm1_we_o
 );
+    // interrupt
+    logic time_interrupt;
 
     // stall -> used by if_master and mem_master
 
@@ -392,6 +394,7 @@ module cpu (
         .wen(mem_wb_wen),
         .ren(mem_wb_ren),
         .sel(mem_wb_sel),
+        .stall(stall),
 
         .wb_ack_i(wbm1_ack_i),
         .wb_dat_i(wbm1_dat_i),
@@ -404,7 +407,8 @@ module cpu (
         .wb_we_o(wbm1_we_o),
 
         .mem_read_data(mem_read_data),
-        .mem_master_stall(mem_master_stall)
+        .mem_master_stall(mem_master_stall),
+        .time_interrupt(time_interrupt)
     );
 
     /* =========== MEM end =========== */
