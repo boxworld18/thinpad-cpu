@@ -6,24 +6,25 @@ module csr(
     input wire clk,
     input wire rst,
     
+    input wire [2:0] sel, // 指令 sel  // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6, TIME_INTERRUPT = 7
+    
+    // raddr rdata waddr wdata 都只用于 CSRRW/S/C
     input wire [`CSR_ADDR_BUS] raddr,
     output reg [`CSR_DATA_BUS] rdata,
-
-    input wire [`ADDR_BUS] wb_pc,
-    input wire [2:0] sel, // 指令 sel
     input wire [`CSR_ADDR_BUS] waddr,
     input wire [`CSR_DATA_BUS] wdata,
 
-    output reg [`CSR_DATA_BUS] csr_mstatus,
-    output reg [`CSR_DATA_BUS] csr_mie,
-    output reg [`CSR_DATA_BUS] csr_mip,
+    input wire [`ADDR_BUS] wb_pc,
+    // output reg [`CSR_DATA_BUS] csr_mstatus,
+    // output reg [`CSR_DATA_BUS] csr_mie,
+    // output reg [`CSR_DATA_BUS] csr_mip,
 
     output reg [`CSR_DATA_BUS] csr_mtvec,
     output reg time_interrupt_enable
 );
 
     // mode
-    logic [1:0] mode;
+    logic [1:0] mode; // 0: user, 1: supervisor, 3: machine
 
     // csr_data csr_regs;
     logic [`CSR_DATA_BUS] mtvec;    // BASE(31:2) MODE(1:0)
