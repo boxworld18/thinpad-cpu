@@ -475,8 +475,8 @@ module thinpad_top (
       .bram_we_n(vga_bram_we_n)
   );
 
-  logic [11:0] hdata;
-  logic [11:0] vdata;
+  logic [12:0] hdata;
+  logic [12:0] vdata;
   logic [18:0] video_nxtaddr;
   logic [ 7:0] screen_color;
 
@@ -499,7 +499,7 @@ module thinpad_top (
       .doutb(screen_color)
   );
 
-  vga #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1, 19) vga800x600at75 (
+  vga #(13, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1, 19) vga800x600at75 (
       .clk        (video_clk),
       .hdata      (hdata),        // 横坐标
       .vdata      (vdata),             // 纵坐标
