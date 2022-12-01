@@ -66,7 +66,7 @@ module csr(
         end else begin
             case (sel)
                 CSR_INST_NOP: ;
-                CSRRW: begin
+                CSRRW, CSRRWI: begin
                     case (waddr)
                         `CSR_MTVEC:     mtvec <= wdata;
                         `CSR_MEPC:      mepc <= wdata;
@@ -78,7 +78,7 @@ module csr(
                         default: ;
                     endcase
                 end
-                CSRRS: begin
+                CSRRS, CSRRSI: begin
                     case (waddr)
                         `CSR_MTVEC:     mtvec <= mtvec | wdata;
                         `CSR_MEPC:      mepc <= mepc | wdata;
@@ -90,7 +90,7 @@ module csr(
                         default: ;
                     endcase
                 end
-                CSRRC: begin
+                CSRRC, CSRRCI: begin
                     case (waddr)
                         `CSR_MTVEC:     mtvec <= mtvec & ~wdata;
                         `CSR_MEPC:      mepc <= mepc & ~wdata;
