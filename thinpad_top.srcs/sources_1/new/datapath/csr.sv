@@ -34,6 +34,7 @@ module csr(
     logic [`CSR_DATA_BUS] mscratch; 
     logic [`CSR_DATA_BUS] mie;      
     logic [`CSR_DATA_BUS] mip;
+    logic [63:0] rdtime;
 
     assign csr_mtvec = mtvec;
     assign time_interrupt_enable = (mie[`MIE_MTIE] && 
@@ -49,6 +50,8 @@ module csr(
             `CSR_MSCRATCH:  rdata = mscratch;
             `CSR_MIE:       rdata = mie;
             `CSR_MIP:       rdata = mip;  
+            `CSR_RDTIME:    rdata = rdtime[31:0];
+            `CSR_RDTIMEH:   rdata = rdtime[63:32];
             default:        rdata = 0;
         endcase
     end
@@ -62,8 +65,10 @@ module csr(
             mscratch <= 0;
             mie <= 0;
             mip <= 0;
+            rdtime <= 0;
             mode <= M_MODE;
         end else begin
+            rdtime <= rdtime + 1;
             case (sel)
                 CSR_INST_NOP: ;
                 CSRRW, CSRRWI, CSRRS, CSRRSI, CSRRC, CSRRCI: begin

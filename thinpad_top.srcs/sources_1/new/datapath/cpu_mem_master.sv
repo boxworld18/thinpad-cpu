@@ -88,6 +88,7 @@ module cpu_mem_master(
             mtime <= 0;
             mtimecmp <= 32'h10000;
         end else begin
+            mtime <= mtime + 1;
             if (wen && state == IDLE) begin
                 case (addr) // 目前只支持4字节访问
                     `MTIME_ADDR_LOW: begin
@@ -104,8 +105,6 @@ module cpu_mem_master(
                     end
                     default: ;
                 endcase
-            end else begin
-                mtime <= mtime + 1;
             end
         end
     end
