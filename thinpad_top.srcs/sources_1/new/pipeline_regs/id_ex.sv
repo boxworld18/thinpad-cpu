@@ -21,6 +21,7 @@ module id_ex(
     input wire id_wb_wen,
     input wire id_wb_ren,
     input wire [`SEL] id_wb_sel,
+    input wire id_wb_read_unsigned,
     // alu (EX)
     input wire [`ALU_OP_WIDTH-1:0] id_alu_op,
     input wire id_alu_sel_imm,
@@ -52,6 +53,7 @@ module id_ex(
     output reg ex_wb_wen,
     output reg ex_wb_ren,
     output reg [`SEL] ex_wb_sel,
+    output reg ex_wb_read_unsigned,
     output reg [`ALU_OP_WIDTH-1:0] ex_alu_op,
     output reg ex_alu_sel_imm,
     output reg ex_alu_sel_pc,
@@ -78,6 +80,7 @@ module id_ex(
             ex_wb_wen <= 1'b0;
             ex_wb_ren <= 1'b0;
             ex_wb_sel <= 0;
+            ex_wb_read_unsigned <= 1'b0;
             ex_alu_op <= 0;
             ex_alu_sel_imm <= 1'b0;
             ex_alu_sel_pc <= 1'b0;
@@ -101,6 +104,7 @@ module id_ex(
                 ex_wb_wen <= 1'b0;
                 ex_wb_ren <= 1'b0;
                 ex_wb_sel <= 0;
+                ex_wb_read_unsigned <= 1'b0;
                 ex_alu_op <= 0;
                 ex_alu_sel_imm <= 1'b0;
                 ex_alu_sel_pc <= 1'b0;
@@ -123,6 +127,7 @@ module id_ex(
                 ex_wb_wen <= 1'b0;
                 ex_wb_ren <= 1'b0;
                 ex_wb_sel <= 0;
+                ex_wb_read_unsigned <= 1'b0;
                 ex_alu_op <= 0;
                 ex_alu_sel_imm <= 1'b0;
                 ex_alu_sel_pc <= 1'b0;
@@ -145,6 +150,7 @@ module id_ex(
                 ex_wb_wen <= id_wb_wen;
                 ex_wb_ren <= id_wb_ren;
                 ex_wb_sel <= id_wb_sel;
+                ex_wb_read_unsigned <= id_wb_read_unsigned;
                 ex_alu_op <= id_alu_op;
                 ex_alu_sel_imm <= id_alu_sel_imm;
                 ex_alu_sel_pc <= id_alu_sel_pc;

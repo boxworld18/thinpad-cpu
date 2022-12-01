@@ -10,7 +10,7 @@ module cpu_mem_master(
     input wire wen,
     input wire ren,
     input wire [`SEL] sel,
-    input wire read_unsigned, // UNUSED UNCONNECTED
+    input wire read_unsigned,
     input wire stall,
 
     // master
@@ -49,6 +49,9 @@ module cpu_mem_master(
     // logic [`SEL] time_sel; // mtime、mtimecmp寄存器的选择信号 (4位) 
 
     assign time_interrupt = (mtime >= mtimecmp) ? 1'b1 : 1'b0;
+
+    logic [`DATA_BUS] data_shift;
+    assign data_shift = addr[1:0] << 3;
 
     always_comb begin
         case (addr) // 目前只支持4字节访问
@@ -142,7 +145,7 @@ module cpu_mem_master(
                             wb_stb_o <= 1'b1;
                             wb_cyc_o <= 1'b1;
                             wb_adr_o <= addr;
-                            wb_dat_o <= data;
+                            wb_dat_o <= data << data_shift;
                             wb_sel_o <= (sel << addr[1:0]);
                             wb_we_o <= 1'b1;    
                             mem_master_stall <= 1'b1;      
@@ -161,11 +164,14 @@ module cpu_mem_master(
                         wb_stb_o <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         mem_master_stall <= 1'b0;
-                        case (wb_sel_o) // 不支持 lh lhu
-                            4'b0001: mem_read_data <= {24'b0, wb_dat_i[7:0]};
-                            4'b0010: mem_read_data <= {24'b0, wb_dat_i[15:8]};
-                            4'b0100: mem_read_data <= {24'b0, wb_dat_i[23:16]};
-                            4'b1000: mem_read_data <= {24'b0, wb_dat_i[31:24]};
+                        case (wb_sel_o)
+                            4'b0001: mem_read_data <= (read_unsigned ? {24'b0, wb_dat_i[7:0]} : {{24{wb_dat_i[7]}}, wb_dat_i[7:0]});
+                            4'b0010: mem_read_data <= (read_unsigned ? {24'b0, wb_dat_i[15:8]} : {{24{wb_dat_i[15]}}, wb_dat_i[15:8]});
+                            4'b0100: mem_read_data <= (read_unsigned ? {24'b0, wb_dat_i[23:16]} : {{24{wb_dat_i[23]}}, wb_dat_i[23:16]});
+                            4'b1000: mem_read_data <= (read_unsigned ? {24'b0, wb_dat_i[31:24]} : {{24{wb_dat_i[31]}}, wb_dat_i[31:24]});
+                            4'b0011: mem_read_data <= (read_unsigned ? {16'b0, wb_dat_i[15:0]} : {{16{wb_dat_i[15]}}, wb_dat_i[15:0]});
+                            4'b0110: mem_read_data <= (read_unsigned ? {16'b0, wb_dat_i[23:8]} : {{16{wb_dat_i[23]}}, wb_dat_i[23:8]});
+                            4'b1100: mem_read_data <= (read_unsigned ? {16'b0, wb_dat_i[31:16]} : {{16{wb_dat_i[31]}}, wb_dat_i[31:16]});
                             4'b1111: mem_read_data <= wb_dat_i;
                             default: mem_read_data <= 0;
                         endcase

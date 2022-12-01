@@ -13,6 +13,7 @@ module control(
     output wire id_wb_wen,
     output wire id_wb_ren,
     output reg [`SEL] id_wb_sel,
+    output reg id_wb_read_unsigned,
     // alu
     output reg [`ALU_OP_WIDTH-1:0] id_alu_op,
     output reg id_alu_sel_imm,
@@ -80,12 +81,12 @@ module control(
     
     always_comb begin // 不代表最终的使能, 只确定字节数, 写入wishbone之前应左移 addr 的低2位
         case (func3)
-            3'b000: id_wb_sel = 4'b0001; // lb
-            3'b100: id_wb_sel = 4'b0001; // lbu
-            3'b001: id_wb_sel = 4'b0011; // lh
-            3'b101: id_wb_sel = 4'b0011; // lhu
-            3'b010: id_wb_sel = 4'b1111; // lw
-            default: id_wb_sel = 4'b0000;
+            3'b000: begin id_wb_sel = 4'b0001; id_wb_read_unsigned = 1'b0; end // lb
+            3'b001: begin id_wb_sel = 4'b0011; id_wb_read_unsigned = 1'b0; end // lh
+            3'b010: begin id_wb_sel = 4'b1111; id_wb_read_unsigned = 1'b0; end // lw
+            3'b100: begin id_wb_sel = 4'b0001; id_wb_read_unsigned = 1'b1; end // lbu
+            3'b101: begin id_wb_sel = 4'b0011; id_wb_read_unsigned = 1'b1; end // lhu    
+            default: begin id_wb_sel = 4'b0000; id_wb_read_unsigned = 1'b0; end
         endcase
     end
 

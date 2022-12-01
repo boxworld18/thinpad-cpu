@@ -16,6 +16,7 @@ module ex_mem(
     input wire ex_wb_wen, // write enable
     input wire ex_wb_ren, // read enable
     input wire [`SEL] ex_wb_sel,
+    input wire ex_wb_read_unsigned,
     // regfile
     input wire ex_rf_wen,
     input wire [`REG_ADDR_BUS] ex_rf_waddr,
@@ -34,6 +35,7 @@ module ex_mem(
     output reg mem_wb_wen,
     output reg mem_wb_ren,
     output reg [`SEL] mem_wb_sel,
+    output reg mem_wb_read_unsigned,
 
     output reg mem_rf_wen,
     output reg [`REG_ADDR_BUS] mem_rf_waddr,
@@ -52,6 +54,7 @@ module ex_mem(
             mem_wb_wen <= 1'b0;
             mem_wb_ren <= 1'b0;
             mem_wb_sel <= 0;
+            mem_wb_read_unsigned <= 1'b0;
             mem_rf_wen <= 1'b0;
             mem_rf_waddr <= 0;
             mem_rf_sel <= 1'b0;
@@ -65,6 +68,7 @@ module ex_mem(
             mem_wb_wen <= ex_wb_wen;
             mem_wb_ren <= ex_wb_ren;
             mem_wb_sel <= ex_wb_sel;
+            mem_wb_read_unsigned <= ex_wb_read_unsigned;
             mem_rf_wen <= ex_rf_wen;
             mem_rf_waddr <= ex_rf_waddr;
             mem_rf_sel <= ex_rf_sel;

@@ -141,6 +141,7 @@ module cpu (
     logic id_wb_wen;
     logic id_wb_ren;
     logic [`SEL] id_wb_sel;
+    logic id_wb_read_unsigned;
     // alu
     logic [`ALU_OP_WIDTH-1:0] id_alu_op;
     logic id_alu_sel_imm;
@@ -160,6 +161,7 @@ module cpu (
         .id_wb_wen(id_wb_wen),
         .id_wb_ren(id_wb_ren),
         .id_wb_sel(id_wb_sel),
+        .id_wb_read_unsigned(id_wb_read_unsigned),
 
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
@@ -218,6 +220,7 @@ module cpu (
     logic ex_rf_sel;
     logic ex_wb_wen;
     logic [`SEL] ex_wb_sel;
+    logic ex_wb_read_unsigned;
     logic [`ALU_OP_WIDTH-1:0] ex_alu_op;
     logic ex_alu_sel_imm;
     logic ex_alu_sel_pc;
@@ -247,6 +250,7 @@ module cpu (
         .id_wb_wen(id_wb_wen),
         .id_wb_ren(id_wb_ren),
         .id_wb_sel(id_wb_sel),
+        .id_wb_read_unsigned(id_wb_read_unsigned),
         .id_alu_op(id_alu_op),
         .id_alu_sel_imm(id_alu_sel_imm),
         .id_alu_sel_pc(id_alu_sel_pc),
@@ -272,6 +276,7 @@ module cpu (
         .ex_wb_wen(ex_wb_wen),
         .ex_wb_ren(ex_wb_ren),
         .ex_wb_sel(ex_wb_sel),
+        .ex_wb_read_unsigned(ex_wb_read_unsigned),
         .ex_alu_op(ex_alu_op),
         .ex_alu_sel_imm(ex_alu_sel_imm),
         .ex_alu_sel_pc(ex_alu_sel_pc),
@@ -358,6 +363,7 @@ module cpu (
     logic mem_wb_wen;
     logic mem_wb_ren;
     logic [`SEL] mem_wb_sel;
+    logic mem_wb_read_unsigned;
     logic mem_rf_sel;
     logic [2:0] mem_csr_inst_sel;
     logic [`CSR_ADDR_BUS] mem_csr_waddr;
@@ -373,6 +379,7 @@ module cpu (
         .ex_wb_wen(ex_wb_wen),
         .ex_wb_ren(ex_wb_ren),
         .ex_wb_sel(ex_wb_sel),
+        .ex_wb_read_unsigned(ex_wb_read_unsigned),
         .ex_rf_wen(ex_rf_wen),
         .ex_rf_waddr(ex_rf_waddr),
         .ex_rf_sel(ex_rf_sel),
@@ -386,6 +393,7 @@ module cpu (
         .mem_wb_wen(mem_wb_wen),
         .mem_wb_ren(mem_wb_ren),
         .mem_wb_sel(mem_wb_sel),
+        .mem_wb_read_unsigned(mem_wb_read_unsigned),
         .mem_rf_wen(mem_rf_wen),
         .mem_rf_waddr(mem_rf_waddr),
         .mem_rf_sel(mem_rf_sel),
@@ -405,6 +413,7 @@ module cpu (
         .wen(mem_wb_wen),
         .ren(mem_wb_ren),
         .sel(mem_wb_sel),
+        .read_unsigned(mem_wb_read_unsigned),
         .stall(stall),
 
         .wb_ack_i(wbm1_ack_i),
