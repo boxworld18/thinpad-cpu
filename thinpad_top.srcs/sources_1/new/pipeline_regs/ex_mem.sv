@@ -22,7 +22,7 @@ module ex_mem(
     input wire [`REG_ADDR_BUS] ex_rf_waddr,
     input wire ex_rf_sel,
     // csr
-    input wire [2:0] ex_csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] ex_csr_inst_sel,
     input wire [`CSR_ADDR_BUS] ex_csr_waddr,
     input wire [`CSR_DATA_BUS] ex_csr_wdata,
 
@@ -41,7 +41,7 @@ module ex_mem(
     output reg [`REG_ADDR_BUS] mem_rf_waddr,
     output reg mem_rf_sel,
 
-    output reg [2:0] mem_csr_inst_sel,
+    output reg [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel,
     output reg [`CSR_ADDR_BUS] mem_csr_waddr,
     output reg [`CSR_DATA_BUS] mem_csr_wdata
 );

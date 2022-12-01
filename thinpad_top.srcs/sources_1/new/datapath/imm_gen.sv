@@ -27,6 +27,8 @@ module imm_gen(
                 imm = {inst[31:12], 12'b0};
             `OPCODE_JAL:
                 imm = {sign_extend_jtype, inst[31], inst[19:12], inst[20], inst[30:21], 1'b0};
+            `OPCODE_PRIV:
+                imm = {27'b0, inst[19:15]};
             default:
                 imm = 32'b0;
         endcase

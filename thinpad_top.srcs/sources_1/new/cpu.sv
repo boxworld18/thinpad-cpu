@@ -148,8 +148,9 @@ module cpu (
     logic id_alu_sel_pc;
     logic id_sel_csr;
     // csr
-    logic [2:0] id_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] id_csr_inst_sel;
     logic [`CSR_ADDR_BUS] id_csr_raddr;
+    logic id_csr_imm_sel;
 
     control u_control(
         .pc(id_pc),
@@ -169,7 +170,8 @@ module cpu (
         .id_sel_csr(id_sel_csr),
 
         .id_csr_inst_sel(id_csr_inst_sel),
-        .id_csr_raddr(id_csr_raddr)
+        .id_csr_raddr(id_csr_raddr),
+        .id_csr_imm_sel(id_csr_imm_sel)
     );
 
     logic [`REG_DATA_BUS] id_rf_data_a;
@@ -190,7 +192,7 @@ module cpu (
     );
 
     logic [`CSR_DATA_BUS] id_csr_rdata;
-    logic [2:0] wb_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] wb_csr_inst_sel;
     logic [`CSR_ADDR_BUS] wb_csr_waddr;
     logic [`CSR_DATA_BUS] wb_csr_wdata;
     logic [`CSR_DATA_BUS] csr_mtvec;
@@ -225,10 +227,11 @@ module cpu (
     logic ex_alu_sel_imm;
     logic ex_alu_sel_pc;
     logic ex_sel_csr;
-    logic [2:0] ex_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] ex_csr_inst_sel;
     logic [`CSR_ADDR_BUS] ex_csr_waddr;
     logic [`CSR_ADDR_BUS] ex_csr_raddr;
     logic [`CSR_DATA_BUS] ex_csr_rdata;
+    logic ex_csr_imm_sel;
     logic [`REG_ADDR_BUS] ex_rs1;
     logic [`REG_ADDR_BUS] ex_rs2;
     logic [`DATA_BUS] ex_imm;
@@ -259,6 +262,7 @@ module cpu (
         .id_csr_waddr(id_inst[31:20]),
         .id_csr_raddr(id_csr_raddr),
         .id_csr_rdata(id_csr_rdata),
+        .id_csr_imm_sel(id_csr_imm_sel),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -285,6 +289,7 @@ module cpu (
         .ex_csr_waddr(ex_csr_waddr),
         .ex_csr_raddr(ex_csr_raddr),
         .ex_csr_rdata(ex_csr_rdata),
+        .ex_csr_imm_sel(ex_csr_imm_sel),
         .ex_rs1(ex_rs1),
         .ex_rs2(ex_rs2),
         .ex_imm(ex_imm)
@@ -365,7 +370,7 @@ module cpu (
     logic [`SEL] mem_wb_sel;
     logic mem_wb_read_unsigned;
     logic mem_rf_sel;
-    logic [2:0] mem_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel;
     logic [`CSR_ADDR_BUS] mem_csr_waddr;
     
     ex_mem u_ex_mem(
@@ -385,7 +390,7 @@ module cpu (
         .ex_rf_sel(ex_rf_sel),
         .ex_csr_inst_sel(ex_csr_inst_sel),
         .ex_csr_waddr(ex_csr_waddr),
-        .ex_csr_wdata(alu_rf_data_a),
+        .ex_csr_wdata(ex_csr_imm_sel ? ex_imm : alu_rf_data_a),
 
         .mem_pc(mem_pc),
         .mem_data(mem_data),

@@ -20,8 +20,9 @@ module control(
     output reg id_alu_sel_pc,
     output reg id_sel_csr,
     // csr
-    output reg [2:0] id_csr_inst_sel, // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6
-    output reg [`CSR_ADDR_BUS] id_csr_raddr
+    output reg [`CSR_SEL_WIDTH-1:0] id_csr_inst_sel, // csr instruction type
+    output reg [`CSR_ADDR_BUS] id_csr_raddr,
+    output reg id_csr_imm_sel
 );
 
     // 提取指令字段
@@ -145,12 +146,27 @@ module control(
     // assign csr_ren_global = csrrw_c_s && (rd != 0 || func3 != 3'b001);
     // assign csr_wen_global = csrrw_c_s && (rs1 != 0 || func3 == 3'b001);
 
+    /* 
+        Attention Please ! ! ! 
+        Current version does not support Table 9.1 in risv-spec.
+        The current version is: 
+            all CSRRW/S/C(I) instructions will both read and write CSR
+        The correct version should be:
+            CSRRW/S/C(I) will only read CSR when rd != 0
+            CSRRW/S/C(I) will only write CSR when rs1/uimm != 0
+        (Read/Write CSR may cause some problems in the future)    
+
+        :)
+    */
     always_comb begin
         if (is_priv) begin
             case (func3)
-                3'b001: begin id_csr_inst_sel = CSRRW; id_csr_raddr = csr_addr; end
-                3'b010: begin id_csr_inst_sel = CSRRS; id_csr_raddr = csr_addr; end
-                3'b011: begin id_csr_inst_sel = CSRRC; id_csr_raddr = csr_addr; end
+                3'b001: begin id_csr_inst_sel = CSRRW; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b0; end
+                3'b010: begin id_csr_inst_sel = CSRRS; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b0; end
+                3'b011: begin id_csr_inst_sel = CSRRC; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b0; end
+                3'b101: begin id_csr_inst_sel = CSRRWI; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b1; end
+                3'b110: begin id_csr_inst_sel = CSRRSI; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b1; end
+                3'b111: begin id_csr_inst_sel = CSRRCI; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b1; end
                 3'b000: begin
                     case (csr_addr)
                         `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end   // 跳转时取[31:2]
@@ -158,12 +174,14 @@ module control(
                         `CSR_MRET: begin id_csr_inst_sel = MRET; id_csr_raddr = `CSR_MEPC; end
                         default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
                     endcase
+                    id_csr_imm_sel = 1'b0;
                 end
-                default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
+                default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; id_csr_imm_sel = 1'b0; end
             endcase
         end else begin
             id_csr_inst_sel = CSR_INST_NOP;
             id_csr_raddr = 0;
+            id_csr_imm_sel = 1'b0;
         end
     end
 

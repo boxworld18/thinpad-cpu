@@ -12,7 +12,7 @@ module mem_wb(
     input wire [`REG_ADDR_BUS] mem_rf_waddr,
     input wire [`REG_DATA_BUS] mem_rf_wdata,
 
-    input wire [2:0] mem_csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel,
     input wire [`CSR_ADDR_BUS] mem_csr_waddr,
     input wire [`CSR_DATA_BUS] mem_csr_wdata,
 
@@ -21,7 +21,7 @@ module mem_wb(
     output reg [`REG_ADDR_BUS] wb_rf_waddr,
     output reg [`REG_DATA_BUS] wb_rf_wdata,
 
-    output reg [2:0] wb_csr_inst_sel,
+    output reg [`CSR_SEL_WIDTH-1:0] wb_csr_inst_sel,
     output reg [`CSR_ADDR_BUS] wb_csr_waddr,
     output reg [`CSR_DATA_BUS] wb_csr_wdata
 

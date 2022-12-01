@@ -175,15 +175,19 @@ typedef struct packed
     logic [`CSR_DATA_BUS] mip;
 } csr_data;
 
-typedef enum logic [2:0] {
+`define CSR_SEL_WIDTH 4 // CSR选择信号宽度
+typedef enum logic [3:0] {
     CSR_INST_NOP = 0,
     CSRRW = 1,
     CSRRS = 2,
     CSRRC = 3,
-    ECALL = 4,
-    EBREAK = 5,
-    MRET = 6,
-    TIME_INTERRUPT = 7
+    CSRRWI = 4,
+    CSRRSI = 5,
+    CSRRCI = 6,
+    ECALL = 7,
+    EBREAK = 8,
+    MRET = 9,
+    TIME_INTERRUPT = 10
 } csr_inst_t;
 
 typedef enum logic [1:0] {

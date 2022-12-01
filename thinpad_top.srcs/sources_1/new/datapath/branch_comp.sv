@@ -9,7 +9,7 @@ module branch_comp(
     input wire [`DATA_BUS] data_a,
     input wire [`DATA_BUS] data_b,
 
-    input wire [2:0] csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] csr_inst_sel,
     input wire [`CSR_DATA_BUS] csr_rdata,
 
     output reg [`ADDR_BUS] pc_branch, // branch target

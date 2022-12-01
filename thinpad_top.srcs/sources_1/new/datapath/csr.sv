@@ -6,7 +6,7 @@ module csr(
     input wire clk,
     input wire rst,
     
-    input wire [2:0] sel, // 指令 sel  // CSR_INST_NOP = 0, CSRRW = 1, CSRRS = 2, CSRRC = 3, ECALL = 4, EBREAK = 5, MRET = 6, TIME_INTERRUPT = 7
+    input wire [`CSR_SEL_WIDTH-1:0] sel, // instruction type  
     
     // raddr rdata waddr wdata 都只用于 CSRRW/S/C
     input wire [`CSR_ADDR_BUS] raddr,
