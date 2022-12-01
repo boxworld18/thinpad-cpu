@@ -51,8 +51,10 @@ module vga #(
 
   // nxtaddr
   always @(posedge clk) begin
-    if (vdata == (VMAX - 1) && hdata == (HMAX - 1)) nxtaddr <= 0;
-    else nxtaddr <= nxtaddr + 1;
+    if (data_enable) begin
+      if (vdata == (VSIZE - 1) && hdata == (HSIZE - 1)) nxtaddr <= 0;
+      else nxtaddr <= nxtaddr + 1;
+    end
   end
 
   // hsync & vsync & blank
