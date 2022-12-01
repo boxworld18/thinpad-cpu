@@ -66,7 +66,7 @@ module csr(
         end else begin
             case (sel)
                 CSR_INST_NOP: ;
-                CSRRW, CSRRWI: begin
+                CSRRW, CSRRWI, CSRRS, CSRRSI, CSRRC, CSRRCI: begin
                     case (waddr)
                         `CSR_MTVEC:     mtvec <= wdata;
                         `CSR_MEPC:      mepc <= wdata;
@@ -75,30 +75,6 @@ module csr(
                         `CSR_MSCRATCH:  mscratch <= wdata;
                         `CSR_MIE:       mie <= wdata;
                         `CSR_MIP:       mip <= wdata;  
-                        default: ;
-                    endcase
-                end
-                CSRRS, CSRRSI: begin
-                    case (waddr)
-                        `CSR_MTVEC:     mtvec <= mtvec | wdata;
-                        `CSR_MEPC:      mepc <= mepc | wdata;
-                        `CSR_MCAUSE:    mcause <= mcause | wdata;
-                        `CSR_MSTATUS:   mstatus <= mstatus | wdata;
-                        `CSR_MSCRATCH:  mscratch <= mscratch | wdata;
-                        `CSR_MIE:       mie <= mie | wdata;
-                        `CSR_MIP:       mip <= mip | wdata;  
-                        default: ;
-                    endcase
-                end
-                CSRRC, CSRRCI: begin
-                    case (waddr)
-                        `CSR_MTVEC:     mtvec <= mtvec & ~wdata;
-                        `CSR_MEPC:      mepc <= mepc & ~wdata;
-                        `CSR_MCAUSE:    mcause <= mcause & ~wdata;
-                        `CSR_MSTATUS:   mstatus <= mstatus & ~wdata;
-                        `CSR_MSCRATCH:  mscratch <= mscratch & ~wdata;
-                        `CSR_MIE:       mie <= mie & ~wdata;
-                        `CSR_MIP:       mip <= mip & ~wdata;  
                         default: ;
                     endcase
                 end

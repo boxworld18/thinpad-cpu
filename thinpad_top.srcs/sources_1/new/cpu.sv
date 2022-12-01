@@ -361,6 +361,16 @@ module cpu (
         .y(alu_data_o)
     );
 
+    logic [`CSR_DATA_BUS] ex_csr_wdata;
+    csr_alu u_csr_alu(
+        .sel(ex_csr_inst_sel),
+        .imm_sel(ex_csr_imm_sel),
+        .rs1_data(alu_rf_data_a),
+        .imm(ex_imm),
+        .csr_rdata(alu_csr_rdata),
+        .wdata(ex_csr_wdata)
+    );
+
     /* =========== EX end =========== */    
 
     logic [`ADDR_BUS] mem_pc;
@@ -390,7 +400,7 @@ module cpu (
         .ex_rf_sel(ex_rf_sel),
         .ex_csr_inst_sel(ex_csr_inst_sel),
         .ex_csr_waddr(ex_csr_waddr),
-        .ex_csr_wdata(ex_csr_imm_sel ? ex_imm : alu_rf_data_a),
+        .ex_csr_wdata(ex_csr_wdata),
 
         .mem_pc(mem_pc),
         .mem_data(mem_data),
