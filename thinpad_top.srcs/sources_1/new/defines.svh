@@ -97,6 +97,8 @@ typedef enum logic [1:0] {
 `define CSR_DATA_WIDTH 32 // CSR数据宽度
 `define CSR_ADDR_BUS `CSR_ADDR_WIDTH-1:0 // CSR地址线宽度 11:0
 `define CSR_DATA_BUS `CSR_DATA_WIDTH-1:0 // CSR数据线宽度 31:0
+
+// CSR M-MODE
 `define CSR_MTVEC 12'h305 // CSR mtvec地址
 `define CSR_MSCRATCH 12'h340 // CSR mscratch地址
 `define CSR_MEPC 12'h341 // CSR mepc地址
@@ -104,9 +106,23 @@ typedef enum logic [1:0] {
 `define CSR_MSTATUS 12'h300 // CSR mstatus地址
 `define CSR_MIE 12'h304 // CSR mie地址
 `define CSR_MIP 12'h344 // CSR mip地址
+`define CSR_MTVAL 12'h343 // CSR mtval地址
+`define CSR_MIDELEG 12'h303 // CSR mideleg地址
+`define CSR_MEDELEG 12'h302 // CSR medeleg地址
+`define CSR_MHARTID 12'hf14 // CSR mhartid地址
 
 `define CSR_RDTIME 12'hC01 // CSR rdtime地址
 `define CSR_RDTIMEH 12'hC81 // CSR rdtimeh地址
+
+// CSR S-MODE
+`define CSR_STVEC 12'h105 // CSR stvec地址
+`define CSR_SSCRATCH 12'h140 // CSR sscratch地址
+`define CSR_SEPC 12'h141 // CSR sepc地址
+`define CSR_SCAUSE 12'h142 // CSR scause地址
+`define CSR_SSTATUS 12'h100 // CSR sstatus地址
+`define CSR_SIE 12'h104 // CSR sie地址
+`define CSR_SIP 12'h144 // CSR sip地址
+`define CSR_STVAL 12'h143 // CSR stval地址
 
 `define CSR_ECALL 12'h000 // CSR ecall地址
 `define CSR_EBREAK 12'h001 // CSR ebreak地址
@@ -116,6 +132,7 @@ typedef enum logic [1:0] {
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
 `define CSR_TOTAL_DATA_BUS ((`CSR_NUM)*(`CSR_DATA_WIDTH))-1:0 // CSR总数据线宽度
 
+`define STATUS_SUM 18
 `define STATUS_MPP 12:11 
 `define STATUS_SPP 8
 `define STATUS_MPIE 7
@@ -144,6 +161,20 @@ typedef enum logic [1:0] {
 `define MIE_MSIE 3
 `define MIE_SSIE 1
 `define MIE_USIE 0
+
+`define SIP_SEIP 9
+`define SIP_UEIP 8
+`define SIP_STIP 5
+`define SIP_UTIP 4
+`define SIP_SSIP 1
+`define SIP_USIP 0
+
+`define SIE_SEIE 9
+`define SIE_UEIE 8
+`define SIE_STIE 5
+`define SIE_UTIE 4
+`define SIE_SSIE 1
+`define SIE_USIE 0
 
 // exception code
 `define CAUSE_ECALL 8

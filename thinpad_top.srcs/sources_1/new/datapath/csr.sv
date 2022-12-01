@@ -26,7 +26,7 @@ module csr(
     // mode
     logic [1:0] mode; // 0: user, 1: supervisor, 3: machine
 
-    // csr_data csr_regs;
+    // M-MODE
     logic [`CSR_DATA_BUS] mtvec;    // BASE(31:2) MODE(1:0)
     logic [`CSR_DATA_BUS] mepc;    
     logic [`CSR_DATA_BUS] mcause;   // Interrupt (31) Exception Code(30:0)
@@ -34,7 +34,21 @@ module csr(
     logic [`CSR_DATA_BUS] mscratch; 
     logic [`CSR_DATA_BUS] mie;      
     logic [`CSR_DATA_BUS] mip;
+    logic [`CSR_DATA_BUS] mtval;
+    logic [`CSR_DATA_BUS] mideleg; 
+    logic [`CSR_DATA_BUS] medeleg; 
+    logic [`CSR_DATA_BUS] mhartid; 
     logic [63:0] rdtime;
+
+    // S-MODE
+    logic [`CSR_DATA_BUS] stvec; 
+    logic [`CSR_DATA_BUS] sepc;    
+    logic [`CSR_DATA_BUS] scause;  
+    logic [`CSR_DATA_BUS] sstatus;  
+    logic [`CSR_DATA_BUS] sscratch; 
+    logic [`CSR_DATA_BUS] sie;      
+    logic [`CSR_DATA_BUS] sip;
+    logic [`CSR_DATA_BUS] stval;
 
     assign csr_mtvec = mtvec;
     assign time_interrupt_enable = (mie[`MIE_MTIE] && 
