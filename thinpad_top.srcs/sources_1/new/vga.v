@@ -26,7 +26,7 @@ module vga #(
     VSPP = 0,
     ADDR_WIDTH = 0
 ) (
-    input wire clk,
+    input wire clk, 
     output wire hsync,
     output wire vsync,
     output reg [WIDTH - 1:0] hdata,
@@ -51,7 +51,7 @@ module vga #(
 
   // nxtaddr
   always @(posedge clk) begin
-    if (vdata == (VMAX - 1) && hdata == (HMAX - 2)) nxtaddr <= 0;
+    if (vdata == (VMAX - 1) && hdata == (HMAX - 1)) nxtaddr <= 0;
     else nxtaddr <= nxtaddr + 1;
   end
 

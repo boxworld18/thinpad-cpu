@@ -37,6 +37,7 @@ module bram_controller #(
 
   assign bram_addr = wb_adr_i[BRAM_ADDR_WIDTH-1:0];
   assign bram_data = bram_data_o;
+  assign wb_dat_o = 32'h0;
 
   always_ff @(posedge clk_i) begin
     if (rst_i) begin
@@ -53,7 +54,13 @@ module bram_controller #(
           if (wb_stb_i && wb_cyc_i && !wb_ack_o) begin            
             if (wb_we_i) begin 
               state <= STATE_WRITE;
-              bram_data_o <= wb_dat_i[7:0];
+              case (wb_sel_i)
+                4'b0001: bram_data_o <= wb_dat_i[ 7: 0];
+                4'b0010: bram_data_o <= wb_dat_i[15: 8];
+                4'b0100: bram_data_o <= wb_dat_i[23:16];
+                4'b1000: bram_data_o <= wb_dat_i[31:24];
+                default: bram_data_o <= 8'h0;
+              endcase
             end else begin 
               state <= STATE_READ;              
             end

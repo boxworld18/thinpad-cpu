@@ -34,6 +34,9 @@ module cpu_mem_master(
     } state_t;
     state_t state;
 
+    logic [`DATA_BUS] wb_data_o_bias;
+    assign wb_data_o_bias = (addr[1:0] << 3);
+
     always_ff @(posedge clk) begin
         if (rst) begin
             state <= IDLE;
@@ -60,7 +63,7 @@ module cpu_mem_master(
                         wb_stb_o <= 1'b1;
                         wb_cyc_o <= 1'b1;
                         wb_adr_o <= addr;
-                        wb_dat_o <= data;
+                        wb_dat_o <= (data << wb_data_o_bias);
                         wb_sel_o <= (sel << addr[1:0]);
                         wb_we_o <= 1'b1;    
                         mem_master_stall <= 1'b1;
