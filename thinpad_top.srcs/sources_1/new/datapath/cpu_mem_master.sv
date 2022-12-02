@@ -29,7 +29,13 @@ module cpu_mem_master(
     output reg mem_master_stall,
 
     // time
-    output reg time_interrupt
+    output reg time_interrupt,
+
+    // page fault
+    output reg load_page_fault,
+    output reg [`ADDR_BUS] load_fault_va, 
+    output reg store_page_fault,
+    output reg [`ADDR_BUS] store_fault_va
 );
 
     typedef enum logic [1:0] {
@@ -52,62 +58,6 @@ module cpu_mem_master(
 
     logic [`DATA_BUS] data_shift;
     assign data_shift = addr[1:0] << 3;
-
-    always_comb begin
-        case (addr) // 目前只支持4字节访问
-            `MTIME_ADDR_LOW: begin
-                read_time_register = ren;
-                write_time_register = wen;
-                time_register_rdata = mtime[31:0];
-            end
-            `MTIME_ADDR_HIGH: begin
-                read_time_register = ren;
-                write_time_register = wen;
-                time_register_rdata = mtime[63:32];
-            end
-            `MTIMECMP_ADDR_LOW: begin
-                read_time_register = ren;
-                write_time_register = wen;
-                time_register_rdata = mtimecmp[31:0];
-            end
-            `MTIMECMP_ADDR_HIGH: begin
-                read_time_register = ren;
-                write_time_register = wen;
-                time_register_rdata = mtimecmp[63:32];
-            end
-            default: begin
-                read_time_register = 1'b0;
-                write_time_register = 1'b0;
-                time_register_rdata = 0;
-            end
-        endcase
-    end
-
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            mtime <= 0;
-            mtimecmp <= 32'h10000;
-        end else begin
-            mtime <= mtime + 1;
-            if (wen && state == IDLE) begin
-                case (addr) // 目前只支持4字节访问
-                    `MTIME_ADDR_LOW: begin
-                        mtime[31:0] <= data;
-                    end
-                    `MTIME_ADDR_HIGH: begin
-                        mtime[63:32] <= data;
-                    end
-                    `MTIMECMP_ADDR_LOW: begin
-                        mtimecmp[31:0] <= data;
-                    end
-                    `MTIMECMP_ADDR_HIGH: begin
-                        mtimecmp[63:32] <= data;
-                    end
-                    default: ;
-                endcase
-            end
-        end
-    end
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -193,6 +143,61 @@ module cpu_mem_master(
         end
     end
 
-    
+    always_comb begin
+        case (addr) // 目前只支持4字节访问
+            `MTIME_ADDR_LOW: begin
+                read_time_register = ren;
+                write_time_register = wen;
+                time_register_rdata = mtime[31:0];
+            end
+            `MTIME_ADDR_HIGH: begin
+                read_time_register = ren;
+                write_time_register = wen;
+                time_register_rdata = mtime[63:32];
+            end
+            `MTIMECMP_ADDR_LOW: begin
+                read_time_register = ren;
+                write_time_register = wen;
+                time_register_rdata = mtimecmp[31:0];
+            end
+            `MTIMECMP_ADDR_HIGH: begin
+                read_time_register = ren;
+                write_time_register = wen;
+                time_register_rdata = mtimecmp[63:32];
+            end
+            default: begin
+                read_time_register = 1'b0;
+                write_time_register = 1'b0;
+                time_register_rdata = 0;
+            end
+        endcase
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            mtime <= 0;
+            mtimecmp <= 32'hf0000000; // TODO: set a proper initial value
+        end else begin
+            // 禁用时钟中断, 减少调试内容
+            // mtime <= mtime + 1;  // TODO: use a timer to count
+            if (wen && state == IDLE) begin
+                case (addr) // 目前只支持4字节访问
+                    `MTIME_ADDR_LOW: begin
+                        mtime[31:0] <= data;
+                    end
+                    `MTIME_ADDR_HIGH: begin
+                        mtime[63:32] <= data;
+                    end
+                    `MTIMECMP_ADDR_LOW: begin
+                        mtimecmp[31:0] <= data;
+                    end
+                    `MTIMECMP_ADDR_HIGH: begin
+                        mtimecmp[63:32] <= data;
+                    end
+                    default: ;
+                endcase
+            end
+        end
+    end
 
 endmodule

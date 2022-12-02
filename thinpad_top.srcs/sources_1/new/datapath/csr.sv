@@ -116,6 +116,25 @@ module csr(
         sie[`MIE_MTIE] = 0;
     end
 
+    logic [30:0] cause_exception_code;
+    always_comb begin
+        case (sel)
+            ECALL: begin
+                case (mode) 
+                    M_MODE: cause_exception_code = `EXCEPTION_CODE_ECALL_M_MODE;
+                    S_MODE: cause_exception_code = `EXCEPTION_CODE_ECALL_S_MODE;
+                    U_MODE: cause_exception_code = `EXCEPTION_CODE_ECALL_U_MODE;
+                    default: cause_exception_code = `EXCEPTION_CODE_ECALL_M_MODE;
+                endcase
+            end
+            EBREAK: cause_exception_code = `EXCEPTION_CODE_BREAKPOINT;
+            INST_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_INST_PAGE_FAULT;
+            LOAD_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_LOAD_PAGE_FAULT;
+            STORE_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_STORE_AMO_PAGE_FAULT;
+            default: cause_exception_code = 31'h8fffffff;
+        endcase
+    end
+
     always_ff @ (posedge clk) begin
         if (rst) begin
             mtvec <= 0;
@@ -170,48 +189,67 @@ module csr(
                         default: ;
                     endcase
                 end
-                ECALL: begin
-                    mepc <= wb_pc;
-                    mcause <= `CAUSE_ECALL;
-                    mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                    mstatus[`MSTATUS_MIE] <= 0;
-                    mstatus[`MSTATUS_MPP] <= 0;
-                    mode <= M_MODE;
-                end
-                EBREAK: begin
-                    mepc <= wb_pc;
-                    mcause <= `CAUSE_EBREAK;
-                    mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                    mstatus[`MSTATUS_MIE] <= 0;
-                    mstatus[`MSTATUS_MPP] <= 0;
-                    mode <= M_MODE;
-                end
-                MRET: begin
-                    mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
-                    mstatus[`MSTATUS_MPP] <= 0;
-                    mstatus[`MSTATUS_MPIE] <= 1;
-                    mode <= U_MODE;
-                end
-                TIME_INTERRUPT: begin  // correct version: assign mip[`MIP_MTIP] = mtime >= mtimecmp
-                    if (mie[`MIE_MTIE]) begin
-                        if (mode == U_MODE) begin
-                            mepc <= wb_pc;
-                            mcause <= `CAUSE_TIME;
-                            mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                            mstatus[`MSTATUS_MIE] <= 0;
-                            mstatus[`MSTATUS_MPP] <= 0;
-                            mip[`MIP_MTIP] <= 1;
-                            mode <= M_MODE;
-                        end else if (mode == M_MODE && mstatus[`MSTATUS_MIE] == 1) begin
-                            mepc <= wb_pc;
-                            mcause <= `CAUSE_TIME;
-                            mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                            mstatus[`MSTATUS_MIE] <= 0;
-                            mstatus[`MSTATUS_MPP] <= M_MODE;
-                            mip[`MIP_MTIP] <= 1;
-                        end
+                ECALL, EBREAK, INST_PAGE_FAULT, LOAD_PAGE_FAULT, STORE_PAGE_FAULT: begin  
+                    if (medeleg[`EXCEPTION_CODE_ECALL_S_MODE] && (mode != M_MODE)) begin
+                        sepc <= wb_pc;
+                        scause[`CAUSE_INTERRUPT] <= `EXCEPTION;
+                        scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                        mstatus[`MSTATUS_SPP] <= mode;
+                        mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
+                        mstatus[`MSTATUS_SIE] <= 0;
+                        mode <= S_MODE;
+                    end else begin
+                        mepc <= wb_pc;
+                        mcause[`CAUSE_INTERRUPT] <= `EXCEPTION;
+                        mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                        mstatus[`MSTATUS_MPP] <= mode;
+                        mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                        mstatus[`MSTATUS_MIE] <= 0;
+                        mode <= M_MODE;
                     end
                 end
+                MRET: begin
+                    mode <= mstatus[`MSTATUS_MPP];
+                    mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
+                    mstatus[`MSTATUS_MPP] <= U_MODE;
+                    mstatus[`MSTATUS_MPIE] <= 1;
+                end
+                SRET: begin
+                    mode <= mstatus[`MSTATUS_SPP];
+                    mstatus[`MSTATUS_SIE] <= mstatus[`MSTATUS_SPIE];
+                    mstatus[`MSTATUS_SPP] <= U_MODE;
+                    mstatus[`MSTATUS_SPIE] <= 1;
+                end
+                // TODO: ! ! ! ! ! !
+                // 需要重写, 现在完全不对
+                // TIME_INTERRUPT: begin  // correct version: assign mip[`MIP_MTIP] = mtime >= mtimecmp
+                    
+                //     if (mie[`MIE_MTIE]) begin
+                //         if (mode == U_MODE) begin
+                //             mepc <= wb_pc;
+                //             mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                //              if (mode == M_MODE) begin
+                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_M_TIME_INTERRUPT;
+                //             end else if (mode == S_MODE) begin
+                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_S_TIME_INTERRUPT;
+                //             end else if (mode == U_MODE) begin
+                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_U_TIME_INTERRUPT;
+                //             end
+                //             mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                //             mstatus[`MSTATUS_MIE] <= 0;
+                //             mstatus[`MSTATUS_MPP] <= 0;
+                //             mip[`MIP_MTIP] <= 1;
+                //             mode <= M_MODE;
+                //         end else if (mode == M_MODE && mstatus[`MSTATUS_MIE] == 1) begin
+                //             mepc <= wb_pc;
+                //             mcause <= `EXCEPTION_CODE_M_TIME_INTERRUPT;
+                //             mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                //             mstatus[`MSTATUS_MIE] <= 0;
+                //             mstatus[`MSTATUS_MPP] <= M_MODE;
+                //             mip[`MIP_MTIP] <= 1;
+                //         end
+                //     end
+                // end
                 default: ;
             endcase
         end

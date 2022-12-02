@@ -25,7 +25,11 @@ module cpu_if_master(
     // cpu if
     output reg [`INST_BUS] inst,
     output reg [`ADDR_BUS] pc,
-    output reg if_master_stall
+    output reg if_master_stall,
+
+    // page fault
+    output reg inst_page_fault,
+    output reg [`ADDR_BUS] inst_fault_va
 );
 
     logic [`ADDR_BUS] pc_reg;

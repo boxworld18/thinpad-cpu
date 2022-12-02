@@ -127,9 +127,10 @@ typedef enum logic [1:0] {
 `define CSR_RDTIME 12'hC01 // CSR rdtime地址
 `define CSR_RDTIMEH 12'hC81 // CSR rdtimeh地址
 
-`define CSR_ECALL 12'h000 // CSR ecall地址
-`define CSR_EBREAK 12'h001 // CSR ebreak地址
-`define CSR_MRET 12'h302 // CSR mret地址
+`define CSR_ECALL 12'h000 // CSR ecall
+`define CSR_EBREAK 12'h001 // CSR ebreak
+`define CSR_MRET 12'h302 // CSR mret
+`define CSR_SRET 12'h102 // CSR sret
 
 `define CSR_NUM 7 // CSR数量
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
@@ -143,8 +144,14 @@ typedef enum logic [1:0] {
 `define CAUSE_INTERRUPT 31 // m/s cause interrupt位宽度
 `define CAUSE_EXCEPTION_CODE 30:0 // m/s cause exception code位宽度
 
+`define INTERRUPT 1'b1
+`define EXCEPTION 1'b0
+
+`define EXCEPTION_CODE_U_TIME_INTERRUPT 4 
 `define EXCEPTION_CODE_S_TIME_INTERRUPT 5 
 `define EXCEPTION_CODE_M_TIME_INTERRUPT 7  
+`define EXCEPTION_CODE_BREAKPOINT 3
+`define EXCEPTION_CODE_ECALL_U_MODE 8
 `define EXCEPTION_CODE_ECALL_S_MODE 9
 `define EXCEPTION_CODE_ECALL_M_MODE 11
 `define EXCEPTION_CODE_INST_PAGE_FAULT 12
@@ -205,38 +212,11 @@ typedef enum logic [1:0] {
 // `define SIE_USIE 0
 `define SIE_MASK 32'h00000333
 
-// exception code
-`define CAUSE_ECALL 8
-`define CAUSE_EBREAK 3
-`define CAUSE_TIME 32'h80000007
-
 // time interrupt
 `define MTIME_ADDR_LOW 32'h200BFF8
 `define MTIME_ADDR_HIGH 32'h200BFFC
 `define MTIMECMP_ADDR_LOW 32'h2004000
 `define MTIMECMP_ADDR_HIGH 32'h2004004 
-
-typedef struct packed
-{
-    logic mtvec;
-    logic mepc;  
-    logic mcause;
-    logic mstatus;
-    logic mscratch; 
-    logic mie;
-    logic mip;
-} csr_en;
-
-typedef struct packed
-{
-    logic [`CSR_DATA_BUS] mtvec;        // BASE(31:2) MODE(1:0)
-    logic [`CSR_DATA_BUS] mepc;
-    logic [`CSR_DATA_BUS] mcause;       // Interrupt (31) Exception Code(30:0)
-    logic [`CSR_DATA_BUS] mstatus;      // MPP(12:11) SPP(8) MPIE(7) SPIE(5) UPIE(4) MIE(3) SIE(1) UIE(0)
-    logic [`CSR_DATA_BUS] mscratch;
-    logic [`CSR_DATA_BUS] mie;
-    logic [`CSR_DATA_BUS] mip;
-} csr_data;
 
 `define CSR_SEL_WIDTH 4 // CSR选择信号宽度
 typedef enum logic [3:0] {
@@ -250,7 +230,11 @@ typedef enum logic [3:0] {
     ECALL = 7,
     EBREAK = 8,
     MRET = 9,
-    TIME_INTERRUPT = 10
+    SRET = 10,
+    TIME_INTERRUPT = 11,
+    INST_PAGE_FAULT = 12,
+    LOAD_PAGE_FAULT = 13,
+    STORE_PAGE_FAULT = 14
 } csr_inst_t;
 
 typedef enum logic [1:0] {

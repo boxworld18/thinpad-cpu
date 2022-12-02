@@ -41,6 +41,12 @@ module cpu (
     // mode
     logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
 
+    // page fault
+    logic inst_page_fault, load_page_fault, store_page_fault;
+    logic [`ADDR_BUS] inst_fault_va;
+    logic [`ADDR_BUS] load_fault_va;
+    logic [`ADDR_BUS] store_fault_va;
+
     // stall -> used by if_master and mem_master
 
     logic if_master_stall, mem_master_stall; 
@@ -87,7 +93,10 @@ module cpu (
 
         .pc(if_pc),
         .inst(if_inst),
-        .if_master_stall(if_master_stall)
+        .if_master_stall(if_master_stall),
+
+        .inst_page_fault(inst_page_fault),
+        .inst_fault_va(inst_fault_va)
     );
 
     /* =========== IF end =========== */    
@@ -439,7 +448,12 @@ module cpu (
 
         .mem_read_data(mem_read_data),
         .mem_master_stall(mem_master_stall),
-        .time_interrupt(time_interrupt)
+        .time_interrupt(time_interrupt),
+
+        .load_page_fault(load_page_fault),
+        .load_fault_va(load_fault_va),
+        .store_page_fault(store_page_fault),
+        .store_fault_va(store_fault_va)
     );
 
     /* =========== MEM end =========== */

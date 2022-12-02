@@ -172,6 +172,7 @@ module control(
                         `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end   // 跳转时取[31:2]
                         `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end // 跳转时取[31:2]
                         `CSR_MRET: begin id_csr_inst_sel = MRET; id_csr_raddr = `CSR_MEPC; end
+                        `CSR_SRET: begin id_csr_inst_sel = SRET; id_csr_raddr = `CSR_SEPC; end
                         default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end
                     endcase
                     id_csr_imm_sel = 1'b0;

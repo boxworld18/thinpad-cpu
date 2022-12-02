@@ -44,8 +44,10 @@ module csr_alu(
                 mcause_valid = 1'b1;
                 scause_valid = 1'b0;
             end
-            `EXCEPTION_CODE_ECALL_S_MODE,
+            `EXCEPTION_CODE_U_TIME_INTERRUPT,
             `EXCEPTION_CODE_S_TIME_INTERRUPT,
+            `EXCEPTION_CODE_ECALL_U_MODE,
+            `EXCEPTION_CODE_ECALL_S_MODE,
             `EXCEPTION_CODE_INST_PAGE_FAULT,
             `EXCEPTION_CODE_LOAD_PAGE_FAULT,
             `EXCEPTION_CODE_STORE_AMO_PAGE_FAULT: begin
@@ -125,11 +127,21 @@ module csr_alu(
                     wdata = tmp;
                 end
             end
-            `CSR_MIDELEG: begin           //
-
+            `CSR_MIDELEG: begin           // s-mode only support: u-time-interrupt, s-time-interrupt 
+                if (m_en) begin
+                    wdata[`EXCEPTION_CODE_U_TIME_INTERRUPT] = tmp[`EXCEPTION_CODE_U_TIME_INTERRUPT];
+                    wdata[`EXCEPTION_CODE_S_TIME_INTERRUPT] = tmp[`EXCEPTION_CODE_S_TIME_INTERRUPT];
+                end
             end
-            `CSR_MEDELEG: begin           //
-
+            `CSR_MEDELEG: begin           // s-mode only support: ebreak, ecall-u-mode, ecall-s-mode, inst-page-fault, load-page-fault, store-amo-page-fault
+                if (m_en) begin
+                    wdata[`EXCEPTION_CODE_BREAKPOINT] = tmp[`EXCEPTION_CODE_BREAKPOINT];
+                    wdata[`EXCEPTION_CODE_ECALL_U_MODE] = tmp[`EXCEPTION_CODE_ECALL_U_MODE];
+                    wdata[`EXCEPTION_CODE_ECALL_S_MODE] = tmp[`EXCEPTION_CODE_ECALL_S_MODE];
+                    wdata[`EXCEPTION_CODE_INST_PAGE_FAULT] = tmp[`EXCEPTION_CODE_INST_PAGE_FAULT];
+                    wdata[`EXCEPTION_CODE_LOAD_PAGE_FAULT] = tmp[`EXCEPTION_CODE_LOAD_PAGE_FAULT];
+                    wdata[`EXCEPTION_CODE_STORE_AMO_PAGE_FAULT] = tmp[`EXCEPTION_CODE_STORE_AMO_PAGE_FAULT];
+                end
             end
             `CSR_RDTIME:  ;               // read only
             `CSR_RDTIMEH: ;               // read only

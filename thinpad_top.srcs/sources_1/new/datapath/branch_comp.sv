@@ -17,7 +17,7 @@ module branch_comp(
 );
 
     logic csr_branch;
-    assign csr_branch = ((csr_inst_sel == ECALL) || (csr_inst_sel == EBREAK) || (csr_inst_sel == MRET) || (csr_inst_sel == TIME_INTERRUPT));
+    assign csr_branch = ((csr_inst_sel == ECALL) || (csr_inst_sel == EBREAK) || (csr_inst_sel == MRET) || (csr_inst_sel == SRET) || (csr_inst_sel == TIME_INTERRUPT));
     assign pc_branch = (inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (csr_branch ? {csr_rdata[`TVEC_BASE], 2'b00} : pc + imm);
 
     always_comb begin
