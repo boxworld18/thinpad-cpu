@@ -5,6 +5,7 @@
 module control(
     input wire [`ADDR_BUS] pc,
     input wire [`INST_BUS] inst,
+    input wire [1:0] mode,
 
     // regfile
     output reg id_rf_wen,

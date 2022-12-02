@@ -209,16 +209,20 @@ module csr(
                     end
                 end
                 MRET: begin
-                    mode <= mstatus[`MSTATUS_MPP];
-                    mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
-                    mstatus[`MSTATUS_MPP] <= U_MODE;
-                    mstatus[`MSTATUS_MPIE] <= 1;
+                    if (mode == M_MODE) begin
+                        mode <= mstatus[`MSTATUS_MPP];
+                        mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
+                        mstatus[`MSTATUS_MPP] <= U_MODE;
+                        mstatus[`MSTATUS_MPIE] <= 1;
+                    end
                 end
                 SRET: begin
-                    mode <= mstatus[`MSTATUS_SPP];
-                    mstatus[`MSTATUS_SIE] <= mstatus[`MSTATUS_SPIE];
-                    mstatus[`MSTATUS_SPP] <= U_MODE;
-                    mstatus[`MSTATUS_SPIE] <= 1;
+                    if (mode == M_MODE || mode == S_MODE) begin
+                        mode <= mstatus[`MSTATUS_SPP];
+                        mstatus[`MSTATUS_SIE] <= mstatus[`MSTATUS_SPIE];
+                        mstatus[`MSTATUS_SPP] <= U_MODE;
+                        mstatus[`MSTATUS_SPIE] <= 1;
+                    end
                 end
                 // TODO: ! ! ! ! ! !
                 // 需要重写, 现在完全不对

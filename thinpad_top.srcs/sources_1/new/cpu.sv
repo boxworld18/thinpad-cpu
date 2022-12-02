@@ -156,6 +156,7 @@ module cpu (
     control u_control(
         .pc(id_pc),
         .inst(id_inst),
+        .mode(mode),
 
         .id_rf_wen(id_rf_wen),
         .id_rf_sel(id_rf_sel),
