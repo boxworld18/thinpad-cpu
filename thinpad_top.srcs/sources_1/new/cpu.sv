@@ -38,6 +38,9 @@ module cpu (
     logic time_interrupt_happen;
     assign time_interrupt_happen = time_interrupt & time_interrupt_enable;
 
+    // mode
+    logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
+
     // stall -> used by if_master and mem_master
 
     logic if_master_stall, mem_master_stall; 
@@ -121,18 +124,7 @@ module cpu (
     logic [`REG_ADDR_BUS] mem_rf_waddr;
     logic wb_rf_wen;
     logic [`REG_ADDR_BUS] wb_rf_waddr;
-    hazard_detection_unit u_hazard_detection_unit(
-        .id_inst(id_inst),
-        .ex_wb_ren(ex_wb_ren),
-        .ex_rf_wen(ex_rf_wen),
-        .ex_rf_waddr(ex_rf_waddr),
-        .branch(branch),
-
-        .if_id_flush(if_id_flush),
-        .id_ex_flush(id_ex_flush),
-        .if_id_hold(if_id_hold),
-        .id_ex_hold(id_ex_hold)
-    );
+    
 
     // regfile
     logic id_rf_wen;
@@ -210,7 +202,8 @@ module cpu (
         .wdata(wb_csr_wdata),
 
         .csr_mtvec(csr_mtvec),
-        .time_interrupt_enable(time_interrupt_enable)
+        .time_interrupt_enable(time_interrupt_enable),
+        .mode_o(mode)
     );
 
     /* =========== ID end =========== */
@@ -367,7 +360,10 @@ module cpu (
         .imm_sel(ex_csr_imm_sel),
         .rs1_data(alu_rf_data_a),
         .imm(ex_imm),
-        .csr_rdata(alu_csr_rdata),
+
+        .mode(mode),
+        .rdata(alu_csr_rdata),
+        .waddr(ex_csr_waddr),
         .wdata(ex_csr_wdata)
     );
 
@@ -504,5 +500,23 @@ module cpu (
     );
 
     /* =========== Forward Unit end =========== */ 
+
+    hazard_detection_unit u_hazard_detection_unit(
+        .id_inst(id_inst),
+        .ex_wb_ren(ex_wb_ren),
+        .ex_rf_wen(ex_rf_wen),
+        .ex_rf_waddr(ex_rf_waddr),
+        .branch(branch),
+
+        .id_csr_inst_sel(id_csr_inst_sel),
+        .ex_csr_inst_sel(ex_csr_inst_sel),
+        .mem_csr_inst_sel(mem_csr_inst_sel),
+        .wb_csr_inst_sel(wb_csr_inst_sel),
+
+        .if_id_flush(if_id_flush),
+        .id_ex_flush(id_ex_flush),
+        .if_id_hold(if_id_hold),
+        .id_ex_hold(id_ex_hold)
+    );
 
 endmodule

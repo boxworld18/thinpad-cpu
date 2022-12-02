@@ -111,9 +111,6 @@ typedef enum logic [1:0] {
 `define CSR_MEDELEG 12'h302 // CSR medeleg地址
 `define CSR_MHARTID 12'hf14 // CSR mhartid地址
 
-`define CSR_RDTIME 12'hC01 // CSR rdtime地址
-`define CSR_RDTIMEH 12'hC81 // CSR rdtimeh地址
-
 // CSR S-MODE
 `define CSR_STVEC 12'h105 // CSR stvec地址
 `define CSR_SSCRATCH 12'h140 // CSR sscratch地址
@@ -124,6 +121,12 @@ typedef enum logic [1:0] {
 `define CSR_SIP 12'h144 // CSR sip地址
 `define CSR_STVAL 12'h143 // CSR stval地址
 
+`define CSR_PMPCFG0 12'h3a0 // CSR pmpcfg0地址
+`define CSR_PMPADDR0 12'h3b0 // CSR pmpaddr0地址
+
+`define CSR_RDTIME 12'hC01 // CSR rdtime地址
+`define CSR_RDTIMEH 12'hC81 // CSR rdtimeh地址
+
 `define CSR_ECALL 12'h000 // CSR ecall地址
 `define CSR_EBREAK 12'h001 // CSR ebreak地址
 `define CSR_MRET 12'h302 // CSR mret地址
@@ -132,49 +135,75 @@ typedef enum logic [1:0] {
 `define CSR_SEL_BUS `CSR_NUM-1:0 // CSR选择信号宽度
 `define CSR_TOTAL_DATA_BUS ((`CSR_NUM)*(`CSR_DATA_WIDTH))-1:0 // CSR总数据线宽度
 
-`define STATUS_SUM 18
-`define STATUS_MPP 12:11 
-`define STATUS_SPP 8
-`define STATUS_MPIE 7
-`define STATUS_SPIE 5
-`define STATUS_UPIE 4
-`define STATUS_MIE 3
-`define STATUS_SIE 1
-`define STATUS_UIE 0
+`define MHARTID_HARTID 31:0 // mhartid hartid位宽度
 
-`define MIP_MEIP 11
-`define MIP_SEIP 9
-`define MIP_UEIP 8
+`define TVEC_BASE 31:2 // m/s tvec base位宽度
+`define TVEC_MODE 1:0 // m/s tvec mode位宽度
+
+`define CAUSE_INTERRUPT 31 // m/s cause interrupt位宽度
+`define CAUSE_EXCEPTION_CODE 30:0 // m/s cause exception code位宽度
+
+`define EXCEPTION_CODE_S_TIME_INTERRUPT 5 
+`define EXCEPTION_CODE_M_TIME_INTERRUPT 7  
+`define EXCEPTION_CODE_ECALL_S_MODE 9
+`define EXCEPTION_CODE_ECALL_M_MODE 11
+`define EXCEPTION_CODE_INST_PAGE_FAULT 12
+`define EXCEPTION_CODE_LOAD_PAGE_FAULT 13
+`define EXCEPTION_CODE_STORE_AMO_PAGE_FAULT 15
+
+`define MSTATUS_SUM 18
+`define MSTATUS_MPP 12:11 
+`define MSTATUS_SPP 8
+`define MSTATUS_MPIE 7
+`define MSTATUS_SPIE 5
+// `define MSTATUS_UPIE 4
+`define MSTATUS_MIE 3
+`define MSTATUS_SIE 1
+// `define MSTATUS_UIE 0
+
+`define SSTATUS_SUM 18
+`define SSTATUS_SPP 8
+`define SSTATUS_SPIE 5
+// `define SSTATUS_UPIE 4
+`define SSTATUS_SIE 1
+// `define SSTATUS_UIE 0
+`define SSTATUS_MASK 32'h00040133
+
+// `define MIP_MEIP 11
+// `define MIP_SEIP 9
+// `define MIP_UEIP 8
 `define MIP_MTIP 7
 `define MIP_STIP 5
-`define MIP_UTIP 4
-`define MIP_MSIP 3
-`define MIP_SSIP 1
-`define MIP_USIP 0
+// `define MIP_UTIP 4
+// `define MIP_MSIP 3
+// `define MIP_SSIP 1
+// `define MIP_USIP 0
 
-`define MIE_MEIE 11
-`define MIE_SEIE 9
-`define MIE_UEIE 8
+// `define MIE_MEIE 11
+// `define MIE_SEIE 9
+// `define MIE_UEIE 8
 `define MIE_MTIE 7
 `define MIE_STIE 5
-`define MIE_UTIE 4
-`define MIE_MSIE 3
-`define MIE_SSIE 1
-`define MIE_USIE 0
+// `define MIE_UTIE 4
+// `define MIE_MSIE 3
+// `define MIE_SSIE 1
+// `define MIE_USIE 0
 
-`define SIP_SEIP 9
-`define SIP_UEIP 8
+// `define SIP_SEIP 9
+// `define SIP_UEIP 8
 `define SIP_STIP 5
-`define SIP_UTIP 4
-`define SIP_SSIP 1
-`define SIP_USIP 0
+// `define SIP_UTIP 4
+// `define SIP_SSIP 1
+// `define SIP_USIP 0
+`define SIP_MASK 32'h00000333 
 
-`define SIE_SEIE 9
-`define SIE_UEIE 8
+// `define SIE_SEIE 9
+// `define SIE_UEIE 8
 `define SIE_STIE 5
-`define SIE_UTIE 4
-`define SIE_SSIE 1
-`define SIE_USIE 0
+// `define SIE_UTIE 4
+// `define SIE_SSIE 1
+// `define SIE_USIE 0
+`define SIE_MASK 32'h00000333
 
 // exception code
 `define CAUSE_ECALL 8
@@ -225,9 +254,15 @@ typedef enum logic [3:0] {
 } csr_inst_t;
 
 typedef enum logic [1:0] {
-    U_MODE = 0,
-    S_MODE = 1,
-    M_MODE = 3
+    U_MODE = 2'b00,
+    S_MODE = 2'b01,
+    M_MODE = 2'b11
 } mode_t;
+
+typedef enum  logic [1:0] {
+    MODE_DIRECT = 2'b00,
+    MODE_VECTORED = 2'b01,
+    MODE_RESERVED = 2'b10
+} tvec_mode_t;
 
 `endif

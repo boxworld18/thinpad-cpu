@@ -12,10 +12,10 @@ module hazard_detection_unit(
     input wire branch,
 
     // 有ECALL EBREAK MRET, 直接给if_id插气泡
-    input wire id_csr_inst_sel,
-    input wire ex_csr_inst_sel,
-    input wire mem_csr_inst_sel,
-    input wire wb_csr_inst_sel, 
+    input wire [`CSR_SEL_WIDTH-1:0] id_csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] ex_csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel,
+    input wire [`CSR_SEL_WIDTH-1:0] wb_csr_inst_sel, 
 
     output reg if_id_flush,
     output reg id_ex_flush,
@@ -30,6 +30,10 @@ module hazard_detection_unit(
     logic load_hazard;
     assign load_hazard = ex_wb_ren & ex_hazard;
 
+    // id遇到CSR指令, 首先让后面全部bubble, 然后再执行CSR指令
+    logic priv_hazard;
+    assign priv_hazard = (id_csr_inst_sel && (ex_csr_inst_sel != 0 || mem_csr_inst_sel != 0 || wb_csr_inst_sel));
+
     logic id_csr_branch, ex_csr_branch, mem_csr_branch, wb_csr_branch, csr_branch; 
     assign id_csr_branch = ((id_csr_inst_sel == ECALL) || (id_csr_inst_sel == EBREAK) || (id_csr_inst_sel == MRET) || (id_csr_inst_sel == TIME_INTERRUPT));
     assign ex_csr_branch = ((ex_csr_inst_sel == ECALL) || (ex_csr_inst_sel == EBREAK) || (ex_csr_inst_sel == MRET) || (ex_csr_inst_sel == TIME_INTERRUPT));
@@ -38,20 +42,29 @@ module hazard_detection_unit(
     assign csr_branch = id_csr_branch | ex_csr_branch | mem_csr_branch | wb_csr_branch;
     
     always_comb begin
-        if (csr_branch) begin
-            if_id_flush = `ENABLE;
-            id_ex_flush = `ENABLE;
-            if_id_hold = `ENABLE;
+        if (priv_hazard) begin
+            if_id_flush = `DISABLE;
+            if_id_hold = `ENABLE;  // hold if master and if-id
+
+            id_ex_flush = `ENABLE; // flush id-ex
             id_ex_hold = `DISABLE;
         end else if (branch) begin
-            if_id_flush = `ENABLE;
-            id_ex_flush = `ENABLE;
-            if_id_hold = `DISABLE;
+            if_id_flush = `ENABLE; // flush if-id
+            if_id_hold = `ENABLE;  // hold if master
+
+            id_ex_flush = `ENABLE; // flush id-ex
+            id_ex_hold = `DISABLE;
+        end else if (csr_branch) begin
+            if_id_flush = `ENABLE; // flush if-id
+            if_id_hold = `ENABLE;  // hold if master
+
+            id_ex_flush = `DISABLE;
             id_ex_hold = `DISABLE;
         end else if (load_hazard) begin
             if_id_flush = `DISABLE;
-            id_ex_flush = `ENABLE;
-            if_id_hold = `ENABLE;
+            if_id_hold = `ENABLE; // hold if master and if-id
+
+            id_ex_flush = `ENABLE; // flush id-ex
             id_ex_hold = `DISABLE;
         end else begin
             if_id_flush = `DISABLE;
