@@ -203,6 +203,9 @@ module csr(
         endcase
     end
 
+    logic [`CSR_DATA_BUS] mip_tmp;
+    assign mip_tmp = ((wdata & `SIP_MASK) | (mip & ~`SIP_MASK));
+
     always_ff @ (posedge clk) begin
         if (rst) begin
             mtvec <= 0;
@@ -255,8 +258,8 @@ module csr(
                         `CSR_SSCRATCH:  sscratch <= wdata;
                         `CSR_SIE:       mie <= (wdata & `SIE_MASK) | (mie & ~`SIE_MASK); // sie is set by comb
                         `CSR_SIP:       begin 
-                                            mip[31:`MIP_MTIP+1] <= {((wdata & `SIP_MASK) | (mip & ~`SIP_MASK))}[31:`MIP_MTIP+1]; // sip is set by comb
-                                            mip[`MIP_MTIP-1:0] <= {((wdata & `SIP_MASK) | (mip & ~`SIP_MASK))}[`MIP_MTIP-1:0];
+                                            mip[31:`MIP_MTIP+1] <= mip_tmp[31:`MIP_MTIP+1]; // sip is set by comb
+                                            mip[`MIP_MTIP-1:0] <= mip_tmp[`MIP_MTIP-1:0];
                                         end
                         `CSR_STVAL:     stval <= wdata;
                         `CSR_SATP:      satp <= wdata;
