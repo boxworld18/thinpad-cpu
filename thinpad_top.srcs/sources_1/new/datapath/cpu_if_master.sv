@@ -29,7 +29,7 @@ module cpu_if_master(
 
     // page fault
     output reg inst_page_fault,
-    output reg [`ADDR_BUS] inst_fault_va
+    output reg [`ADDR_BUS] inst_fault_va,
 
     // paging related
     input wire [`DATA_BUS] satp,
@@ -124,7 +124,7 @@ module cpu_if_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= L1_pte[`PTE_PPN0]<<`PAGE_SIZE + pc_reg[`VA_VPN0]<<PTE_SIZE;
+                        wb_adr_o <= L1_pte[`PTE_PPN0]<<`PAGE_SIZE + pc_reg[`VA_VPN0]<<`PTE_SIZE;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;

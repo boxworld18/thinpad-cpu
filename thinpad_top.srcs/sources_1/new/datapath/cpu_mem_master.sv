@@ -36,7 +36,7 @@ module cpu_mem_master(
     output reg load_page_fault,
     output reg [`ADDR_BUS] load_fault_va, 
     output reg store_page_fault,
-    output reg [`ADDR_BUS] store_fault_va
+    output reg [`ADDR_BUS] store_fault_va,
 
     // paging related
     input wire [`DATA_BUS] satp,
@@ -62,17 +62,17 @@ module cpu_mem_master(
     assign mtime_o = mtime;
     assign mtimecmp_o = mtimecmp;
 
-    logic read_time_register;  // 是否读取mtime、mtimecmp寄存器
+    logic read_time_register;  // 是否读取mtime、mtimecmp寄存�?
     logic [`DATA_BUS] time_register_rdata;
-    logic write_time_register; // 是否写入mtime、mtimecmp寄存器
-    // logic [`SEL] time_sel; // mtime、mtimecmp寄存器的选择信号 (4位) 
+    logic write_time_register; // 是否写入mtime、mtimecmp寄存�?
+    // logic [`SEL] time_sel; // mtime、mtimecmp寄存器的选择信号 (4�?) 
 
     logic [`DATA_BUS] data_shift;
     assign data_shift = addr[1:0] << 3;
 
     logic is_read;
-    logic [`ADDR_BUS] L1_PTE;
-    logic [`ADDR_BUS] L2_PTE;
+    logic [`ADDR_BUS] L1_pte;
+    logic [`ADDR_BUS] L2_pte;
     logic [`ADDR_BUS] VA;
 
     logic L1_invalid;
@@ -99,8 +99,8 @@ module cpu_mem_master(
             store_page_fault <= 1'b0;
             store_fault_va <= 0;
             is_read <= 1'b0;
-            L1_PTE <= 0;
-            L2_PTE <= 0;
+            L1_pte <= 0;
+            L2_pte <= 0;
         end else begin
             case (state)
                IDLE: begin     
@@ -175,7 +175,7 @@ module cpu_mem_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= satp[`SATP_PPN]<<`PAGE_SIZE + VA[`VA_VPN1]<<PTE_SIZE;
+                        wb_adr_o <= satp[`SATP_PPN]<<`PAGE_SIZE + VA[`VA_VPN1]<<`PTE_SIZE;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         mem_master_stall <= 1'b1;
@@ -200,7 +200,7 @@ module cpu_mem_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= L1_pte[`PTE_PPN]<<`PAGE_SIZE + VA[`VA_VPN2]<<PTE_SIZE;
+                        wb_adr_o <= L1_pte[`PTE_PPN0]<<`PAGE_SIZE + VA[`VA_VPN0]<<`PTE_SIZE;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         mem_master_stall <= 1'b1;
@@ -228,7 +228,7 @@ module cpu_mem_master(
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
                             wb_cyc_o <= 1'b1;
-                            wb_adr_o <={L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};;
+                            wb_adr_o <={L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};
                             wb_sel_o <= (sel << VA[1:0]);
                             wb_we_o <= 1'b0;
                             mem_master_stall <= 1'b1;
@@ -236,7 +236,7 @@ module cpu_mem_master(
                             state <= WRITE_DATA_ACTION;
                             wb_stb_o <= 1'b1;
                             wb_cyc_o <= 1'b1;
-                            wb_adr_o <= L2_pte[`PTE_PPN]<<`PAGE_SIZE + VA[`VA_VPN3]<<2;
+                            wb_adr_o <= {L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};
                             wb_dat_o <= data << data_shift;
                             wb_sel_o <= (sel << VA[1:0]);
                             wb_we_o <= 1'b1;    
@@ -281,7 +281,7 @@ module cpu_mem_master(
     end
 
     always_comb begin
-        case (addr) // 目前只支持4字节访问
+        case (addr) // 目前只支�?4字节访问
             `MTIME_ADDR_LOW: begin
                 read_time_register = ren;
                 write_time_register = wen;
@@ -318,7 +318,7 @@ module cpu_mem_master(
             // 禁用时钟中断, 减少调试内容
             // mtime <= mtime + 1;  // TODO: use a timer to count
             if (wen && state == IDLE) begin
-                case (addr) // 目前只支持4字节访问
+                case (addr) // 目前只支�?4字节访问
                     `MTIME_ADDR_LOW: begin
                         mtime[31:0] <= data;
                     end
