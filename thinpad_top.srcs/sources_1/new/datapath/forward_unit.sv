@@ -32,8 +32,9 @@ module forward_unit(
     assign alu_sel_a = mem_forward_a ? ALU_SEL_MEM : (wb_forward_a ? ALU_SEL_WB : ALU_SEL_EX);
     assign alu_sel_b = mem_forward_b ? ALU_SEL_MEM : (wb_forward_b ? ALU_SEL_WB : ALU_SEL_EX);
 
-    // 此处已经废弃, 没有处理 M态和S态 个别CSR寄存器的映射问题
-    // 只要id阶段读到priv指令, 直接插气泡, 因此该前传将不生效
+    // 没有正确处理 m/sstatus m/sip m/sie
+    // 目前, id阶段读到priv指令, 直接插气泡
+    // 但是如果在id_ex插入interrupt, 而id阶段不是priv指令, 则需要前传mtvec/stvec, 此处可以正确支持
     logic mem_forward_csr, wb_forward_csr;
     assign mem_forward_csr = (mem_csr_waddr == ex_csr_raddr);
     assign wb_forward_csr = (wb_csr_waddr == ex_csr_raddr);

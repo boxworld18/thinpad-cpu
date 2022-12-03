@@ -33,10 +33,9 @@ module cpu (
     output reg wbm1_we_o
 );
     // interrupt
-    logic time_interrupt;
-    logic time_interrupt_enable;
-    logic time_interrupt_happen;
-    assign time_interrupt_happen = time_interrupt & time_interrupt_enable;
+    logic m_time_interrupt, s_time_interrupt;
+    logic [63:0] mtime;
+    logic [63:0] mtimecmp;
 
     // mode
     logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
@@ -133,7 +132,6 @@ module cpu (
     logic [`REG_ADDR_BUS] mem_rf_waddr;
     logic wb_rf_wen;
     logic [`REG_ADDR_BUS] wb_rf_waddr;
-    
 
     // regfile
     logic id_rf_wen;
@@ -175,7 +173,7 @@ module cpu (
         .id_csr_raddr(id_csr_raddr),
         .id_csr_imm_sel(id_csr_imm_sel)
     );
-
+    
     logic [`REG_DATA_BUS] id_rf_data_a;
     logic [`REG_DATA_BUS] id_rf_data_b;
     logic [`REG_DATA_BUS] wb_rf_wdata; 
@@ -198,22 +196,28 @@ module cpu (
     logic [`CSR_ADDR_BUS] wb_csr_waddr;
     logic [`CSR_DATA_BUS] wb_csr_wdata;
     logic [`CSR_DATA_BUS] csr_mtvec;
+    logic [`CSR_DATA_BUS] csr_stvec;
 
     csr u_csr(
         .clk(clk_i),
         .rst(rst_i),
+        .mtime(mtime),
+        .mtimecmp(mtimecmp),
+        .sel(wb_csr_inst_sel),
 
         .raddr(id_csr_raddr),
         .rdata(id_csr_rdata),
 
-        .wb_pc(wb_pc),
-        .sel(wb_csr_inst_sel),
         .waddr(wb_csr_waddr),
         .wdata(wb_csr_wdata),
 
+        .wb_pc(wb_pc),
+
         .csr_mtvec(csr_mtvec),
-        .time_interrupt_enable(time_interrupt_enable),
-        .mode_o(mode)
+        .csr_stvec(csr_stvec),
+        .mode_o(mode),
+        .m_time_interrupt(m_time_interrupt),
+        .s_time_interrupt(s_time_interrupt)
     );
 
     /* =========== ID end =========== */
@@ -270,8 +274,10 @@ module cpu (
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
 
-        .time_interrupt(time_interrupt_happen),
+        .m_time_interrupt(m_time_interrupt),
+        .s_time_interrupt(s_time_interrupt),
         .mtvec(csr_mtvec),
+        .stvec(csr_stvec),
 
         .ex_pc(ex_pc),
         .ex_inst(ex_inst),
@@ -449,7 +455,9 @@ module cpu (
 
         .mem_read_data(mem_read_data),
         .mem_master_stall(mem_master_stall),
-        .time_interrupt(time_interrupt),
+
+        .mtime_o(mtime),
+        .mtimecmp_o(mtimecmp),
 
         .load_page_fault(load_page_fault),
         .load_fault_va(load_fault_va),

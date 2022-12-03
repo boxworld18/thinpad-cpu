@@ -17,8 +17,20 @@ module branch_comp(
 );
 
     logic csr_branch;
-    assign csr_branch = ((csr_inst_sel == ECALL) || (csr_inst_sel == EBREAK) || (csr_inst_sel == MRET) || (csr_inst_sel == SRET) || (csr_inst_sel == TIME_INTERRUPT));
-    assign pc_branch = (inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (csr_branch ? {csr_rdata[`TVEC_BASE], 2'b00} : pc + imm);
+    logic [`ADDR_BUS] csr_pc_branch;
+    assign csr_branch = ((csr_inst_sel == ECALL) || (csr_inst_sel == EBREAK) || (csr_inst_sel == MRET) || (csr_inst_sel == SRET) || (csr_inst_sel == M_TIME_INTERRUPT) || (csr_inst_sel == S_TIME_INTERRUPT));
+    assign pc_branch = (inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (csr_branch ? csr_pc_branch : pc + imm);
+
+    always_comb begin
+        csr_pc_branch = {csr_rdata[`TVEC_BASE], 2'b00};
+        if (csr_rdata[`TVEC_MODE] == MODE_VECTORED) begin
+            if (csr_inst_sel == M_TIME_INTERRUPT) begin
+                csr_pc_branch = csr_pc_branch + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
+            end else if (csr_inst_sel == S_TIME_INTERRUPT) begin
+                csr_pc_branch = csr_pc_branch + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+            end
+        end
+    end
 
     always_comb begin
         if (inst[6:0] == `OPCODE_SB) begin

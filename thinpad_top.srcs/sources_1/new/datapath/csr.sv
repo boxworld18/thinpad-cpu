@@ -5,6 +5,8 @@
 module csr(
     input wire clk,
     input wire rst,
+    input wire [63:0] mtime,
+    input wire [63:0] mtimecmp,
     
     input wire [`CSR_SEL_WIDTH-1:0] sel, // instruction type  
     
@@ -19,10 +21,11 @@ module csr(
     // output reg [`CSR_DATA_BUS] csr_mie,
     // output reg [`CSR_DATA_BUS] csr_mip,
 
-    output reg [`CSR_DATA_BUS] csr_mtvec,
-    output reg time_interrupt_enable,
-
-    output wire [1:0] mode_o
+    output wire [`CSR_DATA_BUS] csr_mtvec,
+    output wire [`CSR_DATA_BUS] csr_stvec,
+    output wire [1:0] mode_o,
+    output wire m_time_interrupt,
+    output wire s_time_interrupt
 );
 
     // mode
@@ -41,7 +44,6 @@ module csr(
     logic [`CSR_DATA_BUS] mideleg; 
     logic [`CSR_DATA_BUS] medeleg; 
     logic [`CSR_DATA_BUS] mhartid;  // 0
-    logic [63:0] rdtime;
 
     // S-MODE
     logic [`CSR_DATA_BUS] stvec; 
@@ -57,10 +59,13 @@ module csr(
     logic [`CSR_DATA_BUS] pmpcfg0;
     logic [`CSR_DATA_BUS] pmpaddr0;
 
-    assign csr_mtvec = mtvec; // TODO: pass this signal in pipeline
-    assign time_interrupt_enable = (mie[`MIE_MTIE] && 
-                                    (mode == U_MODE || (mode == M_MODE && mstatus[`MSTATUS_MIE] == 1))
-                                    );
+    assign csr_mtvec = mtvec;
+    assign csr_stvec = stvec;
+
+    // time interrupt
+    assign mip[`MIP_MTIP] = mtime >= mtimecmp;
+    assign m_time_interrupt = mip[`MIP_MTIP] && mie[`MIE_MTIE] && (mstatus[`MSTATUS_MIE] || mode < M_MODE);
+    assign s_time_interrupt = mip[`MIP_STIP] && mie[`MIE_STIE] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE);                                
                                     
     always_comb begin
         case (raddr)
@@ -75,8 +80,8 @@ module csr(
             `CSR_MIDELEG:   rdata = mideleg;
             `CSR_MEDELEG:   rdata = medeleg;
             `CSR_MHARTID:   rdata = mhartid;  
-            `CSR_RDTIME:    rdata = rdtime[31:0];
-            `CSR_RDTIMEH:   rdata = rdtime[63:32];
+            `CSR_RDTIME:    rdata = mtime[31:0];
+            `CSR_RDTIMEH:   rdata = mtime[63:32];
 
             `CSR_STVEC:     rdata = stvec;
             `CSR_SEPC:      rdata = sepc;
@@ -131,6 +136,8 @@ module csr(
             INST_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_INST_PAGE_FAULT;
             LOAD_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_LOAD_PAGE_FAULT;
             STORE_PAGE_FAULT: cause_exception_code = `EXCEPTION_CODE_STORE_AMO_PAGE_FAULT;
+            M_TIME_INTERRUPT: cause_exception_code = `EXCEPTION_CODE_M_TIME_INTERRUPT;
+            S_TIME_INTERRUPT: cause_exception_code = `EXCEPTION_CODE_S_TIME_INTERRUPT;
             default: cause_exception_code = 31'h8fffffff;
         endcase
     end
@@ -143,7 +150,8 @@ module csr(
             mstatus <= 0;
             mscratch <= 0;
             mie <= 0;
-            mip <= 0;
+            mip[31:`MIP_MTIP+1] <= 0; 
+            mip[`MIP_MTIP-1:0] <= 0;
             mtval <= 0;
             mideleg <= 0;
             medeleg <= 0;
@@ -169,7 +177,10 @@ module csr(
                         `CSR_MSTATUS:   mstatus <= wdata; 
                         `CSR_MSCRATCH:  mscratch <= wdata;
                         `CSR_MIE:       mie <= wdata;
-                        `CSR_MIP:       mip <= wdata;
+                        `CSR_MIP:       begin
+                                            mip[31:`MIP_MTIP+1] <= wdata[31:`MIP_MTIP+1];
+                                            mip[`MIP_MTIP-1:0] <= wdata[`MIP_MTIP-1:0];
+                                        end
                         `CSR_MTVAL:     mtval <= wdata;
                         `CSR_MIDELEG:   mideleg <= wdata;
                         `CSR_MEDELEG:   medeleg <= wdata;
@@ -178,10 +189,13 @@ module csr(
                         `CSR_STVEC:     stvec <= wdata;
                         `CSR_SEPC:      sepc <= wdata;
                         `CSR_SCAUSE:    scause <= wdata;
-                        `CSR_SSTATUS:   mstatus <= (wdata & `SSTATUS_MASK) | (mstatus & ~`SSTATUS_MASK);
+                        `CSR_SSTATUS:   mstatus <= (wdata & `SSTATUS_MASK) | (mstatus & ~`SSTATUS_MASK); // sstatus is set by comb
                         `CSR_SSCRATCH:  sscratch <= wdata;
-                        `CSR_SIE:       mie <= (wdata & `SIE_MASK) | (mie & ~`SIE_MASK);
-                        `CSR_SIP:       mip <= (wdata & `SIP_MASK) | (mip & ~`SIP_MASK);
+                        `CSR_SIE:       mie <= (wdata & `SIE_MASK) | (mie & ~`SIE_MASK); // sie is set by comb
+                        `CSR_SIP:       begin 
+                                            mip[31:`MIP_MTIP+1] <= {((wdata & `SIP_MASK) | (mip & ~`SIP_MASK))}[31:`MIP_MTIP+1]; // sip is set by comb
+                                            mip[`MIP_MTIP-1:0] <= {((wdata & `SIP_MASK) | (mip & ~`SIP_MASK))}[`MIP_MTIP-1:0];
+                                        end
                         `CSR_STVAL:     stval <= wdata;
 
                         `CSR_PMPCFG0:   pmpcfg0 <= wdata;
@@ -224,46 +238,36 @@ module csr(
                         mstatus[`MSTATUS_SPIE] <= 1;
                     end
                 end
-                // TODO: ! ! ! ! ! !
-                // 需要重写, 现在完全不对
-                // TIME_INTERRUPT: begin  // correct version: assign mip[`MIP_MTIP] = mtime >= mtimecmp
-                    
-                //     if (mie[`MIE_MTIE]) begin
-                //         if (mode == U_MODE) begin
-                //             mepc <= wb_pc;
-                //             mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                //              if (mode == M_MODE) begin
-                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_M_TIME_INTERRUPT;
-                //             end else if (mode == S_MODE) begin
-                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_S_TIME_INTERRUPT;
-                //             end else if (mode == U_MODE) begin
-                //                 mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_U_TIME_INTERRUPT;
-                //             end
-                //             mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                //             mstatus[`MSTATUS_MIE] <= 0;
-                //             mstatus[`MSTATUS_MPP] <= 0;
-                //             mip[`MIP_MTIP] <= 1;
-                //             mode <= M_MODE;
-                //         end else if (mode == M_MODE && mstatus[`MSTATUS_MIE] == 1) begin
-                //             mepc <= wb_pc;
-                //             mcause <= `EXCEPTION_CODE_M_TIME_INTERRUPT;
-                //             mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                //             mstatus[`MSTATUS_MIE] <= 0;
-                //             mstatus[`MSTATUS_MPP] <= M_MODE;
-                //             mip[`MIP_MTIP] <= 1;
-                //         end
-                //     end
-                // end
+                M_TIME_INTERRUPT: begin 
+                    mepc <= wb_pc;
+                    mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                    mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                    mstatus[`MSTATUS_MPP] <= mode;
+                    mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                    mstatus[`MSTATUS_MIE] <= 0;
+                    mode <= M_MODE;
+                end
+                S_TIME_INTERRUPT: begin
+                    if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
+                        sepc <= wb_pc;
+                        scause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                        scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                        mstatus[`MSTATUS_SPP] <= mode;
+                        mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
+                        mstatus[`MSTATUS_SIE] <= 0;
+                        mode <= S_MODE;
+                    end else begin
+                        mepc <= wb_pc;
+                        mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                        mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                        mstatus[`MSTATUS_MPP] <= mode;
+                        mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                        mstatus[`MSTATUS_MIE] <= 0;
+                        mode <= M_MODE;
+                    end
+                end
                 default: ;
             endcase
-        end
-    end
-
-    always_ff @ (posedge clk) begin
-        if (rst) begin
-            rdtime <= 64'b0;
-        end else begin
-            rdtime <= rdtime + 1;
         end
     end
     

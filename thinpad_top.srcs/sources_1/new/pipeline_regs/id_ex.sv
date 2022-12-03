@@ -39,9 +39,11 @@ module id_ex(
     // imm
     input wire [`DATA_BUS] id_imm,
 
-    input wire time_interrupt,
-    // additional
+    // interrupt
+    input wire m_time_interrupt,
+    input wire s_time_interrupt,
     input wire [`CSR_DATA_BUS] mtvec,
+    input wire [`CSR_DATA_BUS] stvec,
 
     // output
     output reg [`ADDR_BUS] ex_pc,
@@ -96,7 +98,7 @@ module id_ex(
             ex_rs2 <= 0;
             ex_imm <= 0;
         end else if (!stall) begin
-            if (time_interrupt) begin
+            if (m_time_interrupt) begin
                 ex_pc <= id_pc;     // TODO: hold or next ?
                 ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;
@@ -112,10 +114,34 @@ module id_ex(
                 ex_alu_sel_imm <= 1'b0;
                 ex_alu_sel_pc <= 1'b0;
                 ex_sel_csr <= 1'b0;
-                ex_csr_inst_sel <= TIME_INTERRUPT;
+                ex_csr_inst_sel <= M_TIME_INTERRUPT;
                 ex_csr_waddr <= 0;
                 ex_csr_raddr <= `CSR_MTVEC;
                 ex_csr_rdata <= mtvec;
+                ex_csr_imm_sel <= 1'b0;
+                ex_rs1 <= 0;
+                ex_rs2 <= 0;
+                ex_imm <= 0;
+            end else if (s_time_interrupt) begin
+                ex_pc <= id_pc;     // TODO: hold or next ?
+                ex_inst <= `INST_NOP;
+                ex_rf_wen <= 1'b0;
+                ex_rf_waddr <= 0;
+                ex_rf_data_a <= 0;
+                ex_rf_data_b <= 0;
+                ex_rf_sel <= 1'b0;
+                ex_wb_wen <= 1'b0;
+                ex_wb_ren <= 1'b0;
+                ex_wb_sel <= 0;
+                ex_wb_read_unsigned <= 1'b0;
+                ex_alu_op <= 0;
+                ex_alu_sel_imm <= 1'b0;
+                ex_alu_sel_pc <= 1'b0;
+                ex_sel_csr <= 1'b0;
+                ex_csr_inst_sel <= S_TIME_INTERRUPT;
+                ex_csr_waddr <= 0;
+                ex_csr_raddr <= `CSR_STVEC;
+                ex_csr_rdata <= stvec;
                 ex_csr_imm_sel <= 1'b0;
                 ex_rs1 <= 0;
                 ex_rs2 <= 0;

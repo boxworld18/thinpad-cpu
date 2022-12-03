@@ -147,7 +147,7 @@ typedef enum logic [1:0] {
 `define INTERRUPT 1'b1
 `define EXCEPTION 1'b0
 
-`define EXCEPTION_CODE_U_TIME_INTERRUPT 4 
+// `define EXCEPTION_CODE_U_TIME_INTERRUPT 4 // not support
 `define EXCEPTION_CODE_S_TIME_INTERRUPT 5 
 `define EXCEPTION_CODE_M_TIME_INTERRUPT 7  
 `define EXCEPTION_CODE_BREAKPOINT 3
@@ -231,10 +231,11 @@ typedef enum logic [3:0] {
     EBREAK = 8,
     MRET = 9,
     SRET = 10,
-    TIME_INTERRUPT = 11,
-    INST_PAGE_FAULT = 12,
-    LOAD_PAGE_FAULT = 13,
-    STORE_PAGE_FAULT = 14
+    INST_PAGE_FAULT = 11,
+    LOAD_PAGE_FAULT = 12,
+    STORE_PAGE_FAULT = 13,
+    M_TIME_INTERRUPT = 14,
+    S_TIME_INTERRUPT = 15
 } csr_inst_t;
 
 typedef enum logic [1:0] {

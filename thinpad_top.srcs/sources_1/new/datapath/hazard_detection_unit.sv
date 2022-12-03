@@ -35,10 +35,10 @@ module hazard_detection_unit(
     assign priv_hazard = (id_csr_inst_sel && (ex_csr_inst_sel != 0 || mem_csr_inst_sel != 0 || wb_csr_inst_sel));
 
     logic id_csr_branch, ex_csr_branch, mem_csr_branch, wb_csr_branch, csr_branch; 
-    assign id_csr_branch = ((id_csr_inst_sel == ECALL) || (id_csr_inst_sel == EBREAK) || (id_csr_inst_sel == MRET) || (id_csr_inst_sel == SRET) || (id_csr_inst_sel == TIME_INTERRUPT));
-    assign ex_csr_branch = ((ex_csr_inst_sel == ECALL) || (ex_csr_inst_sel == EBREAK) || (ex_csr_inst_sel == MRET) || (ex_csr_inst_sel == SRET) || (ex_csr_inst_sel == TIME_INTERRUPT));
-    assign mem_csr_branch = ((mem_csr_inst_sel == ECALL) || (mem_csr_inst_sel == EBREAK) || (mem_csr_inst_sel == MRET) || (mem_csr_inst_sel == SRET) || (mem_csr_inst_sel == TIME_INTERRUPT));
-    assign wb_csr_branch = ((wb_csr_inst_sel == ECALL) || (wb_csr_inst_sel == EBREAK) || (wb_csr_inst_sel == MRET) || (wb_csr_inst_sel == SRET) || (wb_csr_inst_sel == TIME_INTERRUPT));
+    assign id_csr_branch = ((id_csr_inst_sel == ECALL) || (id_csr_inst_sel == EBREAK) || (id_csr_inst_sel == MRET) || (id_csr_inst_sel == SRET) || (id_csr_inst_sel == M_TIME_INTERRUPT) || (id_csr_inst_sel == S_TIME_INTERRUPT));
+    assign ex_csr_branch = ((ex_csr_inst_sel == ECALL) || (ex_csr_inst_sel == EBREAK) || (ex_csr_inst_sel == MRET) || (ex_csr_inst_sel == SRET) || (ex_csr_inst_sel == M_TIME_INTERRUPT) || (ex_csr_inst_sel == S_TIME_INTERRUPT));
+    assign mem_csr_branch = ((mem_csr_inst_sel == ECALL) || (mem_csr_inst_sel == EBREAK) || (mem_csr_inst_sel == MRET) || (mem_csr_inst_sel == SRET) || (mem_csr_inst_sel == M_TIME_INTERRUPT) || (mem_csr_inst_sel == S_TIME_INTERRUPT));
+    assign wb_csr_branch = ((wb_csr_inst_sel == ECALL) || (wb_csr_inst_sel == EBREAK) || (wb_csr_inst_sel == MRET) || (wb_csr_inst_sel == SRET) || (wb_csr_inst_sel == M_TIME_INTERRUPT) || (wb_csr_inst_sel == S_TIME_INTERRUPT));
     assign csr_branch = id_csr_branch | ex_csr_branch | mem_csr_branch | wb_csr_branch;
     
     always_comb begin
