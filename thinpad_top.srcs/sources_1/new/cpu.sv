@@ -37,14 +37,19 @@ module cpu (
     logic [63:0] mtime;
     logic [63:0] mtimecmp;
 
+    logic wb_csr_branch;
+    logic [`ADDR_BUS] wb_csr_branch_target;
+
     // mode
     logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
 
     // page fault
-    logic inst_page_fault, load_page_fault, store_page_fault;
-    logic [`ADDR_BUS] inst_fault_va;
-    logic [`ADDR_BUS] load_fault_va;
-    logic [`ADDR_BUS] store_fault_va;
+    logic if_inst_page_fault, mem_load_page_fault, mem_store_page_fault;
+    logic [`ADDR_BUS] inst_fault_va; // TODO: To Check: 就是if_pc, 无效字段?
+    logic [`ADDR_BUS] mem_load_fault_va;
+    logic [`ADDR_BUS] mem_store_fault_va;
+    logic [`ADDR_BUS] wb_load_fault_va;
+    logic [`ADDR_BUS] wb_store_fault_va;
 
     // stall -> used by if_master and mem_master
 
@@ -55,6 +60,8 @@ module cpu (
     // flush 
     logic if_id_flush;
     logic id_ex_flush;
+    logic ex_mem_flush;
+    logic mem_wb_flush;
 
     // hold
     logic if_id_hold;
@@ -67,6 +74,7 @@ module cpu (
 
     logic [`ADDR_BUS] id_pc;
     logic [`INST_BUS] id_inst;
+    logic id_inst_page_fault;
 
     logic [`ADDR_BUS] pc_branch;
     logic branch; 
@@ -94,7 +102,7 @@ module cpu (
         .inst(if_inst),
         .if_master_stall(if_master_stall),
 
-        .inst_page_fault(inst_page_fault),
+        .inst_page_fault(if_inst_page_fault),
         .inst_fault_va(inst_fault_va)
     );
 
@@ -106,10 +114,12 @@ module cpu (
         .stall(stall),
         .flush(if_id_flush),
         .hold(if_id_hold),
+        .if_inst_page_fault(if_inst_page_fault),
         .if_pc(if_pc),
         .if_inst(if_inst),
         .id_pc(id_pc),
-        .id_inst(id_inst)
+        .id_inst(id_inst),
+        .id_inst_page_fault(id_inst_page_fault)
     );
 
     /* =========== ID begin =========== */
@@ -203,21 +213,25 @@ module cpu (
         .rst(rst_i),
         .mtime(mtime),
         .mtimecmp(mtimecmp),
-        .sel(wb_csr_inst_sel),
+        .sel(wb_csr_inst_sel), 
 
         .raddr(id_csr_raddr),
         .rdata(id_csr_rdata),
-
         .waddr(wb_csr_waddr),
         .wdata(wb_csr_wdata),
 
         .wb_pc(wb_pc),
+        .wb_load_fault_va(wb_load_fault_va),
+        .wb_store_fault_va(wb_store_fault_va),
 
-        .csr_mtvec(csr_mtvec),
-        .csr_stvec(csr_stvec),
+        .csr_mtvec(csr_mtvec), // unused
+        .csr_stvec(csr_stvec), // unused
         .mode_o(mode),
         .m_time_interrupt(m_time_interrupt),
-        .s_time_interrupt(s_time_interrupt)
+        .s_time_interrupt(s_time_interrupt),
+
+        .wb_csr_branch(wb_csr_branch),
+        .wb_csr_branch_target(wb_csr_branch_target)
     );
 
     /* =========== ID end =========== */
@@ -270,6 +284,7 @@ module cpu (
         .id_csr_raddr(id_csr_raddr),
         .id_csr_rdata(id_csr_rdata),
         .id_csr_imm_sel(id_csr_imm_sel),
+        .id_inst_page_fault(id_inst_page_fault),
         .id_rs1(id_inst[19:15]),
         .id_rs2(id_inst[24:20]),
         .id_imm(id_imm),
@@ -355,8 +370,8 @@ module cpu (
         .imm(ex_imm),
         .data_a(alu_rf_data_a),
         .data_b(alu_rf_data_b),
-        .csr_inst_sel(ex_csr_inst_sel),
-        .csr_rdata(alu_csr_rdata),
+        .wb_csr_branch(wb_csr_branch),
+        .wb_csr_branch_target(wb_csr_branch_target),
 
         .pc_branch(pc_branch), // branch target
         .branch(branch)  // branch taken
@@ -386,6 +401,7 @@ module cpu (
     /* =========== EX end =========== */    
 
     logic [`ADDR_BUS] mem_pc;
+    logic [`INST_BUS] mem_inst;
     logic [`DATA_BUS] mem_wb_wdata;
     logic mem_wb_wen;
     logic mem_wb_ren;
@@ -399,8 +415,10 @@ module cpu (
         .clk(clk_i),
         .rst(rst_i),
         .stall(stall),
+        .flush(ex_mem_flush),
 
         .ex_pc(ex_pc),
+        .ex_inst(ex_inst),
         .ex_data(alu_data_o),
         .ex_wb_wdata(alu_rf_data_b),
         .ex_wb_wen(ex_wb_wen),
@@ -415,6 +433,7 @@ module cpu (
         .ex_csr_wdata(ex_csr_wdata),
 
         .mem_pc(mem_pc),
+        .mem_inst(mem_inst),
         .mem_data(mem_data),
         .mem_wb_wdata(mem_wb_wdata),
         .mem_wb_wen(mem_wb_wen),
@@ -459,24 +478,33 @@ module cpu (
         .mtime_o(mtime),
         .mtimecmp_o(mtimecmp),
 
-        .load_page_fault(load_page_fault),
-        .load_fault_va(load_fault_va),
-        .store_page_fault(store_page_fault),
-        .store_fault_va(store_fault_va)
+        .load_page_fault(mem_load_page_fault),
+        .load_fault_va(mem_load_fault_va),
+        .store_page_fault(mem_store_page_fault),
+        .store_fault_va(mem_store_fault_va)
     );
 
     /* =========== MEM end =========== */
 
     logic [`ADDR_BUS] wb_pc;
+    logic [`INST_BUS] wb_inst;
     logic [`REG_DATA_BUS] mem_rf_wdata;
     assign mem_rf_wdata = mem_rf_sel ? mem_read_data : mem_data;
+    
 
     mem_wb u_mem_wb(
         .clk(clk_i),
         .rst(rst_i),      
         .stall(stall),
+        .flush(mem_wb_flush),
+
+        .mem_load_page_fault(mem_load_page_fault),
+        .mem_load_fault_va(mem_load_fault_va),
+        .mem_store_page_fault(mem_store_page_fault),
+        .mem_store_fault_va(mem_store_fault_va),
 
         .mem_pc(mem_pc),
+        .mem_inst(mem_inst),
         .mem_rf_wen(mem_rf_wen),
         .mem_rf_waddr(mem_rf_waddr),
         .mem_rf_wdata(mem_rf_wdata),
@@ -485,12 +513,16 @@ module cpu (
         .mem_csr_wdata(mem_csr_wdata),
 
         .wb_pc(wb_pc),
+        .wb_inst(wb_inst),
         .wb_rf_wen(wb_rf_wen),
         .wb_rf_waddr(wb_rf_waddr),
         .wb_rf_wdata(wb_rf_wdata),
         .wb_csr_inst_sel(wb_csr_inst_sel),
         .wb_csr_waddr(wb_csr_waddr),
-        .wb_csr_wdata(wb_csr_wdata)        
+        .wb_csr_wdata(wb_csr_wdata),
+
+        .wb_load_fault_va(wb_load_fault_va),
+        .wb_store_fault_va(wb_store_fault_va)
     );
 
     /* =========== WB begin =========== */    
@@ -531,6 +563,14 @@ module cpu (
         .ex_rf_waddr(ex_rf_waddr),
         .branch(branch),
 
+        .ex_inst(ex_inst),
+        .mem_inst(mem_inst),
+        .wb_inst(wb_inst),
+
+        .id_inst_page_fault(id_inst_page_fault),
+        .mem_load_page_fault(mem_load_page_fault),
+        .mem_store_page_fault(mem_store_page_fault),
+
         .id_csr_inst_sel(id_csr_inst_sel),
         .ex_csr_inst_sel(ex_csr_inst_sel),
         .mem_csr_inst_sel(mem_csr_inst_sel),
@@ -538,6 +578,9 @@ module cpu (
 
         .if_id_flush(if_id_flush),
         .id_ex_flush(id_ex_flush),
+        .ex_mem_flush(ex_mem_flush),
+        .mem_wb_flush(mem_wb_flush),
+
         .if_id_hold(if_id_hold),
         .id_ex_hold(id_ex_hold)
     );

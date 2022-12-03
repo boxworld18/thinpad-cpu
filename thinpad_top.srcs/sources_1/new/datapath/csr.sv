@@ -17,15 +17,17 @@ module csr(
     input wire [`CSR_DATA_BUS] wdata,
 
     input wire [`ADDR_BUS] wb_pc,
-    // output reg [`CSR_DATA_BUS] csr_mstatus,
-    // output reg [`CSR_DATA_BUS] csr_mie,
-    // output reg [`CSR_DATA_BUS] csr_mip,
+    input wire [`ADDR_BUS] wb_load_fault_va,
+    input wire [`ADDR_BUS] wb_store_fault_va,
 
     output wire [`CSR_DATA_BUS] csr_mtvec,
     output wire [`CSR_DATA_BUS] csr_stvec,
     output wire [1:0] mode_o,
     output wire m_time_interrupt,
-    output wire s_time_interrupt
+    output wire s_time_interrupt,
+
+    output reg wb_csr_branch,
+    output reg [`ADDR_BUS] wb_csr_branch_target
 );
 
     // mode
@@ -139,6 +141,47 @@ module csr(
             M_TIME_INTERRUPT: cause_exception_code = `EXCEPTION_CODE_M_TIME_INTERRUPT;
             S_TIME_INTERRUPT: cause_exception_code = `EXCEPTION_CODE_S_TIME_INTERRUPT;
             default: cause_exception_code = 31'h8fffffff;
+        endcase
+    end
+
+    // jump
+    always_comb begin
+        case (sel)
+            ECALL, EBREAK, INST_PAGE_FAULT, LOAD_PAGE_FAULT, STORE_PAGE_FAULT: begin
+                wb_csr_branch = 1'b1;
+                if (medeleg[cause_exception_code] && (mode != M_MODE)) begin          
+                    wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
+                end else begin
+                    wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
+                end
+            end
+            MRET: begin
+                wb_csr_branch = 1'b1;
+                wb_csr_branch_target = mepc;
+            end
+            SRET: begin
+                wb_csr_branch = 1'b1;
+                wb_csr_branch_target = sepc;
+            end 
+            M_TIME_INTERRUPT: begin
+                wb_csr_branch = 1'b1;
+                wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
+                wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
+            end
+            S_TIME_INTERRUPT: begin
+                wb_csr_branch = 1'b1;
+                if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
+                    wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
+                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                end else begin
+                    wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
+                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                end
+            end
+            default: begin
+                wb_csr_branch = 1'b0;
+                wb_csr_branch_target = 0;
+            end
         endcase
     end
 

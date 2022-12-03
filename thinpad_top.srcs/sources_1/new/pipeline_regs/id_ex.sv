@@ -33,6 +33,7 @@ module id_ex(
     input wire [`CSR_ADDR_BUS] id_csr_raddr,
     input wire [`CSR_DATA_BUS] id_csr_rdata,
     input wire id_csr_imm_sel,
+    input wire id_inst_page_fault,
     // forward 
     input wire [`REG_ADDR_BUS] id_rs1,
     input wire [`REG_ADDR_BUS] id_rs2,
@@ -74,8 +75,8 @@ module id_ex(
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            ex_pc <= 0;
-            ex_inst <= 0;
+            ex_pc <= `ZERO_WORD;
+            ex_inst <= `INST_NOP;
             ex_rf_wen <= 1'b0;
             ex_rf_waddr <= 0;
             ex_rf_data_a <= 0;
@@ -147,7 +148,7 @@ module id_ex(
                 ex_rs2 <= 0;
                 ex_imm <= 0;
             end else if (flush) begin
-                ex_pc <= `ZERO_WORD;
+                ex_pc <=`ZERO_WORD;
                 ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;
                 ex_rf_waddr <= 0;
@@ -171,29 +172,55 @@ module id_ex(
                 ex_rs2 <= 0;
                 ex_imm <= 0;
             end else if (!hold)begin
-                ex_pc <= id_pc;
-                ex_inst <= id_inst;
-                ex_rf_wen <= id_rf_wen;
-                ex_rf_waddr <= id_rf_waddr;
-                ex_rf_data_a <= id_rf_data_a;
-                ex_rf_data_b <= id_rf_data_b;
-                ex_rf_sel <= id_rf_sel;
-                ex_wb_wen <= id_wb_wen;
-                ex_wb_ren <= id_wb_ren;
-                ex_wb_sel <= id_wb_sel;
-                ex_wb_read_unsigned <= id_wb_read_unsigned;
-                ex_alu_op <= id_alu_op;
-                ex_alu_sel_imm <= id_alu_sel_imm;
-                ex_alu_sel_pc <= id_alu_sel_pc;
-                ex_sel_csr <= id_sel_csr;
-                ex_csr_inst_sel <= id_csr_inst_sel;
-                ex_csr_waddr <= id_csr_waddr;
-                ex_csr_raddr <= id_csr_raddr;
-                ex_csr_rdata <= id_csr_rdata;
-                ex_csr_imm_sel <= id_csr_imm_sel;
-                ex_rs1 <= id_rs1;
-                ex_rs2 <= id_rs2;
-                ex_imm <= id_imm;
+                if (id_inst_page_fault) begin
+                    ex_pc <= id_pc;
+                    ex_inst <= `INST_NOP;
+                    ex_rf_wen <= 1'b0;
+                    ex_rf_waddr <= 0;
+                    ex_rf_data_a <= 0;
+                    ex_rf_data_b <= 0;
+                    ex_rf_sel <= 1'b0;
+                    ex_wb_wen <= 1'b0;
+                    ex_wb_ren <= 1'b0;
+                    ex_wb_sel <= 0;
+                    ex_wb_read_unsigned <= 1'b0;
+                    ex_alu_op <= 0;
+                    ex_alu_sel_imm <= 1'b0;
+                    ex_alu_sel_pc <= 1'b0;
+                    ex_sel_csr <= 1'b0;
+                    ex_csr_inst_sel <= INST_PAGE_FAULT;
+                    ex_csr_waddr <= 0;
+                    ex_csr_raddr <= 0;
+                    ex_csr_rdata <= 0;
+                    ex_csr_imm_sel <= 1'b0;
+                    ex_rs1 <= 0;
+                    ex_rs2 <= 0;
+                    ex_imm <= 0;
+                end else begin
+                    ex_pc <= id_pc;
+                    ex_inst <= id_inst;
+                    ex_rf_wen <= id_rf_wen;
+                    ex_rf_waddr <= id_rf_waddr;
+                    ex_rf_data_a <= id_rf_data_a;
+                    ex_rf_data_b <= id_rf_data_b;
+                    ex_rf_sel <= id_rf_sel;
+                    ex_wb_wen <= id_wb_wen;
+                    ex_wb_ren <= id_wb_ren;
+                    ex_wb_sel <= id_wb_sel;
+                    ex_wb_read_unsigned <= id_wb_read_unsigned;
+                    ex_alu_op <= id_alu_op;
+                    ex_alu_sel_imm <= id_alu_sel_imm;
+                    ex_alu_sel_pc <= id_alu_sel_pc;
+                    ex_sel_csr <= id_sel_csr;
+                    ex_csr_inst_sel <= id_csr_inst_sel;
+                    ex_csr_waddr <= id_csr_waddr;
+                    ex_csr_raddr <= id_csr_raddr;
+                    ex_csr_rdata <= id_csr_rdata;
+                    ex_csr_imm_sel <= id_csr_imm_sel;
+                    ex_rs1 <= id_rs1;
+                    ex_rs2 <= id_rs2;
+                    ex_imm <= id_imm;
+                end
             end
         end
     end

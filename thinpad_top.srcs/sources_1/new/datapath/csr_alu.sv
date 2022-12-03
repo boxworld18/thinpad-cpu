@@ -44,7 +44,7 @@ module csr_alu(
                 mcause_valid = 1'b1;
                 scause_valid = 1'b0;
             end
-            `EXCEPTION_CODE_U_TIME_INTERRUPT,
+            // `EXCEPTION_CODE_U_TIME_INTERRUPT,
             `EXCEPTION_CODE_S_TIME_INTERRUPT,
             `EXCEPTION_CODE_ECALL_U_MODE,
             `EXCEPTION_CODE_ECALL_S_MODE,
@@ -170,7 +170,7 @@ module csr_alu(
                     wdata[`SSTATUS_SIE] = tmp[`SSTATUS_SIE];
                     wdata[`SSTATUS_SPIE] = tmp[`SSTATUS_SPIE];
                     wdata[`SSTATUS_SPP] = tmp[`SSTATUS_SPP];
-                    wdata[`SSTATUS_SUM] = tmp[`SSTATUS_SUM];
+                    wdata[`SSTATUS_SUM] = tmp[`SSTATUS_SUM]; // TODO: can S-mode write this bit?
                 end
             end
             `CSR_SSCRATCH: begin          // read/write
