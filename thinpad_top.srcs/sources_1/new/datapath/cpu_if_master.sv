@@ -46,8 +46,7 @@ module cpu_if_master(
     assign L2_invalid = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
                         || (L2_pte[`PTE_U] == 0 && mode == U_MODE) 
-                        || (L2_pte[`PTE_X] == 0 && L2_pte[`PTE_R] == 0)
-                        || (L2_pte[`PTE_A] == 0);
+                        || (L2_pte[`PTE_X] == 0 && L2_pte[`PTE_R] == 0);
 
     typedef enum logic [2:0] {
         IDLE = 0,
@@ -134,6 +133,7 @@ module cpu_if_master(
                 end
                 L2_FETCH_DONE: begin
                     if (wb_ack_i) begin
+                        if_master_stall <= 1'b1;
                         L2_pte <= wb_dat_i;
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;

@@ -36,13 +36,22 @@ module cpu_mem_master(
     output reg [`ADDR_BUS] load_fault_va, 
     output reg store_page_fault,
     output reg [`ADDR_BUS] store_fault_va
+
+    // paging related
+    input wire [`DATA_BUS] satp,
+    input wire [1:0] mode
 );
 
-    typedef enum logic [1:0] {
-        IDLE,
-        READ_DATA_ACTION,
-        WRITE_DATA_ACTION,
-        DONE
+    typedef enum logic [3:0] {
+        IDLE = 0,
+        L1_FETCH = 1,
+        L1_FETCH_DONE = 2,
+        L2_FETCH = 3,
+        L2_FETCH_DONE = 4,
+        FETCH_DONE = 5,
+        READ_DATA_ACTION = 6,
+        WRITE_DATA_ACTION = 7,
+        DONE = 8
     } state_t;
     state_t state;
 
@@ -59,6 +68,19 @@ module cpu_mem_master(
     logic [`DATA_BUS] data_shift;
     assign data_shift = addr[1:0] << 3;
 
+    logic is_read;
+    logic [`ADDR_BUS] L1_PTE;
+    logic [`ADDR_BUS] L2_PTE;
+    logic [`ADDR_BUS] VA;
+
+    logic L1_invalid;
+    assign L1_invalid = (L1_pte[`PTE_V] == 0) || (L1_pte[`PTE_R] == 0 && L1_pte[`PTE_W] == 1);
+    logic L2_invalid;
+    assign L2_invalid = (L2_pte[`PTE_V] == 0) 
+                        || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
+                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE) 
+                        || (L2_pte[`PTE_X] == 0 && L2_pte[`PTE_R] == 0);
+
     always_ff @(posedge clk) begin
         if (rst) begin
             state <= IDLE;
@@ -70,6 +92,13 @@ module cpu_mem_master(
             wb_we_o <= 1'b0;
             mem_read_data <= 0;
             mem_master_stall <= 1'b0;
+            load_page_fault <= 1'b0;
+            load_fault_va <= 0;
+            store_page_fault <= 1'b0;
+            store_fault_va <= 0;
+            is_read <= 1'b0;
+            L1_PTE <= 0;
+            L2_PTE <= 0;
         end else begin
             case (state)
                IDLE: begin     
@@ -78,26 +107,40 @@ module cpu_mem_master(
                             mem_read_data <= time_register_rdata; 
                             state <= DONE;           
                         end else begin
-                            state <= READ_DATA_ACTION;
-                            wb_stb_o <= 1'b1;
-                            wb_cyc_o <= 1'b1;
-                            wb_adr_o <= addr;
-                            wb_sel_o <= (sel << addr[1:0]);
-                            wb_we_o <= 1'b0;
+                            // is_read <= 1'b1;
+                            // state <= READ_DATA_ACTION;
+                            // wb_stb_o <= 1'b1;
+                            // wb_cyc_o <= 1'b1;
+                            // wb_adr_o <= addr;
+                            // wb_sel_o <= (sel << addr[1:0]);
+                            // wb_we_o <= 1'b0;
+                            // mem_master_stall <= 1'b1;
+                            is_read <= 1'b1;
+                            state <= L1_FETCH;
+                            wb_cyc_o <= 1'b0;
+                            wb_stb_o <= 1'b0;
                             mem_master_stall <= 1'b1;
+                            VA <= addr;
                         end
                     end else if (wen) begin
                         if (write_time_register) begin
                             state <= DONE;
                         end else begin
-                            state <= WRITE_DATA_ACTION;
-                            wb_stb_o <= 1'b1;
-                            wb_cyc_o <= 1'b1;
-                            wb_adr_o <= addr;
-                            wb_dat_o <= data << data_shift;
-                            wb_sel_o <= (sel << addr[1:0]);
-                            wb_we_o <= 1'b1;    
-                            mem_master_stall <= 1'b1;      
+                            // is_read <= 1'b0;
+                            // state <= WRITE_DATA_ACTION;
+                            // wb_stb_o <= 1'b1;
+                            // wb_cyc_o <= 1'b1;
+                            // wb_adr_o <= addr;
+                            // wb_dat_o <= data << data_shift;
+                            // wb_sel_o <= (sel << addr[1:0]);
+                            // wb_we_o <= 1'b1;    
+                            // mem_master_stall <= 1'b1;    
+                            is_read <= 1'b0;
+                            state <= L1_FETCH;
+                            wb_cyc_o <= 1'b0;
+                            wb_stb_o <= 1'b0;
+                            mem_master_stall <= 1'b1;
+                            VA <= addr;
                         end                  
                     end else begin
                         wb_stb_o <= 1'b0;
@@ -106,6 +149,98 @@ module cpu_mem_master(
                         mem_master_stall <= 1'b0;
                         state <= DONE;
                     end       
+                end
+                L1_FETCH: begin
+                    if(mode == M_MODE) begin
+                        if(is_read) begin
+                            state <= READ_DATA_ACTION;
+                            wb_stb_o <= 1'b1;
+                            wb_cyc_o <= 1'b1;
+                            wb_adr_o <= VA;
+                            wb_sel_o <= (sel << VA[1:0]);
+                            wb_we_o <= 1'b0;
+                            mem_master_stall <= 1'b1;
+                        end else begin
+                            state <= WRITE_DATA_ACTION;
+                            wb_stb_o <= 1'b1;
+                            wb_cyc_o <= 1'b1;
+                            wb_adr_o <= VA;
+                            wb_dat_o <= data << data_shift;
+                            wb_sel_o <= (sel << VA[1:0]);
+                            wb_we_o <= 1'b1;    
+                            mem_master_stall <= 1'b1;    
+                        end
+                    end else begin
+                        wb_cyc_o <= 1'b1;
+                        wb_stb_o <= 1'b1;
+                        wb_adr_o <= satp[`SATP_PPN]<<`PAGE_SIZE + VA[`VA_VPN1]<<PTE_SIZE;
+                        wb_sel_o <= 4'hF;
+                        wb_we_o <= 1'b0;
+                        mem_master_stall <= 1'b1;
+                        state <= L1_FETCH_DONE;
+                    end
+                end
+                L1_FETCH_DONE: begin
+                    if(wb_ack_i) begin
+                        L1_pte <= wb_dat_i;
+                        wb_cyc_o <= 1'b0;
+                        wb_stb_o <= 1'b0;
+                        state <= L2_FETCH;
+                    end
+                end
+                L2_FETCH: begin
+                    if(L1_invalid) begin
+                        wb_cyc_o <= 1'b0;
+                        wb_stb_o <= 1'b0;
+                        load_page_fault <= 1'b1;
+                        load_fault_va <= VA;
+                        state <= DONE;
+                    end else begin
+                        wb_cyc_o <= 1'b1;
+                        wb_stb_o <= 1'b1;
+                        wb_adr_o <= L1_pte[`PTE_PPN]<<`PAGE_SIZE + VA[`VA_VPN2]<<PTE_SIZE;
+                        wb_sel_o <= 4'hF;
+                        wb_we_o <= 1'b0;
+                        mem_master_stall <= 1'b1;
+                        state <= L2_FETCH_DONE;
+                    end
+                end
+                L2_FETCH_DONE: begin
+                    if(wb_ack_i) begin
+                        mem_master_stall <= 1'b1;
+                        L2_pte <= wb_dat_i;
+                        wb_cyc_o <= 1'b0;
+                        wb_stb_o <= 1'b0;
+                        state <= FETCH_DONE;
+                    end
+                end
+                FETCH_DONE: begin
+                    if(L2_invalid) begin
+                        wb_cyc_o <= 1'b0;
+                        wb_stb_o <= 1'b0;
+                        load_page_fault <= 1'b1;
+                        load_fault_va <= VA;
+                        state <= DONE;
+                    end else begin
+                        if(is_read) begin
+                            state <= READ_DATA_ACTION;
+                            wb_stb_o <= 1'b1;
+                            wb_cyc_o <= 1'b1;
+                            wb_adr_o <={L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};;
+                            wb_sel_o <= (sel << VA[1:0]);
+                            wb_we_o <= 1'b0;
+                            mem_master_stall <= 1'b1;
+                        end else begin
+                            state <= WRITE_DATA_ACTION;
+                            wb_stb_o <= 1'b1;
+                            wb_cyc_o <= 1'b1;
+                            wb_adr_o <= L2_pte[`PTE_PPN]<<`PAGE_SIZE + VA[`VA_VPN3]<<2;
+                            wb_dat_o <= data << data_shift;
+                            wb_sel_o <= (sel << VA[1:0]);
+                            wb_we_o <= 1'b1;    
+                            mem_master_stall <= 1'b1;    
+                        end
+                    end
                 end
                 READ_DATA_ACTION: begin
                     if (wb_ack_i) begin
