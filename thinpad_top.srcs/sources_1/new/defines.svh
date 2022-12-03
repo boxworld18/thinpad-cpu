@@ -144,6 +144,30 @@ typedef enum logic [1:0] {
 `define CAUSE_INTERRUPT 31 // m/s cause interrupt位宽度
 `define CAUSE_EXCEPTION_CODE 30:0 // m/s cause exception code位宽度
 
+`define SATP_PPN 21:0 // satp ppn位
+`define SATP_MODE 31 // satp mode位
+`define SATP_ASID 30:22 // satp asid位
+
+`define VA_VPN1 31:22 // va vpn1位
+`define VA_VPN0 21:12 // va vpn0位
+`define VA_OFFSET 11:0 // va offset位
+
+`define PTE_V 0 // pte v位
+`define PTE_R 1 // pte r位
+`define PTE_W 2 // pte w位
+`define PTE_X 3 // pte x位
+`define PTE_U 4 // pte u位
+`define PTE_G 5 // pte g位
+`define PTE_A 6 // pte a位
+`define PTE_D 7 // pte d位
+`define PTE_RSW 9:8 // pte rsw位
+`define PTE_PPN0 19:10 // pte ppn0位
+`define PTE_PPN1 31:20 // pte ppn1位
+
+`define PAGE_SIZE 12 // 页大小
+`define LEVELS 2 // 页表层数
+`define PTE_SIZE 4 // PTE大小
+
 `define INTERRUPT 1'b1
 `define EXCEPTION 1'b0
 
