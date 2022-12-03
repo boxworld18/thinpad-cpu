@@ -191,6 +191,12 @@ module csr_alu(
                     wdata = tmp;
                 end
             end
+            `CSR_SATP: begin              // read/write
+                if (s_en) begin
+                    wdata[`SATP_MODE] = tmp[`SATP_MODE];
+                    wdata[`SATP_PPN] = tmp[`SATP_PPN];
+                end
+            end
             `CSR_PMPCFG0: begin           // arbitrary read/write (ignore)
                 wdata = tmp;
             end

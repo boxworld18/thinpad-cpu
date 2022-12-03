@@ -120,6 +120,7 @@ typedef enum logic [1:0] {
 `define CSR_SIE 12'h104 // CSR sie地址
 `define CSR_SIP 12'h144 // CSR sip地址
 `define CSR_STVAL 12'h143 // CSR stval地址
+`define CSR_SATP 12'h180 // CSR satp地址
 
 `define CSR_PMPCFG0 12'h3a0 // CSR pmpcfg0地址
 `define CSR_PMPADDR0 12'h3b0 // CSR pmpaddr0地址

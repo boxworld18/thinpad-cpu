@@ -169,9 +169,9 @@ module control(
                 3'b110: begin id_csr_inst_sel = CSRRSI; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b1; end
                 3'b111: begin id_csr_inst_sel = CSRRCI; id_csr_raddr = csr_addr; id_csr_imm_sel = 1'b1; end
                 3'b000: begin
-                    case (csr_addr)
-                        `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end   // 跳转时取[31:2]
-                        `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end // 跳转时取[31:2]
+                    case (csr_addr) // TODO: 似乎不需要读csr了
+                        `CSR_ECALL: begin id_csr_inst_sel = ECALL; id_csr_raddr = `CSR_MTVEC; end 
+                        `CSR_EBREAK: begin id_csr_inst_sel = EBREAK; id_csr_raddr = `CSR_MTVEC; end
                         `CSR_MRET: begin id_csr_inst_sel = MRET; id_csr_raddr = `CSR_MEPC; end
                         `CSR_SRET: begin id_csr_inst_sel = SRET; id_csr_raddr = `CSR_SEPC; end
                         default: begin id_csr_inst_sel = CSR_INST_NOP; id_csr_raddr = 0; end

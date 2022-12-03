@@ -42,6 +42,7 @@ module cpu (
 
     // mode
     logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
+    logic [`CSR_DATA_BUS] satp; 
 
     // page fault
     logic if_inst_page_fault, mem_load_page_fault, mem_store_page_fault;
@@ -103,7 +104,10 @@ module cpu (
         .if_master_stall(if_master_stall),
 
         .inst_page_fault(if_inst_page_fault),
-        .inst_fault_va(inst_fault_va)
+        .inst_fault_va(inst_fault_va),
+
+        .satp(satp),
+        .mode(mode)
     );
 
     /* =========== IF end =========== */    
@@ -226,6 +230,7 @@ module cpu (
 
         .csr_mtvec(csr_mtvec), // unused
         .csr_stvec(csr_stvec), // unused
+        .csr_satp(satp),
         .mode_o(mode),
         .m_time_interrupt(m_time_interrupt),
         .s_time_interrupt(s_time_interrupt),
@@ -481,7 +486,10 @@ module cpu (
         .load_page_fault(mem_load_page_fault),
         .load_fault_va(mem_load_fault_va),
         .store_page_fault(mem_store_page_fault),
-        .store_fault_va(mem_store_fault_va)
+        .store_fault_va(mem_store_fault_va),
+
+        .satp(satp),
+        .mode(mode)
     );
 
     /* =========== MEM end =========== */

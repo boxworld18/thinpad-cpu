@@ -22,6 +22,7 @@ module csr(
 
     output wire [`CSR_DATA_BUS] csr_mtvec,
     output wire [`CSR_DATA_BUS] csr_stvec,
+    output wire [`CSR_DATA_BUS] csr_satp,
     output wire [1:0] mode_o,
     output wire m_time_interrupt,
     output wire s_time_interrupt,
@@ -56,6 +57,7 @@ module csr(
     logic [`CSR_DATA_BUS] sie;      
     logic [`CSR_DATA_BUS] sip;
     logic [`CSR_DATA_BUS] stval;
+    logic [`CSR_DATA_BUS] satp;
 
     // 无关寄存器, 防止报错
     logic [`CSR_DATA_BUS] pmpcfg0;
@@ -63,6 +65,7 @@ module csr(
 
     assign csr_mtvec = mtvec;
     assign csr_stvec = stvec;
+    assign csr_satp = satp;
 
     // time interrupt
     assign mip[`MIP_MTIP] = mtime >= mtimecmp;
@@ -93,6 +96,7 @@ module csr(
             `CSR_SIE:       rdata = sie;
             `CSR_SIP:       rdata = sip;
             `CSR_STVAL:     rdata = stval;
+            `CSR_SATP:      rdata = satp;
 
             `CSR_PMPCFG0:   rdata = pmpcfg0;
             `CSR_PMPADDR0:  rdata = pmpaddr0;
@@ -143,6 +147,20 @@ module csr(
             default: cause_exception_code = 31'h8fffffff;
         endcase
     end
+
+    logic [`CSR_DATA_BUS] trap_value;
+    always_comb begin
+        case (sel)
+            ECALL: trap_value = 0;
+            EBREAK: trap_value = 0;
+            INST_PAGE_FAULT: trap_value = wb_pc;
+            LOAD_PAGE_FAULT: trap_value = wb_load_fault_va;
+            STORE_PAGE_FAULT: trap_value = wb_store_fault_va;
+            M_TIME_INTERRUPT: trap_value = 0;
+            S_TIME_INTERRUPT: trap_value = 0;
+            default: trap_value = 0;
+        endcase
+    end 
 
     // jump
     always_comb begin
@@ -205,6 +223,7 @@ module csr(
             scause <= 0;
             sscratch <= 0;
             stval <= 0;
+            satp <= 0;
 
             pmpcfg0 <= 0;
             pmpaddr0 <= 0;
@@ -240,6 +259,7 @@ module csr(
                                             mip[`MIP_MTIP-1:0] <= {((wdata & `SIP_MASK) | (mip & ~`SIP_MASK))}[`MIP_MTIP-1:0];
                                         end
                         `CSR_STVAL:     stval <= wdata;
+                        `CSR_SATP:      satp <= wdata;
 
                         `CSR_PMPCFG0:   pmpcfg0 <= wdata;
                         `CSR_PMPADDR0:  pmpaddr0 <= wdata;
@@ -255,6 +275,7 @@ module csr(
                         mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
                         mstatus[`MSTATUS_SIE] <= 0;
                         mode <= S_MODE;
+                        stval <= trap_value;
                     end else begin
                         mepc <= wb_pc;
                         mcause[`CAUSE_INTERRUPT] <= `EXCEPTION;
@@ -263,6 +284,7 @@ module csr(
                         mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
                         mstatus[`MSTATUS_MIE] <= 0;
                         mode <= M_MODE;
+                        mtval <= trap_value;
                     end
                 end
                 MRET: begin
@@ -289,6 +311,7 @@ module csr(
                     mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
                     mstatus[`MSTATUS_MIE] <= 0;
                     mode <= M_MODE;
+                    mtval <= trap_value;
                 end
                 S_TIME_INTERRUPT: begin
                     if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
@@ -299,6 +322,7 @@ module csr(
                         mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
                         mstatus[`MSTATUS_SIE] <= 0;
                         mode <= S_MODE;
+                        stval <= trap_value;
                     end else begin
                         mepc <= wb_pc;
                         mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
@@ -307,6 +331,7 @@ module csr(
                         mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
                         mstatus[`MSTATUS_MIE] <= 0;
                         mode <= M_MODE;
+                        mtval <= trap_value;
                     end
                 end
                 default: ;

@@ -39,7 +39,7 @@ module cpu_mem_master(
     output reg [`ADDR_BUS] store_fault_va,
 
     // paging related
-    input wire [`DATA_BUS] satp,
+    input wire [`CSR_DATA_BUS] satp,
     input wire [1:0] mode
 );
 
