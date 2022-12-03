@@ -44,7 +44,7 @@ module csr_alu(
                 mcause_valid = 1'b1;
                 scause_valid = 1'b0;
             end
-            `EXCEPTION_CODE_U_TIME_INTERRUPT,
+            // `EXCEPTION_CODE_U_TIME_INTERRUPT,
             `EXCEPTION_CODE_S_TIME_INTERRUPT,
             `EXCEPTION_CODE_ECALL_U_MODE,
             `EXCEPTION_CODE_ECALL_S_MODE,
@@ -129,7 +129,7 @@ module csr_alu(
             end
             `CSR_MIDELEG: begin           // s-mode only support: u-time-interrupt, s-time-interrupt 
                 if (m_en) begin
-                    wdata[`EXCEPTION_CODE_U_TIME_INTERRUPT] = tmp[`EXCEPTION_CODE_U_TIME_INTERRUPT];
+                    // wdata[`EXCEPTION_CODE_U_TIME_INTERRUPT] = tmp[`EXCEPTION_CODE_U_TIME_INTERRUPT];
                     wdata[`EXCEPTION_CODE_S_TIME_INTERRUPT] = tmp[`EXCEPTION_CODE_S_TIME_INTERRUPT];
                 end
             end
@@ -170,7 +170,7 @@ module csr_alu(
                     wdata[`SSTATUS_SIE] = tmp[`SSTATUS_SIE];
                     wdata[`SSTATUS_SPIE] = tmp[`SSTATUS_SPIE];
                     wdata[`SSTATUS_SPP] = tmp[`SSTATUS_SPP];
-                    wdata[`SSTATUS_SUM] = tmp[`SSTATUS_SUM];
+                    wdata[`SSTATUS_SUM] = tmp[`SSTATUS_SUM]; // TODO: can S-mode write this bit?
                 end
             end
             `CSR_SSCRATCH: begin          // read/write
@@ -183,10 +183,8 @@ module csr_alu(
                     wdata[`SIE_STIE] = tmp[`SIE_STIE];
                 end
             end
-            `CSR_SIP: begin               // STIP: read/write
-                if (s_en) begin
-                    wdata[`SIP_STIP] = tmp[`SIP_STIP];
-                end
+            `CSR_SIP: begin               // STIP: read only
+                // nothing can be changed
             end
             `CSR_STVAL: begin             // read/write
                 if (s_en) begin

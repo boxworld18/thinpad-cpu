@@ -29,7 +29,8 @@ module cpu_mem_master(
     output reg mem_master_stall,
 
     // time
-    output reg time_interrupt,
+    output wire [63:0] mtime_o,
+    output wire [63:0] mtimecmp_o,
 
     // page fault
     output reg load_page_fault,
@@ -58,12 +59,13 @@ module cpu_mem_master(
     logic [63:0] mtime;
     logic [63:0] mtimecmp;   
 
+    assign mtime_o = mtime;
+    assign mtimecmp_o = mtimecmp;
+
     logic read_time_register;  // 是否读取mtime、mtimecmp寄存器
     logic [`DATA_BUS] time_register_rdata;
     logic write_time_register; // 是否写入mtime、mtimecmp寄存器
     // logic [`SEL] time_sel; // mtime、mtimecmp寄存器的选择信号 (4位) 
-
-    assign time_interrupt = (mtime >= mtimecmp) ? 1'b1 : 1'b0;
 
     logic [`DATA_BUS] data_shift;
     assign data_shift = addr[1:0] << 3;
