@@ -190,7 +190,7 @@ module csr(
                     endcase
                 end
                 ECALL, EBREAK, INST_PAGE_FAULT, LOAD_PAGE_FAULT, STORE_PAGE_FAULT: begin  
-                    if (medeleg[`EXCEPTION_CODE_ECALL_S_MODE] && (mode != M_MODE)) begin
+                    if (medeleg[cause_exception_code] && (mode != M_MODE)) begin
                         sepc <= wb_pc;
                         scause[`CAUSE_INTERRUPT] <= `EXCEPTION;
                         scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
