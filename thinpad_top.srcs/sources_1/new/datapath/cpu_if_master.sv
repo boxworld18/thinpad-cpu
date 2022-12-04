@@ -46,7 +46,8 @@ module cpu_if_master(
     assign L2_invalid = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
                         || (L2_pte[`PTE_U] == 0 && mode == U_MODE) 
-                        || (L2_pte[`PTE_X] == 0 && L2_pte[`PTE_R] == 0);
+                        || (L2_pte[`PTE_X] == 0);
+
 
     typedef enum logic [2:0] {
         IDLE = 0,
@@ -80,6 +81,7 @@ module cpu_if_master(
             case (state)
                 IDLE: begin
                     if (!stall) begin
+                        inst_page_fault <= 1'b0;
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;
                         if_master_stall <= 1'b1;
@@ -99,7 +101,7 @@ module cpu_if_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= satp[`SATP_PPN]<<`PAGE_SIZE + pc_reg[`VA_VPN1]<<`PTE_SIZE;
+                        wb_adr_o <= (satp[`SATP_PPN]<<`PAGE_SIZE) + (pc_reg[`VA_VPN1]*`PTE_SIZE);
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;
@@ -119,12 +121,15 @@ module cpu_if_master(
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;
                         inst_page_fault <= 1'b1;
+                        if(hold) begin
+                            pc_reg <= pc_reg - 4;
+                        end
                         inst_fault_va <= pc_reg;
                         state <= IDLE;
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= L1_pte[`PTE_PPN0]<<`PAGE_SIZE + pc_reg[`VA_VPN0]<<`PTE_SIZE;
+                        wb_adr_o <= (L1_pte[`PTE_PPN]<<`PAGE_SIZE) + (pc_reg[`VA_VPN0]*`PTE_SIZE);
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;
@@ -145,12 +150,15 @@ module cpu_if_master(
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;
                         inst_page_fault <= 1'b1;
+                        if(hold) begin
+                            pc_reg <= pc_reg - 4;
+                        end
                         inst_fault_va <= pc_reg;
                         state <= IDLE;
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= {L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], pc_reg[11:2], L2_pte[11:10]};
+                        wb_adr_o <= {L2_pte[29:10], pc_reg[`VA_OFFSET]};
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;

@@ -77,11 +77,17 @@ module cpu_mem_master(
 
     logic L1_invalid;
     assign L1_invalid = (L1_pte[`PTE_V] == 0) || (L1_pte[`PTE_R] == 0 && L1_pte[`PTE_W] == 1);
-    logic L2_invalid;
-    assign L2_invalid = (L2_pte[`PTE_V] == 0) 
+    logic L2_invalid_read;
+    assign L2_invalid_read = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
-                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE) 
-                        || (L2_pte[`PTE_X] == 0 && L2_pte[`PTE_R] == 0);
+                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE)
+                        || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 0);
+    logic L2_invalid_write;
+    assign L2_invalid_write = (L2_pte[`PTE_V] == 0) 
+                        || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
+                        || (L2_pte[`PTE_R] == 1 && L2_pte[`PTE_W] == 0)
+                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE)
+                        || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 0);
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -103,20 +109,16 @@ module cpu_mem_master(
             L2_pte <= 0;
         end else begin
             case (state)
-               IDLE: begin     
+               IDLE: begin    
+                    load_page_fault <= 1'b0;
+                    load_fault_va <= 0;
+                    store_page_fault <= 1'b0;
+                    store_fault_va <= 0; 
                     if (ren) begin
                         if (read_time_register) begin
                             mem_read_data <= time_register_rdata; 
                             state <= DONE;           
                         end else begin
-                            // is_read <= 1'b1;
-                            // state <= READ_DATA_ACTION;
-                            // wb_stb_o <= 1'b1;
-                            // wb_cyc_o <= 1'b1;
-                            // wb_adr_o <= addr;
-                            // wb_sel_o <= (sel << addr[1:0]);
-                            // wb_we_o <= 1'b0;
-                            // mem_master_stall <= 1'b1;
                             is_read <= 1'b1;
                             state <= L1_FETCH;
                             wb_cyc_o <= 1'b0;
@@ -127,16 +129,7 @@ module cpu_mem_master(
                     end else if (wen) begin
                         if (write_time_register) begin
                             state <= DONE;
-                        end else begin
-                            // is_read <= 1'b0;
-                            // state <= WRITE_DATA_ACTION;
-                            // wb_stb_o <= 1'b1;
-                            // wb_cyc_o <= 1'b1;
-                            // wb_adr_o <= addr;
-                            // wb_dat_o <= data << data_shift;
-                            // wb_sel_o <= (sel << addr[1:0]);
-                            // wb_we_o <= 1'b1;    
-                            // mem_master_stall <= 1'b1;    
+                        end else begin   
                             is_read <= 1'b0;
                             state <= L1_FETCH;
                             wb_cyc_o <= 1'b0;
@@ -175,7 +168,7 @@ module cpu_mem_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= satp[`SATP_PPN]<<`PAGE_SIZE + VA[`VA_VPN1]<<`PTE_SIZE;
+                        wb_adr_o <= (satp[`SATP_PPN]<<`PAGE_SIZE) + (VA[`VA_VPN1]*`PTE_SIZE);
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         mem_master_stall <= 1'b1;
@@ -200,7 +193,7 @@ module cpu_mem_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= L1_pte[`PTE_PPN0]<<`PAGE_SIZE + VA[`VA_VPN0]<<`PTE_SIZE;
+                        wb_adr_o <= (L1_pte[`PTE_PPN]<<`PAGE_SIZE) + (VA[`VA_VPN0]*`PTE_SIZE);
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         mem_master_stall <= 1'b1;
@@ -217,30 +210,38 @@ module cpu_mem_master(
                     end
                 end
                 FETCH_DONE: begin
-                    if(L2_invalid) begin
-                        wb_cyc_o <= 1'b0;
-                        wb_stb_o <= 1'b0;
-                        load_page_fault <= 1'b1;
-                        load_fault_va <= VA;
-                        state <= DONE;
-                    end else begin
-                        if(is_read) begin
+                    if(is_read) begin
+                        if(L2_invalid_read) begin
+                            wb_cyc_o <= 1'b0;
+                            wb_stb_o <= 1'b0;
+                            load_page_fault <= 1'b1;
+                            load_fault_va <= VA;
+                            state <= DONE;
+                        end else begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
                             wb_cyc_o <= 1'b1;
-                            wb_adr_o <={L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};
+                            wb_adr_o <={L2_pte[29:10], VA[`VA_OFFSET]};
                             wb_sel_o <= (sel << VA[1:0]);
                             wb_we_o <= 1'b0;
                             mem_master_stall <= 1'b1;
+                        end
+                    end else begin
+                        if(L2_invalid_write) begin
+                            wb_cyc_o <= 1'b0;
+                            wb_stb_o <= 1'b0;
+                            store_page_fault <= 1'b1;
+                            store_fault_va <= VA;
+                            state <= DONE;
                         end else begin
                             state <= WRITE_DATA_ACTION;
                             wb_stb_o <= 1'b1;
                             wb_cyc_o <= 1'b1;
-                            wb_adr_o <= {L2_pte[`PTE_PPN1], L2_pte[`PTE_PPN0], VA[11:2], L2_pte[11:10]};
+                            wb_adr_o <= {L2_pte[29:10], VA[`VA_OFFSET]};
                             wb_dat_o <= data << data_shift;
                             wb_sel_o <= (sel << VA[1:0]);
                             wb_we_o <= 1'b1;    
-                            mem_master_stall <= 1'b1;    
+                            mem_master_stall <= 1'b1;  
                         end
                     end
                 end

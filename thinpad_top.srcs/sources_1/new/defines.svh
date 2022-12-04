@@ -164,6 +164,7 @@ typedef enum logic [1:0] {
 `define PTE_RSW 9:8 // pte rsw位
 `define PTE_PPN0 19:10 // pte ppn0位
 `define PTE_PPN1 31:20 // pte ppn1位
+`define PTE_PPN 31:10 // pte ppn位
 
 `define PAGE_SIZE 12 // 页大小
 `define LEVELS 2 // 页表层数
