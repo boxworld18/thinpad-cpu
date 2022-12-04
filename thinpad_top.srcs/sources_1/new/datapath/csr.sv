@@ -166,16 +166,19 @@ module csr(
             M_TIME_INTERRUPT: begin
                 wb_csr_branch = 1'b1;
                 wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
-                wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
+                if (mtvec[`TVEC_MODE] == MODE_VECTORED) 
+                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
             end
             S_TIME_INTERRUPT: begin
                 wb_csr_branch = 1'b1;
                 if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
                     wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
-                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                    if (stvec[`TVEC_MODE] == MODE_VECTORED) 
+                        wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
                 end else begin
                     wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
-                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                    if (mtvec[`TVEC_MODE] == MODE_VECTORED) 
+                        wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
                 end
             end
             default: begin
