@@ -223,6 +223,7 @@ module cpu (
         .mtime(mtime),
         .mtimecmp(mtimecmp),
         .sel(wb_csr_inst_sel), 
+        .stall(stall),
 
         .raddr(id_csr_raddr),
         .rdata(id_csr_rdata),

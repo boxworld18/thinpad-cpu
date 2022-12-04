@@ -7,6 +7,7 @@ module csr(
     input wire rst,
     input wire [63:0] mtime,
     input wire [63:0] mtimecmp,
+    input wire stall,
     
     input wire [`CSR_SEL_WIDTH-1:0] sel, // instruction type  
     
@@ -272,63 +273,50 @@ module csr(
                     endcase
                 end
                 ECALL, EBREAK, INST_PAGE_FAULT, LOAD_PAGE_FAULT, STORE_PAGE_FAULT: begin  
-                    if (medeleg[cause_exception_code] && (mode != M_MODE)) begin
-                        sepc <= wb_pc;
-                        scause[`CAUSE_INTERRUPT] <= `EXCEPTION;
-                        scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
-                        mstatus[`MSTATUS_SPP] <= mode;
-                        mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
-                        mstatus[`MSTATUS_SIE] <= 0;
-                        mode <= S_MODE;
-                        stval <= trap_value;
-                    end else begin
-                        mepc <= wb_pc;
-                        mcause[`CAUSE_INTERRUPT] <= `EXCEPTION;
-                        mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
-                        mstatus[`MSTATUS_MPP] <= mode;
-                        mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                        mstatus[`MSTATUS_MIE] <= 0;
-                        mode <= M_MODE;
-                        mtval <= trap_value;
+                    if (!stall) begin
+                        if (medeleg[cause_exception_code] && (mode != M_MODE)) begin
+                            sepc <= wb_pc;
+                            scause[`CAUSE_INTERRUPT] <= `EXCEPTION;
+                            scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            mstatus[`MSTATUS_SPP] <= mode;
+                            mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
+                            mstatus[`MSTATUS_SIE] <= 0;
+                            mode <= S_MODE;
+                            stval <= trap_value;
+                        end else begin
+                            mepc <= wb_pc;
+                            mcause[`CAUSE_INTERRUPT] <= `EXCEPTION;
+                            mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            mstatus[`MSTATUS_MPP] <= mode;
+                            mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                            mstatus[`MSTATUS_MIE] <= 0;
+                            mode <= M_MODE;
+                            mtval <= trap_value;
+                        end
                     end
                 end
                 MRET: begin
-                    if (mode == M_MODE) begin
-                        mode <= mstatus[`MSTATUS_MPP];
-                        mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
-                        mstatus[`MSTATUS_MPP] <= U_MODE;
-                        mstatus[`MSTATUS_MPIE] <= 1;
+                    if (!stall) begin
+                        if (mode == M_MODE) begin
+                            mode <= mstatus[`MSTATUS_MPP];
+                            mstatus[`MSTATUS_MIE] <= mstatus[`MSTATUS_MPIE];
+                            mstatus[`MSTATUS_MPP] <= U_MODE;
+                            mstatus[`MSTATUS_MPIE] <= 1;
+                        end
                     end
                 end
                 SRET: begin
-                    if (mode == M_MODE || mode == S_MODE) begin
-                        mode <= mstatus[`MSTATUS_SPP];
-                        mstatus[`MSTATUS_SIE] <= mstatus[`MSTATUS_SPIE];
-                        mstatus[`MSTATUS_SPP] <= U_MODE;
-                        mstatus[`MSTATUS_SPIE] <= 1;
+                    if (!stall) begin
+                        if (mode == M_MODE || mode == S_MODE) begin
+                            mode <= mstatus[`MSTATUS_SPP];
+                            mstatus[`MSTATUS_SIE] <= mstatus[`MSTATUS_SPIE];
+                            mstatus[`MSTATUS_SPP] <= U_MODE;
+                            mstatus[`MSTATUS_SPIE] <= 1;
+                        end
                     end
                 end
                 M_TIME_INTERRUPT: begin 
-                    mepc <= wb_pc;
-                    mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                    mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
-                    mstatus[`MSTATUS_MPP] <= mode;
-                    mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
-                    mstatus[`MSTATUS_MIE] <= 0;
-                    mode <= M_MODE;
-                    mtval <= trap_value;
-                end
-                S_TIME_INTERRUPT: begin
-                    if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
-                        sepc <= wb_pc;
-                        scause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                        scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
-                        mstatus[`MSTATUS_SPP] <= mode;
-                        mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
-                        mstatus[`MSTATUS_SIE] <= 0;
-                        mode <= S_MODE;
-                        stval <= trap_value;
-                    end else begin
+                    if (!stall) begin
                         mepc <= wb_pc;
                         mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
                         mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
@@ -337,6 +325,29 @@ module csr(
                         mstatus[`MSTATUS_MIE] <= 0;
                         mode <= M_MODE;
                         mtval <= trap_value;
+                    end
+                end
+                S_TIME_INTERRUPT: begin
+                    if (!stall) begin
+                        if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
+                            sepc <= wb_pc;
+                            scause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                            scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            mstatus[`MSTATUS_SPP] <= mode;
+                            mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
+                            mstatus[`MSTATUS_SIE] <= 0;
+                            mode <= S_MODE;
+                            stval <= trap_value;
+                        end else begin
+                            mepc <= wb_pc;
+                            mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
+                            mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            mstatus[`MSTATUS_MPP] <= mode;
+                            mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
+                            mstatus[`MSTATUS_MIE] <= 0;
+                            mode <= M_MODE;
+                            mtval <= trap_value;
+                        end
                     end
                 end
                 default: ;
