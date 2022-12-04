@@ -190,9 +190,15 @@ module cpu_mem_master(
                     if(L1_invalid) begin
                         wb_cyc_o <= 1'b0;
                         wb_stb_o <= 1'b0;
-                        load_page_fault <= 1'b1;
-                        load_fault_va <= VA;
+                        if (is_read) begin
+                            load_page_fault <= 1'b1;
+                            load_fault_va <= VA;
+                        end else begin
+                            store_page_fault <= 1'b1;
+                            store_page_fault <= VA;
+                        end
                         state <= DONE;
+                        mem_master_stall <= 1'b0;
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
@@ -220,6 +226,7 @@ module cpu_mem_master(
                             load_page_fault <= 1'b1;
                             load_fault_va <= VA;
                             state <= DONE;
+                            mem_master_stall <= 1'b0;
                         end else begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
@@ -236,6 +243,7 @@ module cpu_mem_master(
                             store_page_fault <= 1'b1;
                             store_fault_va <= VA;
                             state <= DONE;
+                            mem_master_stall <= 1'b0;
                         end else begin
                             state <= WRITE_DATA_ACTION;
                             wb_stb_o <= 1'b1;
