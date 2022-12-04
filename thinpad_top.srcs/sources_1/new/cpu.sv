@@ -30,7 +30,10 @@ module cpu (
     output reg [`ADDR_BUS] wbm1_adr_o,
     output reg [`DATA_BUS] wbm1_dat_o,
     output reg [`SEL] wbm1_sel_o,
-    output reg wbm1_we_o
+    output reg wbm1_we_o,
+
+    output reg [`ADDR_BUS] wb_pc_o,
+    output reg [`DATA_BUS] wb_inst_o
 );
     // interrupt
     logic m_time_interrupt, s_time_interrupt;
@@ -596,5 +599,8 @@ module cpu (
         .if_id_hold(if_id_hold),
         .id_ex_hold(id_ex_hold)
     );
+
+    assign wb_pc_o = wb_pc;
+    assign wb_inst_o = wb_inst;
 
 endmodule

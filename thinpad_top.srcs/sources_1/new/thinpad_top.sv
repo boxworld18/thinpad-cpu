@@ -78,7 +78,10 @@ module thinpad_top (
     output wire       video_hsync,  // 行同步（水平同步）信号
     output wire       video_vsync,  // 场同步（垂直同步）信号
     output wire       video_clk,    // 像素时钟输出
-    output wire       video_de      // 行数据有效信号，用于区分消隐区
+    output wire       video_de,      // 行数据有效信号，用于区分消隐区
+
+    output wire [31:0] wb_pc,
+    output wire [31:0] wb_inst
 );
 
   /* =========== Demo code begin =========== */
@@ -195,7 +198,10 @@ module thinpad_top (
       .wbm1_sel_o(wbm1_sel_o),
       .wbm1_we_o (wbm1_we_o),
       .wbm1_err_i(wbm1_err_i),
-      .wbm1_rty_i(wbm1_rty_i)
+      .wbm1_rty_i(wbm1_rty_i),
+
+      .wb_pc_o(wb_pc),
+      .wb_inst_o(wb_inst)
   );
   /* =========== CPU end =========== */
 
