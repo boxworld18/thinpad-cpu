@@ -149,7 +149,7 @@ module cpu_mem_master(
                     end       
                 end
                 L1_FETCH: begin
-                    if (mode == M_MODE || satp[`SATP_MODE] == 1'b0 || (mode == U_MODE && (VA == 32'h10000000 || VA == 32'h10000005))) begin
+                    if (mode == M_MODE || satp[`SATP_MODE] == 1'b0) begin
                         if(is_read) begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
@@ -325,10 +325,10 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 32'hf0000000; // TODO: set a proper initial value
+            mtimecmp <= 64'h80000000; // TODO: set a proper initial value
         end else begin
             // 禁用时钟中断, 减少调试内容
-            // mtime <= mtime + 1;  // TODO: use a timer to count
+            mtime <= mtime + 1;  // TODO: use a timer to count
             if (wen && state == IDLE) begin
                 case (addr) // 目前只支�?4字节访问
                     `MTIME_ADDR_LOW: begin
