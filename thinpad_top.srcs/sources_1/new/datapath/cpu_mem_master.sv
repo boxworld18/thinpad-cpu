@@ -149,7 +149,7 @@ module cpu_mem_master(
                     end       
                 end
                 L1_FETCH: begin
-                    if(mode == M_MODE) begin
+                    if(mode == M_MODE || satp[`SATP_MODE] == 1'b0) begin
                         if(is_read) begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;

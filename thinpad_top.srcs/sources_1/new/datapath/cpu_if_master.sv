@@ -92,7 +92,7 @@ module cpu_if_master(
                     end
                 end
                 L1_FETCH: begin
-                    if(mode == M_MODE) begin
+                    if(mode == M_MODE || satp[`SATP_MODE] == 1'b0) begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
                         wb_adr_o <= pc_reg;
