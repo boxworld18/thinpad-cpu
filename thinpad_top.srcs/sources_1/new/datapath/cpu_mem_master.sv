@@ -112,7 +112,7 @@ module cpu_mem_master(
             L2_pte <= 0;
         end else begin
             case (state)
-               IDLE: begin    
+                IDLE: begin    
                     load_page_fault <= 1'b0;
                     load_fault_va <= 0;
                     store_page_fault <= 1'b0;
@@ -149,7 +149,7 @@ module cpu_mem_master(
                     end       
                 end
                 L1_FETCH: begin
-                    if(mode == M_MODE || satp[`SATP_MODE] == 1'b0) begin
+                    if (mode == M_MODE || satp[`SATP_MODE] == 1'b0 || (mode == U_MODE && (VA == 32'h10000000 || VA == 32'h10000005))) begin
                         if(is_read) begin
                             state <= READ_DATA_ACTION;
                             wb_stb_o <= 1'b1;
