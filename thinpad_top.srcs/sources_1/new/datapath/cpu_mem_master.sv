@@ -195,7 +195,7 @@ module cpu_mem_master(
                             load_fault_va <= VA;
                         end else begin
                             store_page_fault <= 1'b1;
-                            store_page_fault <= VA;
+                            store_fault_va <= VA;
                         end
                         state <= DONE;
                         mem_master_stall <= 1'b0;
