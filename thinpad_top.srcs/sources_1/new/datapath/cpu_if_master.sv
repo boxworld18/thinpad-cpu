@@ -33,6 +33,7 @@ module cpu_if_master(
 
     // paging related
     input wire [`CSR_DATA_BUS] satp,
+    input wire [`CSR_DATA_BUS] mstatus,
     input wire [1:0] mode
 );
 
@@ -45,7 +46,8 @@ module cpu_if_master(
     logic L2_invalid;
     assign L2_invalid = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
-                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE) 
+                        || (L2_pte[`PTE_U] == 0 && mode == U_MODE)  
+                        || (L2_pte[`PTE_U] == 1 && mstatus[`MSTATUS_SUM] == 0 && mode == S_MODE) 
                         || (L2_pte[`PTE_X] == 0);
 
 

@@ -40,6 +40,7 @@ module cpu_mem_master(
 
     // paging related
     input wire [`CSR_DATA_BUS] satp,
+    input wire [`CSR_DATA_BUS] mstatus,
     input wire [1:0] mode
 );
 
@@ -81,12 +82,14 @@ module cpu_mem_master(
     assign L2_invalid_read = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
                         || (L2_pte[`PTE_U] == 0 && mode == U_MODE)
+                        || (L2_pte[`PTE_U] == 1 && mstatus[`MSTATUS_SUM] == 0 && mode == S_MODE)
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 0);
     logic L2_invalid_write;
     assign L2_invalid_write = (L2_pte[`PTE_V] == 0) 
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 1) 
                         || (L2_pte[`PTE_R] == 1 && L2_pte[`PTE_W] == 0)
                         || (L2_pte[`PTE_U] == 0 && mode == U_MODE)
+                        || (L2_pte[`PTE_U] == 1 && mstatus[`MSTATUS_SUM] == 0 && mode == S_MODE)
                         || (L2_pte[`PTE_R] == 0 && L2_pte[`PTE_W] == 0);
 
     always_ff @(posedge clk) begin

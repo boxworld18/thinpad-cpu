@@ -23,6 +23,7 @@ module csr(
     output wire [`CSR_DATA_BUS] csr_mtvec,
     output wire [`CSR_DATA_BUS] csr_stvec,
     output wire [`CSR_DATA_BUS] csr_satp,
+    output wire [`CSR_DATA_BUS] csr_mstatus,
     output wire [1:0] mode_o,
     output wire m_time_interrupt,
     output wire s_time_interrupt,
@@ -66,6 +67,7 @@ module csr(
     assign csr_mtvec = mtvec;
     assign csr_stvec = stvec;
     assign csr_satp = satp;
+    assign csr_mstatus = mstatus;
 
     // time interrupt
     assign mip[`MIP_MTIP] = mtime >= mtimecmp;
