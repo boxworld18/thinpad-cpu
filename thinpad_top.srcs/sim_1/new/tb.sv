@@ -62,17 +62,17 @@ module tb;
     #1000;
     reset_btn = 0;
     
-    last_pc = 32'hffffffff;
+//    last_pc = 32'hffffffff;
 
-    outputfile = $fopen("test.txt","w");
-    while (1) begin
-        #10;
-        if (last_pc === wb_pc) continue;
-        if (wb_inst[0] === 1'bz) continue;
-        last_pc = wb_pc;
-        $fwrite(outputfile, "0x%h:  %h\n", wb_pc, wb_inst);
-    end
-    $fclose(outputfile);
+//    outputfile = $fopen("test.txt","w");
+//    while (1) begin
+//        #10;
+//        if (last_pc === wb_pc) continue;
+//        if (wb_pc === 32'h0) continue;
+//        last_pc = wb_pc;
+//        $fwrite(outputfile, "0x%h:  %h\n", wb_pc, wb_inst);
+//    end
+//    $fclose(outputfile);
 
     #1000000000;
     $finish;
@@ -127,10 +127,7 @@ module tb;
       .flash_oe_n(flash_oe_n),
       .flash_ce_n(flash_ce_n),
       .flash_byte_n(flash_byte_n),
-      .flash_we_n(flash_we_n),
-
-      .wb_pc(wb_pc),
-      .wb_inst(wb_inst)
+      .flash_we_n(flash_we_n)
   );
   // 时钟�??
   clock osc (
