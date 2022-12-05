@@ -71,9 +71,10 @@ module csr(
     assign csr_mstatus = mstatus;
 
     // time interrupt
-    assign mip[`MIP_MTIP] = mtime >= mtimecmp;
+    assign mip[`MIP_MTIP] = (mtime >= mtimecmp);
     assign m_time_interrupt = mip[`MIP_MTIP] && mie[`MIE_MTIE] && (mstatus[`MSTATUS_MIE] || mode < M_MODE);
-    assign s_time_interrupt = mip[`MIP_STIP] && mie[`MIE_STIE] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE);                                
+    assign s_time_interrupt = mip[`MIP_STIP] && mie[`MIE_STIE] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE); 
+    // assign s_time_interrupt = mip[`MIP_STIP] && mideleg[`EXCEPTION_CODE_S_TIME_INTERRUPT] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE);                               
                                     
     always_comb begin
         case (raddr)
@@ -185,18 +186,31 @@ module csr(
                 wb_csr_branch_target = sepc;
             end 
             M_TIME_INTERRUPT: begin
-                wb_csr_branch = 1'b1;
-                wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
-                wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
+                if (m_time_interrupt) begin
+                    wb_csr_branch = 1'b1;
+                    wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
+                    if (mtvec[`TVEC_MODE] == MODE_VECTORED)
+                        wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_M_TIME_INTERRUPT << 2);
+                end else begin
+                    wb_csr_branch = 1'b0;
+                    wb_csr_branch_target = 0;
+                end
             end
             S_TIME_INTERRUPT: begin
-                wb_csr_branch = 1'b1;
-                if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
-                    wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
-                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                if (s_time_interrupt) begin
+                    wb_csr_branch = 1'b1;
+                    if (mideleg[`EXCEPTION_CODE_S_TIME_INTERRUPT] && (mode != M_MODE)) begin
+                        wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
+                        if (stvec[`TVEC_MODE] == MODE_VECTORED)
+                            wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                    end else begin
+                        wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
+                        if (mtvec[`TVEC_MODE] == MODE_VECTORED)
+                            wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                    end
                 end else begin
-                    wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
-                    wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
+                    wb_csr_branch = 1'b0;
+                    wb_csr_branch_target = 0;
                 end
             end
             default: begin
@@ -316,10 +330,10 @@ module csr(
                     end
                 end
                 M_TIME_INTERRUPT: begin 
-                    if (!stall) begin
+                    if (!stall && m_time_interrupt) begin
                         mepc <= wb_pc;
                         mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                        mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                        mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_M_TIME_INTERRUPT;
                         mstatus[`MSTATUS_MPP] <= mode;
                         mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
                         mstatus[`MSTATUS_MIE] <= 0;
@@ -328,11 +342,11 @@ module csr(
                     end
                 end
                 S_TIME_INTERRUPT: begin
-                    if (!stall) begin
-                        if (mideleg[cause_exception_code] && (mode != M_MODE)) begin
+                    if (!stall && s_time_interrupt) begin
+                        if (mideleg[`EXCEPTION_CODE_S_TIME_INTERRUPT] && (mode != M_MODE)) begin
                             sepc <= wb_pc;
                             scause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                            scause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            scause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_S_TIME_INTERRUPT;
                             mstatus[`MSTATUS_SPP] <= mode;
                             mstatus[`MSTATUS_SPIE] <= mstatus[`MSTATUS_SIE];
                             mstatus[`MSTATUS_SIE] <= 0;
@@ -341,7 +355,7 @@ module csr(
                         end else begin
                             mepc <= wb_pc;
                             mcause[`CAUSE_INTERRUPT] <= `INTERRUPT;
-                            mcause[`CAUSE_EXCEPTION_CODE] <= cause_exception_code;
+                            mcause[`CAUSE_EXCEPTION_CODE] <= `EXCEPTION_CODE_S_TIME_INTERRUPT;
                             mstatus[`MSTATUS_MPP] <= mode;
                             mstatus[`MSTATUS_MPIE] <= mstatus[`MSTATUS_MIE];
                             mstatus[`MSTATUS_MIE] <= 0;

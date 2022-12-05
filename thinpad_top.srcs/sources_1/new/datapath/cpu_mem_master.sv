@@ -118,7 +118,7 @@ module cpu_mem_master(
                     store_page_fault <= 1'b0;
                     store_fault_va <= 0; 
                     if (ren) begin
-                        if (read_time_register) begin
+                        if (read_time_register && mode == M_MODE) begin
                             mem_read_data <= time_register_rdata; 
                             state <= DONE;           
                         end else begin
@@ -130,7 +130,7 @@ module cpu_mem_master(
                             VA <= addr;
                         end
                     end else if (wen) begin
-                        if (write_time_register) begin
+                        if (write_time_register && mode == M_MODE) begin
                             state <= DONE;
                         end else begin   
                             is_read <= 1'b0;
@@ -325,11 +325,11 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 64'h80000000; // TODO: set a proper initial value
+            mtimecmp <= 64'd2_0000_0000; // TODO: set a proper initial value
         end else begin
             // 禁用时钟中断, 减少调试内容
             mtime <= mtime + 1;  // TODO: use a timer to count
-            if (wen && state == IDLE) begin
+            if (wen && state == IDLE && mode == M_MODE) begin
                 case (addr) // 目前只支�?4字节访问
                     `MTIME_ADDR_LOW: begin
                         mtime[31:0] <= data;

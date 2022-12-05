@@ -77,8 +77,15 @@ module cpu (
     logic [`ADDR_BUS] if_pc;
     logic [`INST_BUS] if_inst;    
 
-    logic [`ADDR_BUS] id_pc;
-    logic [`INST_BUS] id_inst;
+    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] id_pc;
+    (* MARK_DEBUG = "TRUE" *) logic [`INST_BUS] id_inst;
+
+    ila_0 ila(
+        .clk(clk_i),
+        .probe0(id_pc),
+        .probe1(id_inst)
+    );
+
     logic id_inst_page_fault;
 
     logic [`ADDR_BUS] pc_branch;
