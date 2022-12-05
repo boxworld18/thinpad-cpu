@@ -325,10 +325,10 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 64'd20_0000; // TODO: set a proper initial value
+            mtimecmp <= 64'd300_000_000; 
         end else begin
             // 禁用时钟中断, 减少调试内容
-            mtime <= mtime + 1;  // TODO: use a timer to count
+            mtime <= mtime + 1; 
             if (wen && state == IDLE && mode == M_MODE) begin
                 case (addr) // 目前只支�?4字节访问
                     `MTIME_ADDR_LOW: begin
