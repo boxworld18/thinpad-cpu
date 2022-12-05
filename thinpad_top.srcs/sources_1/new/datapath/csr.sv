@@ -73,7 +73,7 @@ module csr(
     // time interrupt
     assign mip[`MIP_MTIP] = mtime >= mtimecmp;
     assign m_time_interrupt = mip[`MIP_MTIP] && mie[`MIE_MTIE] && (mstatus[`MSTATUS_MIE] || mode < M_MODE);
-    assign s_time_interrupt = mip[`MIP_STIP] && mie[`MIE_STIE] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE);                                
+    assign s_time_interrupt = sip[`MIP_STIP] && sie[`MIE_STIE] && ((mode == S_MODE && mstatus[`MSTATUS_SIE]) || mode < S_MODE);                                
                                     
     always_comb begin
         case (raddr)
