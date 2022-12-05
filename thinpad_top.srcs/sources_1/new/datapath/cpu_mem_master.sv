@@ -326,7 +326,7 @@ module cpu_mem_master(
         if (rst) begin
             mtime <= 0;
             mtimecmp <= 64'd300_000_000; 
-            // mtimecmp <= 64'd200_000;
+            // mtimecmp <= 64'd150_000;
         end else begin
             // 禁用时钟中断, 减少调试内容
             mtime <= mtime + 1; 

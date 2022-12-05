@@ -437,6 +437,7 @@ module cpu (
         .rst(rst_i),
         .stall(stall),
         .flush(ex_mem_flush),
+        .if_pc(if_pc),
 
         .ex_pc(ex_pc),
         .ex_inst(ex_inst),

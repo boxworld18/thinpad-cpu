@@ -7,6 +7,7 @@ module ex_mem(
     input wire rst,
     input wire stall,
     input wire flush,
+    input wire if_pc,
     
     // pc
     input wire [`ADDR_BUS] ex_pc,
@@ -97,7 +98,7 @@ module ex_mem(
                 mem_csr_waddr <= 0;
                 mem_csr_wdata <= 0;
             end else if (s_time_interrupt) begin
-                mem_pc <= last_not_zero_pc;
+                mem_pc <= if_pc; // mepc
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;
