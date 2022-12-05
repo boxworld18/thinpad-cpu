@@ -52,6 +52,18 @@ module ex_mem(
     output reg [`CSR_DATA_BUS] mem_csr_wdata
 );
 
+    logic [`ADDR_BUS] last_not_zero_pc;
+
+    always_ff @ (posedge clk) begin
+        if (rst) begin
+            last_not_zero_pc <= `ZERO_WORD;
+        end else begin
+            if (ex_pc != `ZERO_WORD) begin
+                last_not_zero_pc <= ex_pc;
+            end
+        end
+    end
+
     always_ff @ (posedge clk) begin
         if (rst) begin
             mem_pc <= `ZERO_WORD;
@@ -70,7 +82,7 @@ module ex_mem(
             mem_csr_wdata <= 0;
         end else if (!stall) begin
             if (m_time_interrupt) begin
-                mem_pc <= ex_pc;
+                mem_pc <= last_not_zero_pc;
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;
@@ -85,7 +97,7 @@ module ex_mem(
                 mem_csr_waddr <= 0;
                 mem_csr_wdata <= 0;
             end else if (s_time_interrupt) begin
-                mem_pc <= ex_pc;
+                mem_pc <= last_not_zero_pc;
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;
