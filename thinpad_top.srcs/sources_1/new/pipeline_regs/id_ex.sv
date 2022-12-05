@@ -39,6 +39,8 @@ module id_ex(
     input wire [`REG_ADDR_BUS] id_rs2,
     // imm
     input wire [`DATA_BUS] id_imm,
+    input wire branch,
+    input wire [`ADDR_BUS] pc_branch,
 
     // interrupt
     input wire m_time_interrupt,
@@ -100,7 +102,7 @@ module id_ex(
             ex_imm <= 0;
         end else if (!stall) begin
             if (m_time_interrupt) begin
-                ex_pc <= id_pc;     // TODO: hold or next ?
+                ex_pc <= branch ? pc_branch : id_pc;  
                 ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;
                 ex_rf_waddr <= 0;
@@ -124,7 +126,7 @@ module id_ex(
                 ex_rs2 <= 0;
                 ex_imm <= 0;
             end else if (s_time_interrupt) begin
-                ex_pc <= id_pc;     // TODO: hold or next ?
+                ex_pc <= branch ? pc_branch : id_pc; 
                 ex_inst <= `INST_NOP;
                 ex_rf_wen <= 1'b0;
                 ex_rf_waddr <= 0;
