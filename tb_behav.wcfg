@@ -13,15 +13,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="18993880833fs"></ZoomStartTime>
-      <ZoomEndTime time="18999295834fs"></ZoomEndTime>
-      <Cursor1Time time="18995595833fs"></Cursor1Time>
+      <ZoomStartTime time="8743320000fs"></ZoomStartTime>
+      <ZoomEndTime time="8745225001fs"></ZoomEndTime>
+      <Cursor1Time time="8744510000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="270"></NameColumnWidth>
-      <ValueColumnWidth column_width="175"></ValueColumnWidth>
+      <ValueColumnWidth column_width="170"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="255" />
+   <WVObjectSize size="253" />
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_if_master/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -101,10 +101,6 @@
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_if_master/satp" type="array">
       <obj_property name="ElementShortName">satp[31:0]</obj_property>
       <obj_property name="ObjectShortName">satp[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_if_master/mode" type="array">
-      <obj_property name="ElementShortName">mode[1:0]</obj_property>
-      <obj_property name="ObjectShortName">mode[1:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/u_cpu_if_master/pc_reg" type="array">
       <obj_property name="ElementShortName">pc_reg[31:0]</obj_property>
@@ -218,38 +214,6 @@
       <obj_property name="ElementShortName">wbm1_we_o</obj_property>
       <obj_property name="ObjectShortName">wbm1_we_o</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/wb_pc_o" type="array">
-      <obj_property name="ElementShortName">wb_pc_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_pc_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/wb_inst_o" type="array">
-      <obj_property name="ElementShortName">wb_inst_o[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_inst_o[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/m_time_interrupt" type="logic">
-      <obj_property name="ElementShortName">m_time_interrupt</obj_property>
-      <obj_property name="ObjectShortName">m_time_interrupt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/s_time_interrupt" type="logic">
-      <obj_property name="ElementShortName">s_time_interrupt</obj_property>
-      <obj_property name="ObjectShortName">s_time_interrupt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/mtime" type="array">
-      <obj_property name="ElementShortName">mtime[63:0]</obj_property>
-      <obj_property name="ObjectShortName">mtime[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/mtimecmp" type="array">
-      <obj_property name="ElementShortName">mtimecmp[63:0]</obj_property>
-      <obj_property name="ObjectShortName">mtimecmp[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_branch" type="logic">
-      <obj_property name="ElementShortName">wb_csr_branch</obj_property>
-      <obj_property name="ObjectShortName">wb_csr_branch</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_branch_target" type="array">
-      <obj_property name="ElementShortName">wb_csr_branch_target[31:0]</obj_property>
-      <obj_property name="ObjectShortName">wb_csr_branch_target[31:0]</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/mode" type="array">
       <obj_property name="ElementShortName">mode[1:0]</obj_property>
       <obj_property name="ObjectShortName">mode[1:0]</obj_property>
@@ -330,6 +294,30 @@
       <obj_property name="ElementShortName">id_ex_hold</obj_property>
       <obj_property name="ObjectShortName">id_ex_hold</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/m_time_interrupt" type="logic">
+      <obj_property name="ElementShortName">m_time_interrupt</obj_property>
+      <obj_property name="ObjectShortName">m_time_interrupt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/s_time_interrupt" type="logic">
+      <obj_property name="ElementShortName">s_time_interrupt</obj_property>
+      <obj_property name="ObjectShortName">s_time_interrupt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/mtime" type="array">
+      <obj_property name="ElementShortName">mtime[63:0]</obj_property>
+      <obj_property name="ObjectShortName">mtime[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/mtimecmp" type="array">
+      <obj_property name="ElementShortName">mtimecmp[63:0]</obj_property>
+      <obj_property name="ObjectShortName">mtimecmp[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_branch" type="logic">
+      <obj_property name="ElementShortName">wb_csr_branch</obj_property>
+      <obj_property name="ObjectShortName">wb_csr_branch</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/wb_csr_branch_target" type="array">
+      <obj_property name="ElementShortName">wb_csr_branch_target[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wb_csr_branch_target[31:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/if_pc" type="array">
       <obj_property name="ElementShortName">if_pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">if_pc[31:0]</obj_property>
@@ -345,6 +333,10 @@
    <wvobject fp_name="/tb/dut/u_cpu/id_inst" type="array">
       <obj_property name="ElementShortName">id_inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">id_inst[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/dut/u_cpu/u_cpu_if_master/mode" type="array">
+      <obj_property name="ElementShortName">mode[1:0]</obj_property>
+      <obj_property name="ObjectShortName">mode[1:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/tb/dut/u_cpu/id_inst_page_fault" type="logic">
       <obj_property name="ElementShortName">id_inst_page_fault</obj_property>

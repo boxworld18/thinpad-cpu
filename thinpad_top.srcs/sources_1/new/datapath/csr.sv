@@ -25,6 +25,10 @@ module csr(
     output wire [`CSR_DATA_BUS] csr_stvec,
     output wire [`CSR_DATA_BUS] csr_satp,
     output wire [`CSR_DATA_BUS] csr_mstatus,
+    output wire [`CSR_DATA_BUS] csr_mip,
+    output wire [`CSR_DATA_BUS] csr_mie,
+    output wire [`CSR_DATA_BUS] csr_medeleg,
+    output wire [`CSR_DATA_BUS] csr_mideleg,
     output wire [1:0] mode_o,
     output wire m_time_interrupt,
     output wire s_time_interrupt,
@@ -69,6 +73,10 @@ module csr(
     assign csr_stvec = stvec;
     assign csr_satp = satp;
     assign csr_mstatus = mstatus;
+    assign csr_mip = mip;
+    assign csr_mie = mie;
+    assign csr_medeleg = medeleg;
+    assign csr_mideleg = mideleg;
 
     // time interrupt
     assign mip[`MIP_MTIP] = (mtime >= mtimecmp);
@@ -202,6 +210,13 @@ module csr(
                     wb_csr_branch_target = 0;
                 end
             end
+            //    assign real_mie = ((mode_i == M_MODE) && mstatus_mie) || mode_i < M_MODE;
+            //    assign real_sie = ((mode_i == S_MODE) && mstatus_sie) || mode_i < S_MODE;
+            // 
+            // 2. stip stie mideleg
+            // mi = mie & mip;
+            // m_int = mi & ~mideleg;   M_time --> M_mode 
+            // s_int = mi & mideleg;    S_time --> S / M
             S_TIME_INTERRUPT: begin
                 if (s_time_interrupt) begin
                     wb_csr_branch = 1'b1;
@@ -209,7 +224,7 @@ module csr(
                         wb_csr_branch_target = {stvec[`TVEC_BASE], 2'b00};
                         if (stvec[`TVEC_MODE] == MODE_VECTORED)
                             wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);
-                    end else begin
+                    end else if (mode == M_MODE && mstatus[`MSTATUS_MIE]) begin
                         wb_csr_branch_target = {mtvec[`TVEC_BASE], 2'b00};
                         if (mtvec[`TVEC_MODE] == MODE_VECTORED)
                             wb_csr_branch_target = wb_csr_branch_target + (`EXCEPTION_CODE_S_TIME_INTERRUPT << 2);

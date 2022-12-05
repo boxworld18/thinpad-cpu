@@ -82,8 +82,8 @@ module ex_mem(
             mem_csr_waddr <= 0;
             mem_csr_wdata <= 0;
         end else if (!stall) begin
-            if (m_time_interrupt) begin
-                mem_pc <= last_not_zero_pc;
+            if (m_time_interrupt && ex_pc != `ZERO_WORD) begin // bubble时, 不中断
+                mem_pc <= ex_pc;
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;
@@ -97,8 +97,8 @@ module ex_mem(
                 mem_csr_inst_sel <= M_TIME_INTERRUPT;
                 mem_csr_waddr <= 0;
                 mem_csr_wdata <= 0;
-            end else if (s_time_interrupt) begin
-                mem_pc <= if_pc; // mepc
+            end else if (s_time_interrupt && ex_pc != `ZERO_WORD) begin // bubble时, 不中断
+                mem_pc <= ex_pc;
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;

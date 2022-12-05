@@ -325,7 +325,7 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 64'd300_000_000; 
+            mtimecmp <= 64'd0; 
             // mtimecmp <= 64'd150_000;
         end else begin
             // 禁用时钟中断, 减少调试内容
