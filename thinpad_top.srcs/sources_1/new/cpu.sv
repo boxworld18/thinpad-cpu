@@ -35,28 +35,28 @@ module cpu (
     output reg [`ADDR_BUS] wb_pc_o,
     output reg [`DATA_BUS] wb_inst_o
 );
-    (* MARK_DEBUG = "TRUE" *) logic wbm0_adr_o_copy;
-    (* MARK_DEBUG = "TRUE" *) logic wbm1_adr_o_copy;
+    logic wbm0_adr_o_copy;
+    logic wbm1_adr_o_copy;
     assign wbm0_adr_o_copy = wbm0_adr_o;
     assign wbm1_adr_o_copy = wbm1_adr_o;
 
     // interrupt
-    (* MARK_DEBUG = "TRUE" *) logic m_time_interrupt;
-    (* MARK_DEBUG = "TRUE" *) logic s_time_interrupt;
-    (* MARK_DEBUG = "TRUE" *) logic [63:0] mtime;
-    (* MARK_DEBUG = "TRUE" *) logic [63:0] mtimecmp;
+    logic m_time_interrupt;
+    logic s_time_interrupt;
+    logic [63:0] mtime;
+    logic [63:0] mtimecmp;
 
     logic wb_csr_branch;
     logic [`ADDR_BUS] wb_csr_branch_target;
 
     // mode
-    (* MARK_DEBUG = "TRUE" *) logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
+    logic [1:0] mode; // 0: U_MODE 1: S_MODE 3: M_MODE
     logic [`CSR_DATA_BUS] satp; 
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_DATA_BUS] mstatus;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_DATA_BUS] mip;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_DATA_BUS] mie;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_DATA_BUS] medeleg;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_DATA_BUS] mideleg;
+    logic [`CSR_DATA_BUS] mstatus;
+    logic [`CSR_DATA_BUS] mip;
+    logic [`CSR_DATA_BUS] mie;
+    logic [`CSR_DATA_BUS] medeleg;
+    logic [`CSR_DATA_BUS] mideleg;
 
     // page fault
     logic if_inst_page_fault, mem_load_page_fault, mem_store_page_fault;
@@ -84,11 +84,11 @@ module cpu (
 
     /* =========== IF begin =========== */
 
-    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] if_pc;
+    logic [`ADDR_BUS] if_pc;
     logic [`INST_BUS] if_inst;    
 
-    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] id_pc;
-    (* MARK_DEBUG = "TRUE" *) logic [`INST_BUS] id_inst;
+    logic [`ADDR_BUS] id_pc;
+    logic [`INST_BUS] id_inst;
 
     logic id_inst_page_fault;
 
@@ -177,7 +177,7 @@ module cpu (
     logic id_alu_sel_pc;
     logic id_sel_csr;
     // csr
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_SEL_WIDTH-1:0] id_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] id_csr_inst_sel;
     logic [`CSR_ADDR_BUS] id_csr_raddr;
     logic id_csr_imm_sel;
 
@@ -222,7 +222,7 @@ module cpu (
     );
 
     logic [`CSR_DATA_BUS] id_csr_rdata;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_SEL_WIDTH-1:0] wb_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] wb_csr_inst_sel;
     logic [`CSR_ADDR_BUS] wb_csr_waddr;
     logic [`CSR_DATA_BUS] wb_csr_wdata;
     logic [`CSR_DATA_BUS] csr_mtvec;
@@ -263,7 +263,7 @@ module cpu (
 
     /* =========== ID end =========== */
 
-    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] ex_pc;
+    logic [`ADDR_BUS] ex_pc;
     logic [`INST_BUS] ex_inst;
     logic [`DATA_BUS] ex_rf_data_a;
     logic [`DATA_BUS] ex_rf_data_b;
@@ -275,7 +275,7 @@ module cpu (
     logic ex_alu_sel_imm;
     logic ex_alu_sel_pc;
     logic ex_sel_csr;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_SEL_WIDTH-1:0] ex_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] ex_csr_inst_sel;
     logic [`CSR_ADDR_BUS] ex_csr_waddr;
     logic [`CSR_ADDR_BUS] ex_csr_raddr;
     logic [`CSR_DATA_BUS] ex_csr_rdata;
@@ -429,7 +429,7 @@ module cpu (
 
     /* =========== EX end =========== */    
 
-    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] mem_pc;
+    logic [`ADDR_BUS] mem_pc;
     logic [`INST_BUS] mem_inst;
     logic [`DATA_BUS] mem_wb_wdata;
     logic mem_wb_wen;
@@ -437,7 +437,7 @@ module cpu (
     logic [`SEL] mem_wb_sel;
     logic mem_wb_read_unsigned;
     logic mem_rf_sel;
-    (* MARK_DEBUG = "TRUE" *) logic [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel;
+    logic [`CSR_SEL_WIDTH-1:0] mem_csr_inst_sel;
     logic [`CSR_ADDR_BUS] mem_csr_waddr;
     
     ex_mem u_ex_mem(
@@ -522,7 +522,7 @@ module cpu (
 
     /* =========== MEM end =========== */
 
-    (* MARK_DEBUG = "TRUE" *) logic [`ADDR_BUS] wb_pc;
+    logic [`ADDR_BUS] wb_pc;
     logic [`INST_BUS] wb_inst;
     logic [`REG_DATA_BUS] mem_rf_wdata;
     assign mem_rf_wdata = mem_rf_sel ? mem_read_data : mem_data;
@@ -619,37 +619,6 @@ module cpu (
 
         .if_id_hold(if_id_hold),
         .id_ex_hold(id_ex_hold)
-    );
-
-    ila_0 ila(
-        .clk(clk_i),
-        .probe0(if_pc),
-        .probe1(id_pc),
-        .probe2(ex_pc),
-        .probe3(mem_pc),
-        .probe4(wb_pc),
-
-        .probe5(m_time_interrupt),
-        .probe6(s_time_interrupt),
-
-        .probe7(mstatus),
-        .probe8(mip),
-        .probe9(mie),
-        .probe10(medeleg),
-        .probe11(mideleg),
-
-        .probe12(id_csr_inst_sel),
-        .probe13(ex_csr_inst_sel),
-        .probe14(mem_csr_inst_sel),
-        .probe15(wb_csr_inst_sel),
-
-        .probe16(wbm0_adr_o_copy),
-        .probe17(wbm1_adr_o_copy),
-
-        .probe18(mode),
-
-        .probe19(mtime),
-        .probe20(mtimecmp)
     );
 
 endmodule
