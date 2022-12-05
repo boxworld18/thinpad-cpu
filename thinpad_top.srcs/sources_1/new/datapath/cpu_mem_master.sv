@@ -325,7 +325,7 @@ module cpu_mem_master(
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
-            mtimecmp <= 64'd2_0000_0000; // TODO: set a proper initial value
+            mtimecmp <= 64'd20_0000; // TODO: set a proper initial value
         end else begin
             // 禁用时钟中断, 减少调试内容
             mtime <= mtime + 1;  // TODO: use a timer to count
