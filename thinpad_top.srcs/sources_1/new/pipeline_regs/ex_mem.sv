@@ -28,6 +28,9 @@ module ex_mem(
     input wire [`CSR_ADDR_BUS] ex_csr_waddr,
     input wire [`CSR_DATA_BUS] ex_csr_wdata,
 
+    input wire m_time_interrupt,
+    input wire s_time_interrupt,
+
     //output
     output reg [`ADDR_BUS] mem_pc,
     output reg [`INST_BUS] mem_inst,
@@ -66,8 +69,8 @@ module ex_mem(
             mem_csr_waddr <= 0;
             mem_csr_wdata <= 0;
         end else if (!stall) begin
-            if (flush) begin
-                mem_pc <= `ZERO_WORD;
+            if (m_time_interrupt) begin
+                mem_pc <= ex_pc;
                 mem_inst <= `INST_NOP;
                 mem_data <= 0;
                 mem_wb_wdata <= 0;
@@ -78,24 +81,56 @@ module ex_mem(
                 mem_rf_wen <= 1'b0;
                 mem_rf_waddr <= 0;
                 mem_rf_sel <= 1'b0;
-                mem_csr_inst_sel <= 0;
+                mem_csr_inst_sel <= M_TIME_INTERRUPT;
+                mem_csr_waddr <= 0;
+                mem_csr_wdata <= 0;
+            end else if (s_time_interrupt) begin
+                mem_pc <= ex_pc;
+                mem_inst <= `INST_NOP;
+                mem_data <= 0;
+                mem_wb_wdata <= 0;
+                mem_wb_wen <= 1'b0;
+                mem_wb_ren <= 1'b0;
+                mem_wb_sel <= 0;
+                mem_wb_read_unsigned <= 1'b0;
+                mem_rf_wen <= 1'b0;
+                mem_rf_waddr <= 0;
+                mem_rf_sel <= 1'b0;
+                mem_csr_inst_sel <= S_TIME_INTERRUPT;
                 mem_csr_waddr <= 0;
                 mem_csr_wdata <= 0;
             end else begin
-                mem_pc <= ex_pc;
-                mem_inst <= ex_inst;
-                mem_data <= ex_data;
-                mem_wb_wdata <= ex_wb_wdata;
-                mem_wb_wen <= ex_wb_wen;
-                mem_wb_ren <= ex_wb_ren;
-                mem_wb_sel <= ex_wb_sel;
-                mem_wb_read_unsigned <= ex_wb_read_unsigned;
-                mem_rf_wen <= ex_rf_wen;
-                mem_rf_waddr <= ex_rf_waddr;
-                mem_rf_sel <= ex_rf_sel;
-                mem_csr_inst_sel <= ex_csr_inst_sel;
-                mem_csr_waddr <= ex_csr_waddr;
-                mem_csr_wdata <= ex_csr_wdata;
+                if (flush) begin
+                    mem_pc <= `ZERO_WORD;
+                    mem_inst <= `INST_NOP;
+                    mem_data <= 0;
+                    mem_wb_wdata <= 0;
+                    mem_wb_wen <= 1'b0;
+                    mem_wb_ren <= 1'b0;
+                    mem_wb_sel <= 0;
+                    mem_wb_read_unsigned <= 1'b0;
+                    mem_rf_wen <= 1'b0;
+                    mem_rf_waddr <= 0;
+                    mem_rf_sel <= 1'b0;
+                    mem_csr_inst_sel <= 0;
+                    mem_csr_waddr <= 0;
+                    mem_csr_wdata <= 0;
+                end else begin
+                    mem_pc <= ex_pc;
+                    mem_inst <= ex_inst;
+                    mem_data <= ex_data;
+                    mem_wb_wdata <= ex_wb_wdata;
+                    mem_wb_wen <= ex_wb_wen;
+                    mem_wb_ren <= ex_wb_ren;
+                    mem_wb_sel <= ex_wb_sel;
+                    mem_wb_read_unsigned <= ex_wb_read_unsigned;
+                    mem_rf_wen <= ex_rf_wen;
+                    mem_rf_waddr <= ex_rf_waddr;
+                    mem_rf_sel <= ex_rf_sel;
+                    mem_csr_inst_sel <= ex_csr_inst_sel;
+                    mem_csr_waddr <= ex_csr_waddr;
+                    mem_csr_wdata <= ex_csr_wdata;
+                end
             end
         end
     end

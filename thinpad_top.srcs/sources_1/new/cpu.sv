@@ -452,6 +452,8 @@ module cpu (
         .ex_csr_inst_sel(ex_csr_inst_sel),
         .ex_csr_waddr(ex_csr_waddr),
         .ex_csr_wdata(ex_csr_wdata),
+        .m_time_interrupt(m_time_interrupt),
+        .s_time_interrupt(s_time_interrupt),
 
         .mem_pc(mem_pc),
         .mem_inst(mem_inst),
