@@ -168,6 +168,8 @@ module csr(
 
     // jump
     always_comb begin
+        wb_csr_branch = 1'b0;
+        wb_csr_branch_target = 0;
         case (sel)
             ECALL, EBREAK, INST_PAGE_FAULT, LOAD_PAGE_FAULT, STORE_PAGE_FAULT: begin
                 wb_csr_branch = 1'b1;
@@ -178,12 +180,16 @@ module csr(
                 end
             end
             MRET: begin
-                wb_csr_branch = 1'b1;
-                wb_csr_branch_target = mepc;
+                if (mode == M_MODE) begin
+                    wb_csr_branch = 1'b1;
+                    wb_csr_branch_target = mepc;
+                end
             end
             SRET: begin
-                wb_csr_branch = 1'b1;
-                wb_csr_branch_target = sepc;
+                if (mode == M_MODE || mode == S_MODE) begin
+                    wb_csr_branch = 1'b1;
+                    wb_csr_branch_target = sepc;
+                end
             end 
             M_TIME_INTERRUPT: begin
                 if (m_time_interrupt) begin

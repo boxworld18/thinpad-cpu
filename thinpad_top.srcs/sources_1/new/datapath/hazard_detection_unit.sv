@@ -79,7 +79,7 @@ module hazard_detection_unit(
                             (wb_csr_inst_sel == INST_PAGE_FAULT) || (wb_csr_inst_sel == LOAD_PAGE_FAULT) || (wb_csr_inst_sel == STORE_PAGE_FAULT));
 
     logic priv_hazard;
-    assign priv_hazard = (id_csr_inst_sel != CSR_INST_NOP || id_inst_page_fault) && (ex_inst != `INST_NOP || mem_inst != `INST_NOP || wb_inst != `INST_NOP);
+    assign priv_hazard = ((id_csr_inst_sel != CSR_INST_NOP) || id_inst_page_fault) && (ex_inst != `INST_NOP || mem_inst != `INST_NOP || wb_inst != `INST_NOP);
     
     always_comb begin
         if (wb_csr_branch) begin  // 最优先wb阶段跳转 ecall ebreak mret sret m_time_interrupt s_time_interrupt inst_page_fault load_page_fault store_page_fault

@@ -16,7 +16,7 @@ module branch_comp(
     output reg branch  // branch taken
 );
 
-   assign pc_branch = wb_csr_branch ? wb_csr_branch_target : ((inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (pc + imm));
+    assign pc_branch = wb_csr_branch ? wb_csr_branch_target : ((inst[6:0] == `OPCODE_JALR) ? ((data_a + imm) & 32'hffff_fffe) : (pc + imm));
 
     always_comb begin
         if (wb_csr_branch) begin
