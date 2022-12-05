@@ -63,11 +63,11 @@ module cpu_if_master(
         end else begin
             case (state)
                 IDLE: begin
+                    is_add_o <= 1'b0;
                     if (!stall) begin
                         pc_reg <= branch ? pc_branch : pc_reg + 4;
                         if_master_stall <= 1'b1;
                         inst_cache_addr_o <= branch ? pc_branch : pc_reg + 4;
-                        is_add_o <= 1'b0;
                         inst_cache_data_o <= 32'h0000_0000;
                         state <= QUERY_CACHE;
                     end
