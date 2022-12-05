@@ -210,13 +210,6 @@ module csr(
                     wb_csr_branch_target = 0;
                 end
             end
-            //    assign real_mie = ((mode_i == M_MODE) && mstatus_mie) || mode_i < M_MODE;
-            //    assign real_sie = ((mode_i == S_MODE) && mstatus_sie) || mode_i < S_MODE;
-            // 
-            // 2. stip stie mideleg
-            // mi = mie & mip;
-            // m_int = mi & ~mideleg;   M_time --> M_mode 
-            // s_int = mi & mideleg;    S_time --> S / M
             S_TIME_INTERRUPT: begin
                 if (s_time_interrupt) begin
                     wb_csr_branch = 1'b1;
