@@ -312,6 +312,8 @@ module cpu (
         .s_time_interrupt(s_time_interrupt),
         .mtvec(csr_mtvec),
         .stvec(csr_stvec),
+        .branch(branch),
+        .pc_branch(pc_branch),
 
         .ex_pc(ex_pc),
         .ex_inst(ex_inst),
