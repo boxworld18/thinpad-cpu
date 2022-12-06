@@ -621,6 +621,9 @@ module cpu (
         .id_ex_hold(id_ex_hold)
     );
 
+    (* MARK_DEBUG = "TRUE" *) logic [63:0] important_signal;
+    assign important_signal = {pc_branch, 27'b0, wbm0_stb_o, wbm0_ack_i, branch, if_id_hold, stall};
+
     ila_0 ila(
         .clk(clk_i),
         .probe0(if_pc),
@@ -648,7 +651,7 @@ module cpu (
 
         .probe18(mode),
 
-        .probe19(mtime),
+        .probe19(important_signal),
         .probe20(mtimecmp)
     );
 

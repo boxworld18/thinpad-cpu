@@ -169,6 +169,7 @@ typedef enum logic [1:0] {
 `define PAGE_SIZE 12 // 页大小
 `define LEVELS 2 // 页表层数
 `define PTE_SIZE 4 // PTE大小
+`define LOG_PTE_SIZE 2
 
 `define INTERRUPT 1'b1
 `define EXCEPTION 1'b0

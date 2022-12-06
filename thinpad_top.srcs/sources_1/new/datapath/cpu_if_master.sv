@@ -50,7 +50,13 @@ module cpu_if_master(
                         || (L2_pte[`PTE_U] == 1 && mstatus[`MSTATUS_SUM] == 0 && mode == S_MODE) 
                         || (L2_pte[`PTE_X] == 0);
 
-
+    logic [`ADDR_BUS] L1_addr;
+    logic [`ADDR_BUS] L2_addr;
+    logic [`ADDR_BUS] PA;
+    assign L1_addr = (satp[`SATP_PPN] << `PAGE_SIZE) + (pc_reg[`VA_VPN1] << `LOG_PTE_SIZE);   
+    assign L2_addr = (L1_pte[`PTE_PPN] << `PAGE_SIZE) + (pc_reg[`VA_VPN0] << `LOG_PTE_SIZE);      
+    assign PA = {L2_pte[29:10], pc_reg[`VA_OFFSET]};
+              
     typedef enum logic [2:0] {
         IDLE = 0,
         L1_FETCH = 1,
@@ -103,7 +109,7 @@ module cpu_if_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= (satp[`SATP_PPN]<<`PAGE_SIZE) + (pc_reg[`VA_VPN1]*`PTE_SIZE);
+                        wb_adr_o <= L1_addr;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;
@@ -131,7 +137,7 @@ module cpu_if_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= (L1_pte[`PTE_PPN]<<`PAGE_SIZE) + (pc_reg[`VA_VPN0]*`PTE_SIZE);
+                        wb_adr_o <= L2_addr;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;
@@ -160,7 +166,7 @@ module cpu_if_master(
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
-                        wb_adr_o <= {L2_pte[29:10], pc_reg[`VA_OFFSET]};
+                        wb_adr_o <= PA;
                         wb_sel_o <= 4'hF;
                         wb_we_o <= 1'b0;
                         if_master_stall <= 1'b1;
