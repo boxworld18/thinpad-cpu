@@ -128,6 +128,7 @@ module cpu_if_master(
                         end
                         inst_fault_va <= pc_reg;
                         state <= IDLE;
+                        if_master_stall <= 1'b0;
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
@@ -157,6 +158,7 @@ module cpu_if_master(
                         end
                         inst_fault_va <= pc_reg;
                         state <= IDLE;
+                        if_master_stall <= 1'b0;
                     end else begin
                         wb_cyc_o <= 1'b1;
                         wb_stb_o <= 1'b1;
