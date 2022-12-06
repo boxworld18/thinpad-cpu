@@ -1,7 +1,7 @@
 // Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2019.2 (lin64) Build 2708876 Wed Nov  6 21:39:14 MST 2019
-// Date        : Tue Dec  6 02:35:40 2022
+// Date        : Tue Dec  6 13:45:56 2022
 // Host        : ubuntu running 64-bit Ubuntu 18.04.2 LTS
 // Command     : write_verilog -force -mode synth_stub
 //               /home/boxworld/Desktop/vivado/cod22-grp01/thinpad_top.srcs/sources_1/ip/pll_example/pll_example_stub.v
