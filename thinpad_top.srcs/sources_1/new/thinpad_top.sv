@@ -139,10 +139,10 @@ module thinpad_top (
   end
 
   logic reset_of_clk75M;
-  // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk50M
-  always_ff @(posedge clk_50M or negedge locked) begin
-    if (~locked) reset_of_clk50M <= 1'b1;
-    else reset_of_clk50M <= 1'b0;
+  // 异步复位，同步释放，将 locked 信号转为后级电路的复位 reset_of_clk75M
+  always_ff @(posedge clk_75M or negedge locked) begin
+    if (~locked) reset_of_clk75M <= 1'b1;
+    else reset_of_clk75M <= 1'b0;
   end
 
   logic sys_clk;
