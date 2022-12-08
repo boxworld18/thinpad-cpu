@@ -322,14 +322,18 @@ module cpu_mem_master(
         endcase
     end
 
+    logic update_time;
+
     always_ff @(posedge clk) begin
         if (rst) begin
             mtime <= 0;
             mtimecmp <= 64'd0; 
-            // mtimecmp <= 64'd150_000;
+            update_time <= 1'b0;
         end else begin
-            // 禁用时钟中断, 减少调试内容
-            mtime <= mtime + 1; 
+            update_time <= ~update_time;
+            if (update_time) begin
+                mtime <= mtime + 1;
+            end
             if (wen && state == IDLE && mode == M_MODE) begin
                 case (addr) // 目前只支�?4字节访问
                     `MTIME_ADDR_LOW: begin
