@@ -67,7 +67,8 @@ typedef enum logic [4:0] {
     ALU_OP_ADD_4 = 5'd12,
     ALU_OP_ANDN = 5'd13,
     ALU_OP_SBCLR = 5'd14,
-    ALU_OP_CTZ = 5'd15
+    ALU_OP_CTZ = 5'd15,
+    ALU_OP_X = 5'd16
 } alu_op_t;
 
 // ALU Select

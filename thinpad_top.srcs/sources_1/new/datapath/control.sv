@@ -96,7 +96,12 @@ module control(
                 end
                 3'b010: id_alu_op = ALU_OP_SLT; // alu 暂不支持
                 3'b011: id_alu_op = ALU_OP_SLTU; // alu 暂不支持
-                3'b100: id_alu_op = ALU_OP_XOR;
+                3'b100: begin
+                    if (func7 == 7'b0010100)
+                        id_alu_op = ALU_OP_X;
+                    else
+                        id_alu_op = ALU_OP_XOR;
+                end
                 3'b101: begin
                     if (func7 == 7'b0100000)
                         id_alu_op = ALU_OP_SRA;

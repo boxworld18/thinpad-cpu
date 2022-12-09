@@ -34,7 +34,6 @@ module cpu (
 );
 
     // stall -> used by if_master and mem_master
-
     logic if_master_stall, mem_master_stall; 
     logic stall; 
     assign stall = if_master_stall | mem_master_stall;
