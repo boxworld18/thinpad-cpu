@@ -51,6 +51,7 @@
 
 // ALU OP
 `define ALU_OP_WIDTH 5 // ALU操作码宽度 TBD
+`define ALU_OP_X_MASK 32'hffff_fffc
 typedef enum logic [4:0] {
     ALU_OP_NOP = 5'd0,
     ALU_OP_ADD = 5'd1,
